@@ -31,11 +31,14 @@ async function run() {
   const selectedKeyword = keywords[Math.floor(Math.random() * keywords.length)];
   console.log(`🔍 今回のターゲットキーワード: 「${selectedKeyword}」`);
 
-  // 💡 【タイムアウト対策】有頭ブラウザ（headless: false）で実行
+  // 💡 【GitHub Actions対策】クラウドでは自動で headless: true、ローカルでは headless: false に切り替えます
+  const isCI = process.env.GITHUB_ACTIONS === 'true';
+  console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
+
   const browser = await chromium.launch({
-    headless: false, // ボット判定を徹底回避
-    channel: 'chrome' // システムのChromeを利用
-  }).catch(() => chromium.launch({ headless: false }));
+    headless: isCI ? true : false,
+    channel: isCI ? undefined : 'chrome'
+  }).catch(() => chromium.launch({ headless: isCI }));
 
   const context = await browser.newContext({
     storageState: STATE_PATH,

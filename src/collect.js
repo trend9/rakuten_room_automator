@@ -151,11 +151,16 @@ async function run() {
 
   console.log(`📦 今回の自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
 
-  // 有頭ブラウザ（headless: false）で実行
+  // 💡 【超重要：GitHub Actions（ヘッドレス環境）対策の決定版】
+  // クラウド（Actions）上では画面がないため自動で headless: true / channel無指定に切り替わり、
+  // ローカル（あなたのPC）では headless: false / 本物Chromeで立ち上がって挙動が目視できます！
+  const isCI = process.env.GITHUB_ACTIONS === 'true';
+  console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
+
   const browser = await chromium.launch({
-    headless: false,
-    channel: 'chrome'
-  }).catch(() => chromium.launch({ headless: false }));
+    headless: isCI ? true : false,
+    channel: isCI ? undefined : 'chrome'
+  }).catch(() => chromium.launch({ headless: isCI }));
 
   const context = await browser.newContext({
     storageState: STATE_PATH,
