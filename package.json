@@ -1,0 +1,19 @@
+{
+  "name": "rakuten-room-automator",
+  "version": "1.0.0",
+  "description": "Automated posting and engagement tool for Rakuten ROOM",
+  "main": "src/scheduler.js",
+  "type": "module",
+  "scripts": {
+    "auth": "node src/auth.js",
+    "research": "node src/research.js",
+    "collect": "node src/collect.js",
+    "engage": "node src/engage.js",
+    "start": "node src/scheduler.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "playwright": "^1.44.0"
+  }
+}

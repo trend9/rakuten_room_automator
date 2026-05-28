@@ -1,0 +1,13 @@
+{
+  "searchKeywords": [
+    "北欧インテリア",
+    "お取り寄せスイーツ",
+    "プチプラファッション",
+    "時短家電",
+    "子育て便利グッズ"
+  ],
+  "engagementLimit": 15,
+  "minDelayMs": 3000,
+  "maxDelayMs": 8000,
+  "postsPerDay": 4
+}
