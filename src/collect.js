@@ -74,7 +74,7 @@ function generateDynamicMessage(title) {
     appeals.push('💪 日々のトレーニング、本格的なボディメイク、健康管理の栄養補給として今大人気です！');
   }
   if (title.includes('日傘') || title.includes('折りたたみ') || title.includes('軽量')) {
-    appeals.push('☀️ 紫外線が気になる季節の必須アイテム！超軽量で持ち運びも楽々なのが嬉しいですね。');
+    appeals.push('☀️ 紫外線が気になる季節 of 必須アイテム！超軽量で持ち運びも楽々なのが嬉しいですね。');
   }
   if (title.includes('炭酸水') || title.includes('水') || title.includes('ラベルレス')) {
     appeals.push('🥛 毎日の水分補給や災害用の備蓄水、お酒の割り材にも最適な、高品質・大容量の定番品！');
@@ -154,9 +154,7 @@ async function run() {
   const isCI = process.env.GITHUB_ACTIONS === 'true';
   console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
 
-  // 💡 【タイムアウト・HTTP2プロトコルエラー対策の決定版】
-  // 「--disable-http2」フラグを追加してHTTP/2プロトコルを完全に無効化し、HTTP/1.1で超安定通信を行います！
-  // これにより、Akamai等のCDNによるHTTP/2リセット（ERR_HTTP2_PROTOCOL_ERROR）を物理的に100%回避します。
+  // HTTP2プロトコルエラー回避
   const browser = await chromium.launch({
     headless: isCI ? true : false,
     channel: isCI ? undefined : 'chrome',
@@ -175,54 +173,63 @@ async function run() {
   const page = await context.newPage();
 
   try {
-    // -------------------------------------------------------------
-    // ステップ1: 楽天市場の商品詳細ページへアクセス（自動リトライ処理搭載）
-    // -------------------------------------------------------------
-    let loaded = false;
-    let retries = 0;
-    const maxRetries = 3;
-
-    while (retries < maxRetries && !loaded) {
-      try {
-        console.log(`🌐 楽天市場の商品ページにアクセスしています... (試行 ${retries + 1}/${maxRetries})`);
-        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-        loaded = true;
-      } catch (err) {
-        retries++;
-        console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
-        await page.waitForTimeout(1500);
-      }
-    }
-
-    if (!loaded) {
-      throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
-    }
-
-    await page.waitForTimeout(4000);
-    await takeScreenshot(page, 'step1_rakuten_loaded');
-
-    console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
-    const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
-    const linkCount = await roomLinkLocator.count();
-    
     let officialRecommendUrl = null;
-    if (linkCount > 0) {
-      officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
-      console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-    } else {
-      const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
-      if (await fallbackLocator.count() > 0) {
-        officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
-        console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
-      }
-    }
-
     let useDirectPasteRoute = false;
 
-    if (!officialRecommendUrl) {
-      console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
+    // 💡 【究極のクラウドIP規制バイパス・ハイブリッドルーティング】
+    // GitHub Actions（クラウド環境）のIPアドレスは、楽天市場（item.rakuten.co.jp）のAkamaiセキュリティによりボットと判定され、
+    // 商品ページへのアクセス自体が100%タイムアウト（フリーズ）させられます。
+    // そのため、GitHub Actions上では危険な楽天市場へのアクセスを【完全にスキップ】し、
+    // IP制限の全くない楽天ROOMの「通常コピペ投稿画面」に直接アクセスして、爆速・安全に投稿を完遂します！
+    
+    if (isCI) {
+      console.log('🌐 [Actions自動運転] 楽天市場へのアクセスをスキップし、直接楽天ROOMコピペ投稿画面に遷移します（IP規制回避）。');
       useDirectPasteRoute = true;
       officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
+    } else {
+      // ローカルPC（ご自宅の一般プロバイダ回線）の場合は、これまで通り最もリアルな「商品詳細からの公式ボタン抽出ワープ」を実行します！
+      console.log('🌐 楽天市場の商品ページにアクセスしています...');
+      
+      let loaded = false;
+      let retries = 0;
+      const maxRetries = 3;
+
+      while (retries < maxRetries && !loaded) {
+        try {
+          await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+          loaded = true;
+        } catch (err) {
+          retries++;
+          console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+          await page.waitForTimeout(1500);
+        }
+      }
+
+      if (!loaded) {
+        throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
+      }
+
+      await page.waitForTimeout(4000);
+      await takeScreenshot(page, 'step1_rakuten_loaded');
+
+      console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
+      const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
+      if (await roomLinkLocator.count() > 0) {
+        officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
+        console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
+      } else {
+        const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
+        if (await fallbackLocator.count() > 0) {
+          officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
+          console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
+        }
+      }
+
+      if (!officialRecommendUrl) {
+        console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
+        useDirectPasteRoute = true;
+        officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
+      }
     }
 
     // -------------------------------------------------------------
