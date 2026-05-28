@@ -93,7 +93,7 @@ function generateDynamicMessage(title) {
     const genericAppeals = [
       `🌟 抜群の実用性と高いデザイン性を兼ね備えた、長く愛用できる大満足のクオリティです。`,
       `✨ 実際に購入したユーザーの満足度も非常に高く、大切な人へのプレゼントや自分へのご褒美にも超おすすめ！`,
-      `📦 日常生活をちょっと豊かに、そして便利にしてくれるアイデア満載の注目アイテム。`,
+      `📦 日常生活をちょっと豊かに、そして便利にしてくれるアイデア満載 of 注目アイテム。`,
       `👍 圧倒的な使いやすさと信頼性で、様々な生活シーンで大活躍してくれること間違いなしの商品。`
     ];
     appeals.push(genericAppeals[Math.floor(Math.random() * genericAppeals.length)]);
@@ -151,16 +151,20 @@ async function run() {
 
   console.log(`📦 今回の自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
 
-  // 💡 【超重要：GitHub Actions（ヘッドレス環境）対策の決定版】
-  // クラウド（Actions）上では画面がないため自動で headless: true / channel無指定に切り替わり、
-  // ローカル（あなたのPC）では headless: false / 本物Chromeで立ち上がって挙動が目視できます！
   const isCI = process.env.GITHUB_ACTIONS === 'true';
   console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
 
+  // 💡 【タイムアウト・HTTP2プロトコルエラー対策の決定版】
+  // 「--disable-http2」フラグを追加してHTTP/2プロトコルを完全に無効化し、HTTP/1.1で超安定通信を行います！
+  // これにより、Akamai等のCDNによるHTTP/2リセット（ERR_HTTP2_PROTOCOL_ERROR）を物理的に100%回避します。
   const browser = await chromium.launch({
     headless: isCI ? true : false,
-    channel: isCI ? undefined : 'chrome'
-  }).catch(() => chromium.launch({ headless: isCI }));
+    channel: isCI ? undefined : 'chrome',
+    args: ['--disable-http2']
+  }).catch(() => chromium.launch({ 
+    headless: isCI,
+    args: ['--disable-http2']
+  }));
 
   const context = await browser.newContext({
     storageState: STATE_PATH,
@@ -172,10 +176,28 @@ async function run() {
 
   try {
     // -------------------------------------------------------------
-    // ステップ1: 楽天市場の商品詳細ページへアクセス
+    // ステップ1: 楽天市場の商品詳細ページへアクセス（自動リトライ処理搭載）
     // -------------------------------------------------------------
-    console.log('🌐 楽天市場の商品ページにアクセスしています...');
-    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    let loaded = false;
+    let retries = 0;
+    const maxRetries = 3;
+
+    while (retries < maxRetries && !loaded) {
+      try {
+        console.log(`🌐 楽天市場の商品ページにアクセスしています... (試行 ${retries + 1}/${maxRetries})`);
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        loaded = true;
+      } catch (err) {
+        retries++;
+        console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+        await page.waitForTimeout(1500);
+      }
+    }
+
+    if (!loaded) {
+      throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
+    }
+
     await page.waitForTimeout(4000);
     await takeScreenshot(page, 'step1_rakuten_loaded');
 
@@ -197,9 +219,6 @@ async function run() {
 
     let useDirectPasteRoute = false;
 
-    // 💡 【タイムアウト・404対策】
-    // PC版楽天ROOMのURL入力画面の正しい最新URLは末尾に「/url」が付いた「/mix/items/create/url」です。
-    // これにより、404エラーやトップページへの強制リダイレクトを完全に回避します！
     if (!officialRecommendUrl) {
       console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
       useDirectPasteRoute = true;
