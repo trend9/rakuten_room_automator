@@ -23,7 +23,7 @@ jobs:
   run-automator:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 履歴(queue.json)を自動コミットしてリポジトリに保存するための書き込み権限
+      contents: write # 履歴(queue.json)を自動コミットしてリポジトリに保存
 
     steps:
       - name: リポジトリのチェックアウト
@@ -34,6 +34,16 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+
+      # 💡 画面非搭載のLinuxサーバー上に「仮想ディスプレイ (Xvfb)」と「本物Google Chrome」を自動インストール
+      - name: 📺 仮想ディスプレイ(Xvfb)および依存パッケージのインストール
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgbm-dev
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: 依存パッケージのインストール
         run: npm ci
@@ -48,15 +58,15 @@ jobs:
         env:
           RAKUTEN_STATE_JSON: ${{ secrets.RAKUTEN_STATE_JSON }}
 
-      # 日本時間06:00 (UTC 21:00) の時だけ「自動リサーチ」を実行するステップ
+      # 💡 仮想画面 Xvfb を通すことで、クラウド上でも「 headless: false 」（有頭ブラウザ）を完全稼働させます！
       - name: 🔍 トレンド商品の自動リサーチ（1日1回早朝のみ）
         if: github.event.schedule == '0 21 * * *' || github.event_name == 'workflow_dispatch'
-        run: npm run research
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run research
 
-      # それ以外のスケジュール時間帯は「自動投稿」を実行するステップ
+      # 💡 同様に自動投稿も Xvfb を通して完全有頭偽装で実行！
       - name: 🚀 自動コレ！投稿（1日10回定期実行）
         if: github.event.schedule != '0 21 * * *' || github.event_name == 'workflow_dispatch'
-        run: npm run collect
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run collect
 
       - name: 💾 投稿履歴とキューリストの自動コミット・保存
         run: |

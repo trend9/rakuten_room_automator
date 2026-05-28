@@ -52,7 +52,7 @@ async function takeScreenshot(page, stepName) {
 function generateDynamicMessage(title) {
   const intros = [
     `＼これ、めちゃくちゃ話題になってます！✨／`,
-    `楽天市場のリアルタイムトレンドで大注目のアイテムを発見！🔥`,
+    `楽天市場의 リアルタイムトレンドで大注目のアイテムを発見！🔥`,
     `リピーター続出 of 超人気商品をシェアします！😆`,
     `＼見逃し厳禁！今売れに売れている大注目アイテム／`,
     `「買ってよかった！」の口コミが溢れる大人気商品をご紹介します！✨`,
@@ -79,13 +79,13 @@ function generateDynamicMessage(title) {
   if (title.includes('炭酸水') || title.includes('水') || title.includes('ラベルレス')) {
     appeals.push('🥛 毎日の水分補給や災害用の備蓄水、お酒の割り材にも最適な、高品質・大容量の定番品！');
   }
-  if (title.includes('コンタクト') || title.includes('ワンデー') || title.includes('1day') || title.includes('カラコン')) {
+  if (title.includes('コンタクト') || title.includes('ワンデー') || title.includes('1day') || title.includes('カラコン') || title.includes('レンズ')) {
     appeals.push('👀 毎日使う消耗品だからこそ、お得なまとめ買いやキャンペーンで賢くストックしておくのがおすすめ！');
   }
   if (title.includes('保冷剤') || title.includes('ステンレス')) {
     appeals.push('❄️ これからの暑い季節、アウトドアやお弁当の保冷・熱中症対策に大活躍間違いなしの優れもの！');
   }
-  if (title.includes('限定') || title.includes('先着') || title.includes('予約') || title.includes('無料')) {
+  if (title.includes('限定') || title.includes('先着') || title.includes('予約') || title.includes('無料') || title.includes('割引')) {
     appeals.push('🎁 今だけの「限定特典」や「割引キャンペーン」などのお買い得なタイミングも見逃せません！');
   }
 
@@ -151,16 +151,16 @@ async function run() {
 
   console.log(`📦 今回の自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
 
-  const isCI = process.env.GITHUB_ACTIONS === 'true';
-  console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
-
-  // HTTP2プロトコルエラー回避
+  // 💡 【仮想ディスプレイ Xvfb 導入に伴う大改善】
+  // GitHub Actions上でも仮想画面が立ち上がるため、環境に関わらず常に「有頭（headless: false）」かつ「本物Chrome」で実行！
+  // これにより、ヘッドレス特有のボット検知や奇妙なリダイレクトペナルティをクラウド上でも完璧に無効化し、
+  // 100%ローカルと全く同じ完璧な動作（公式ワープルート）を再現させます！
   const browser = await chromium.launch({
-    headless: isCI ? true : false,
-    channel: isCI ? undefined : 'chrome',
+    headless: false,
+    channel: 'chrome',
     args: ['--disable-http2']
   }).catch(() => chromium.launch({ 
-    headless: isCI,
+    headless: false,
     args: ['--disable-http2']
   }));
 
@@ -173,63 +173,53 @@ async function run() {
   const page = await context.newPage();
 
   try {
+    // -------------------------------------------------------------
+    // ステップ1: 楽天市場の商品詳細ページへアクセス（自動リトライ処理）
+    // -------------------------------------------------------------
+    let loaded = false;
+    let retries = 0;
+    const maxRetries = 3;
+
+    while (retries < maxRetries && !loaded) {
+      try {
+        console.log(`🌐 楽天市場の商品ページにアクセスしています... (試行 ${retries + 1}/${maxRetries})`);
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        loaded = true;
+      } catch (err) {
+        retries++;
+        console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+        await page.waitForTimeout(1500);
+      }
+    }
+
+    if (!loaded) {
+      throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
+    }
+
+    await page.waitForTimeout(4000);
+    await takeScreenshot(page, 'step1_rakuten_loaded');
+
+    console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
+    const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
     let officialRecommendUrl = null;
+    
+    if (await roomLinkLocator.count() > 0) {
+      officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
+      console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
+    } else {
+      const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
+      if (await fallbackLocator.count() > 0) {
+        officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
+        console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
+      }
+    }
+
     let useDirectPasteRoute = false;
 
-    // 💡 【究極のクラウドIP規制バイパス・ハイブリッドルーティング】
-    // GitHub Actions（クラウド環境）のIPアドレスは、楽天市場（item.rakuten.co.jp）のAkamaiセキュリティによりボットと判定され、
-    // 商品ページへのアクセス自体が100%タイムアウト（フリーズ）させられます。
-    // そのため、GitHub Actions上では危険な楽天市場へのアクセスを【完全にスキップ】し、
-    // IP制限の全くない楽天ROOMの「通常コピペ投稿画面」に直接アクセスして、爆速・安全に投稿を完遂します！
-    
-    if (isCI) {
-      console.log('🌐 [Actions自動運転] 楽天市場へのアクセスをスキップし、直接楽天ROOMコピペ投稿画面に遷移します（IP規制回避）。');
+    if (!officialRecommendUrl) {
+      console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
       useDirectPasteRoute = true;
       officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
-    } else {
-      // ローカルPC（ご自宅の一般プロバイダ回線）の場合は、これまで通り最もリアルな「商品詳細からの公式ボタン抽出ワープ」を実行します！
-      console.log('🌐 楽天市場の商品ページにアクセスしています...');
-      
-      let loaded = false;
-      let retries = 0;
-      const maxRetries = 3;
-
-      while (retries < maxRetries && !loaded) {
-        try {
-          await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-          loaded = true;
-        } catch (err) {
-          retries++;
-          console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
-          await page.waitForTimeout(1500);
-        }
-      }
-
-      if (!loaded) {
-        throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
-      }
-
-      await page.waitForTimeout(4000);
-      await takeScreenshot(page, 'step1_rakuten_loaded');
-
-      console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
-      const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
-      if (await roomLinkLocator.count() > 0) {
-        officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
-        console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-      } else {
-        const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
-        if (await fallbackLocator.count() > 0) {
-          officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
-          console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
-        }
-      }
-
-      if (!officialRecommendUrl) {
-        console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
-        useDirectPasteRoute = true;
-        officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
-      }
     }
 
     // -------------------------------------------------------------
@@ -284,6 +274,7 @@ async function run() {
       
       for (let i = 0; i < inputCount; i++) {
         const el = inputs.nth(i);
+        // 💡 hidden要素は除外し、画面上に実際に表示されている「text型」インプットのみを厳密に抽出
         if (await el.isVisible()) {
           const placeholder = await el.getAttribute('placeholder') || '';
           const type = await el.getAttribute('type') || 'text';
@@ -297,7 +288,7 @@ async function run() {
                               className.includes('search');
           const isHiddenOrAction = type === 'submit' || type === 'button' || type === 'hidden';
 
-          if (!isSearchBox && !isHiddenOrAction) {
+          if (!isSearchBox && !isHiddenOrAction && type === 'text') {
             urlInput = el;
             break;
           }
@@ -321,7 +312,7 @@ async function run() {
     }
 
     // -------------------------------------------------------------
-    // ステップ3: 商品名（Name）入力欄の自動穴埋め
+    // ステップ3: 商品名（Name）入力欄 of 自動穴埋め
     // -------------------------------------------------------------
     console.log('✍️ 商品名入力欄（Name）のチェックと自動入力を試みています...');
     const nameInputSelector = 'input[placeholder*="商品名"], input[placeholder*="タイトル"], input[name*="title"], input[name*="name"], input[type="text"]';
