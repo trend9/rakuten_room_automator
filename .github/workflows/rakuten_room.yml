@@ -42,9 +42,7 @@ jobs:
       - name: 🔐 ログイン認証セッションの復元
         run: |
           mkdir -p storage
-          echo '${{ secrets.RAKUTEN_STATE_JSON }}' > storage/state.json
-        env:
-          RAKUTEN_STATE_JSON: ${{ secrets.RAKUTEN_STATE_JSON }}
+          echo "${{ secrets.RAKUTEN_STATE_JSON }}" | base64 -d > storage/state.json
 
       # 💡 仮想画面 Xvfb を通すことで、クラウド上でも「 headless: false 」（有頭ブラウザ）を完全稼働させます！
       - name: 🔍 トレンド商品の自動リサーチ（キュー補充ガード付き）
