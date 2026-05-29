@@ -9,11 +9,15 @@
     "research": "node src/research.js",
     "collect": "node src/collect.js",
     "engage": "node src/engage.js",
-    "start": "node src/scheduler.js"
+    "start": "pm2 start src/scheduler.js --name 'rakuten-room-automator'",
+    "stop": "pm2 stop 'rakuten-room-automator'",
+    "status": "pm2 status",
+    "logs": "pm2 logs 'rakuten-room-automator'"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "node-cron": "^3.0.3",
-    "playwright": "^1.44.0"
+    "playwright": "^1.44.0",
+    "pm2": "^7.0.1"
   }
 }

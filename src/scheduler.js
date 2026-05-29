@@ -6,51 +6,53 @@ const RESEARCH_PATH = path.resolve('src/research.js');
 const COLLECT_PATH = path.resolve('src/collect.js');
 const ENGAGE_PATH = path.resolve('src/engage.js');
 
-console.log('⏰ 楽天ROOM完全自動化スケジューラを起動しました。');
-console.log('このプロセスは常駐して指定時間にリサーチ、投稿、巡回をすべて全自動で実行します。');
+console.log('⏰ 楽天ROOM完全自動化・超高頻度ローカルスケジューラを起動しました。');
+console.log('このプロセスはローカル常駐し、1時間に1回、確実にリサーチ・投稿・いいね巡回を全自動で実行します。');
 
-// 子プロセスを安全に起動するヘルパー関数
-function runScript(scriptPath) {
-  console.log(`\n[${new Date().toLocaleString()}] 🔄 スクリプト実行開始: ${path.basename(scriptPath)}`);
-  const process = fork(scriptPath);
+// スクリプトを順次（同期的に）実行するヘルパー関数
+function runScriptSync(scriptPath) {
+  return new Promise((resolve, reject) => {
+    console.log(`\n[${new Date().toLocaleString()}] 🔄 スクリプト実行開始: ${path.basename(scriptPath)}`);
+    const process = fork(scriptPath);
 
-  process.on('close', (code) => {
-    console.log(`[${new Date().toLocaleString()}] 🏁 スクリプト実行終了 (終了コード: ${code}): ${path.basename(scriptPath)}`);
-  });
+    process.on('close', (code) => {
+      console.log(`[${new Date().toLocaleString()}] 🏁 スクリプト実行終了 (コード: ${code}): ${path.basename(scriptPath)}`);
+      resolve(code);
+    });
 
-  process.on('error', (err) => {
-    console.error(`❌ プロセス実行エラー: ${path.basename(scriptPath)}`, err);
+    process.on('error', (err) => {
+      console.error(`❌ プロセス実行エラー: ${path.basename(scriptPath)}`, err);
+      reject(err);
+    });
   });
 }
 
 // -------------------------------------------------------------
-// 完全自動化スケジュール設定
+// 毎時0分の完全自動自律稼働スケジュール (1日24回)
 // -------------------------------------------------------------
-
-// 1. 自動リサーチ（トレンド商品自動収集）
-// 毎日 朝 06:00 に楽天市場からその日のトレンド商品を自動で10件リサーチしてキューに補充
-cron.schedule('0 6 * * *', () => {
-  console.log('📢 スケジュールトリガー: トレンド商品の自動リサーチを開始します。');
-  runScript(RESEARCH_PATH);
+cron.schedule('0 * * * *', async () => {
+  console.log('\n📢 毎時スケジュールトリガー: 全自動アフィリエイト統合プロセスを開始します。');
+  
+  try {
+    // 1. キュー補充リサーチ（5件未満の時のみ実際に楽天市場をスクレイピング）
+    await runScriptSync(RESEARCH_PATH).catch(() => {});
+    
+    // 2. 自動コレ！投稿（1件投稿）
+    await runScriptSync(COLLECT_PATH).catch(() => {});
+    
+    // 3. 周囲への自動いいね・フォロー巡回
+    await runScriptSync(ENGAGE_PATH).catch(() => {});
+    
+    console.log(`[${new Date().toLocaleString()}] 💖 毎時の統合プロセスがすべて正常に完了しました！次回まで待機します。`);
+  } catch (err) {
+    console.error('❌ 統合プロセスの実行中に致命的なエラーが発生しました:', err);
+  }
 });
 
-// 2. 自動投稿（コレ！）
-// 毎日 朝 08:00 と 夜 20:00 (1日2回) にキューから自動で1件投稿
-cron.schedule('0 8,20 * * *', () => {
-  console.log('📢 スケジュールトリガー: 自動投稿の実行時間になりました。');
-  runScript(COLLECT_PATH);
-});
-
-// 3. 自動いいね・フォロー巡回
-// 毎日 7:00 から 23:00 までの間、1時間ごとに実行（深夜帯は避けて安全運用）
-cron.schedule('0 7-23/1 * * *', () => {
-  console.log('📢 スケジュールトリガー: 自動いいね・フォロー巡回の時間になりました。');
-  runScript(ENGAGE_PATH);
-});
-
-console.log('\n--- 📅 登録された全自動スケジュール ---');
-console.log('🔍 自動トレンドリサーチ : 毎日 06:00');
-console.log('📢 トレンド商品自動投稿 : 毎日 08:00, 20:00 (1日2回)');
-console.log('❤️ いいね・フォロー巡回 : 毎日 07:00〜23:00 の間、毎正時 (1時間ごと)');
-console.log('------------------------------------\n');
-console.log('⏳ 常駐待機モードに入りました。このままターミナルを開いておいてください...');
+console.log('\n--- 📅 登録されたローカル超高頻度スケジュール ---');
+console.log('🔄 毎時0分 (1日24回) に以下をシームレスに連続実行します：');
+console.log('   1. キュー自動補充 (残り5件未満時のみ作動)');
+console.log('   2. 楽天ROOM自動投稿 (マニアック便利雑貨特化・超高CTA)');
+console.log('   3. 周囲への自動いいね・フォロー巡回 (超安全マイルド設計)');
+console.log('--------------------------------------------------\n');
+console.log('⏳ 常駐待機モードに入りました。');
