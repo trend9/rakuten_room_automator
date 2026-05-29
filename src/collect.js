@@ -87,7 +87,7 @@ function generateDynamicMessage(title) {
   const reviews = [
     `⚠️ 大人気の隠れ名品のため、楽天市場でもよく品切れ（予約待ち）になっています。現在のリアルタイムな在庫状況や、使える限定クーポン情報は今すぐこちらから確認できます👇🔗`,
     `🎁 今だけの限定割引クーポンや、ポイントアップの最新情報は楽天市場の公式ページで公開されています！損する前にぜひチェックしてみてね👇✨`,
-    `「本当に買って暮らしのQOLが上がった！」というリアルな愛用者たちの絶賛口コミや、現在の割引価格は楽天市場の公式ページで今すぐチェックできます！👇🔗`,
+    `「本当に買って暮らしのQOLが上がった！」というリアルな愛用者たちの引退口コミや、現在の割引価格は楽天市場の公式ページで今すぐチェックできます！👇🔗`,
     `これ、本当にすぐ売り切れてしまうので、現在のお得なプライスや在庫の有無は楽天市場の公式ページで今すぐ確認しておくのがおすすめです！🔗👇`
   ];
 
@@ -142,11 +142,9 @@ async function run() {
   // 仮想ディスプレイ Xvfb で駆動するため、常時 headless: false
   const browser = await chromium.launch({
     headless: false,
-    channel: 'chrome',
-    args: ['--disable-http2']
+    channel: 'chrome'
   }).catch(() => chromium.launch({ 
-    headless: false,
-    args: ['--disable-http2']
+    headless: false
   }));
 
   const context = await browser.newContext({
@@ -158,13 +156,55 @@ async function run() {
   const page = await context.newPage();
 
   try {
-    // 💡 楽天市場へのアクセス（ボット規制）と、ROOMコピペフォーム（404等）を完全に回避するため、
-    // 商品URLをエンコードした「自己生成の公式ROOM投稿ワープURL」を組み立ててダイレクト遷移します！
-    const encodedTargetUrl = encodeURIComponent(targetUrl);
-    const officialWarpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodedTargetUrl}`;
+    let officialRecommendUrl = null;
+
+    // 💡 【超重要】ローカル環境では、まず楽天市場の個別商品ページにアクセスすることで、
+    // 楽天の巨大なドメインをまたぐクロスドメイン認証クッキー（ITP/SameSite規制）を完全にアクティブ化させます！
+    if (!isCI) {
+      console.log('🌐 楽天市場の商品ページにアクセスしています（クッキーのアクティブ化・セッション橋渡しのため）...');
+      let loaded = false;
+      let retries = 0;
+      const maxRetries = 3;
+
+      while (retries < maxRetries && !loaded) {
+        try {
+          await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+          loaded = true;
+        } catch (err) {
+          retries++;
+          console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+          await page.waitForTimeout(1500);
+        }
+      }
+
+      if (loaded) {
+        await page.waitForTimeout(4000);
+        await takeScreenshot(page, 'step1_rakuten_loaded');
+
+        console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
+        const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
+        if (await roomLinkLocator.count() > 0) {
+          officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
+          console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
+        } else {
+          const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
+          if (await fallbackLocator.count() > 0) {
+            officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
+            console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
+          }
+        }
+      }
+    }
+
+    // 検出できなかった場合、またはGitHub Actions（CI）上では、自己生成のワープURLを使用します。
+    if (!officialRecommendUrl) {
+      const encodedTargetUrl = encodeURIComponent(targetUrl);
+      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodedTargetUrl}`;
+      console.log('🌐 公式投稿ワープURLを生成しました。');
+    }
     
-    console.log(`🌐 公式投稿ワープURLに直接アクセスしています...\n👉 ${officialWarpUrl}`);
-    await page.goto(officialWarpUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    console.log(`🚀 正規の公式投稿URLへ遷移します:\n👉 ${officialRecommendUrl}`);
+    await page.goto(officialRecommendUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     
     console.log('⏳ 編集・入力画面の表示を待っています...');
     const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea';
@@ -229,21 +269,27 @@ async function run() {
       // 💡 超インテリジェント高クリック率（CTA）紹介文を自動生成！
       const customComment = generateDynamicMessage(targetTitle);
       
-      console.log('✍️ 独自のおすすめメッセージをタイピングします...');
+      console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
       await commentArea.focus();
       await commentArea.click();
       
-      await page.keyboard.press('Meta+A').catch(() => {});
-      await page.keyboard.press('Control+A').catch(() => {});
-      await page.keyboard.press('Backspace');
-      await page.waitForTimeout(500);
+      // 🔥 Reactの入力トラッキング（Value Setterフック）を突破する魔法のコード
+      // これにより、ReactのStateに文字が100%バインドされ、送信時に絶対に消えなくなります。
+      await commentArea.evaluate((el, val) => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+        nativeSetter.call(el, val);
+        // Reactの変更検知イベントをバブリングで発火
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }, customComment);
       
-      await page.keyboard.insertText(customComment);
-      await page.keyboard.press('Space');
-      await page.keyboard.press('Backspace');
       await page.waitForTimeout(1000);
       
-      console.log('✅ おすすめ紹介メッセージとハッシュタグを入力しました！');
+      // テキストエリアからフォーカスを外して値を確定させる
+      await commentArea.blur();
+      await page.waitForTimeout(1000);
+      
+      console.log('✅ おすすめ紹介メッセージとハッシュタグをReactステートに完全同期しました！');
       commentInputSuccess = true;
     }
 

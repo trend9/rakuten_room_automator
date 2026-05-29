@@ -269,7 +269,7 @@
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00333/",
       "title": "[ ワイドジャグボトルスタンド タワー ] 山崎実業 公式 tower ボトルスタンド 水切りラック キッチン 用品 ボトルラック 5409 5410 水切りか",
       "addedAt": "2026-05-29T05:05:24.378Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -277,7 +277,7 @@
       "url": "https://item.rakuten.co.jp/alamode/27-4330/",
       "title": "【365日出荷】山崎実業 ワイドジャグボトルスタンド タワー tower 公式 水切り マグ ボトル 水筒 哺乳瓶 シンプル タンブラー ボトルスタンド スタン",
       "addedAt": "2026-05-29T05:05:24.378Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -285,22 +285,105 @@
       "url": "https://item.rakuten.co.jp/alamode/3605-c910/",
       "title": "【365日出荷】山崎実業 ティーポット タワー tower 公式 急須 紅茶ポット 600ml 茶こし付き ティーストレーナー 洗いやすい 割れない 耐熱 電子",
       "addedAt": "2026-05-29T05:05:24.378Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-05-29T11:47:32.278Z"
     },
     {
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00413/",
       "title": "（土・日発送可） [ トレースタンド タワー ] 山崎実業 tower ホワイト/ブラック 5052 5053 キッチン 用品 シンプル モダン おしゃれ おす",
       "addedAt": "2026-05-29T05:05:24.378Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-05-29T11:52:27.974Z"
     },
     {
       "url": "https://item.rakuten.co.jp/k-style/kom01_121_bottle/",
       "title": "水筒 ジャグボトルスタンド TOWER コップ立て マグボトルスタンド 水切りスタンド 水切り 乾燥 ボトルスタンド 山崎実業 キッチン整理用品 タワー 便利グ",
       "addedAt": "2026-05-29T05:05:24.378Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-05-29T12:01:59.355Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/roomy/ymz20jan28h04/",
+      "title": "［ 折り畳み水切り タワー シリコーントレー付き L ］山崎実業 tower 折り畳み 水切りラック シリコン シンク上 折りたたみ 水切りカゴ 水切りマット ",
+      "addedAt": "2026-05-29T12:00:11.843Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/patie/ymj-00413/",
+      "title": "（土・日発送可） [ トレースタンド タワー ] 山崎実業 tower ホワイト/ブラック 5052 5053 キッチン シンプル モダン おしゃれ おすすめ ",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/alamode/3605-3070/",
+      "title": "【365日出荷】山崎実業 トレースタンド タワー tower 公式 トレーホルダー トレー お盆 天板 角皿 ホットプレート 替え天板 収納ラック 隙間収納 キ",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/sommelier/ymj-00333/",
+      "title": "[ ワイドジャグボトルスタンド タワー ] 山崎実業 公式 tower ホワイト/ブラック 5409 5410 水切りラック ボトルスタンド タンブラー 水筒 ",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/roomy-garden/ymz21apr26h06/",
+      "title": "水切りラック ［ ワイドジャグボトルスタンド タワー ］山崎実業 tower 水筒 水切り 置き 立て 収納 乾燥 乾かす 水切りかご 水切りカゴ 水切りトレー",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/roomy/ymz23apr21h02/",
+      "title": "［ シンク中ワイドジャグ＆マグボトルスタンド タワー ］山崎実業 tower 水筒 収納 水切りラック 哺乳瓶 タンブラー マグボトル ボトルスタンド キッチン",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/alamode/3605-5610/",
+      "title": "山崎実業 立体コースター 角型 丸型 タワー tower 公式 立体型 コースター ソーサ— マグカップ カフェ シリコン スタッキング キッチン雑貨 ホワイト",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/roomy/ymz16feb10z017/",
+      "title": "［ 伸縮水切りラック タワー ポケット2つ付き ］山崎実業 tower 水切りラック シンク上 スリム 水切り コンパクト 伸縮 水切りトレー 水きり キッチン",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/interiorworks/5409/",
+      "title": "ワイドジャグボトルスタンド タワー 水筒 スタンド 水切りラック ボトルスタンド おしゃれ 干す 乾燥 水筒置き ボトルラック タンブラー ペットボトル 収納 ",
+      "addedAt": "2026-05-29T12:00:11.845Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/yamasoro/27-4330/",
+      "title": "【365日出荷】山崎実業 ワイドジャグボトルスタンド タワー tower 公式 水切り マグ ボトル 水筒 哺乳瓶 シンプル タンブラー ボトルスタンド スタン",
+      "addedAt": "2026-05-29T12:00:11.845Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -315,6 +398,9 @@
     "https://item.rakuten.co.jp/yama-oatmeal-institute/kiwamiseimai10/",
     "https://item.rakuten.co.jp/netbaby/404758/",
     "https://item.rakuten.co.jp/cicib/e1-2/",
-    "https://item.rakuten.co.jp/wwpc/3182550901215/"
+    "https://item.rakuten.co.jp/wwpc/3182550901215/",
+    "https://item.rakuten.co.jp/alamode/3605-c910/",
+    "https://item.rakuten.co.jp/bellevie-harima/ymj-00413/",
+    "https://item.rakuten.co.jp/k-style/kom01_121_bottle/"
   ]
 }

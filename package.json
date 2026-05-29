@@ -9,10 +9,10 @@
     "research": "node src/research.js",
     "collect": "node src/collect.js",
     "engage": "node src/engage.js",
-    "start": "pm2 start src/scheduler.js --name 'rakuten-room-automator'",
-    "stop": "pm2 stop 'rakuten-room-automator'",
-    "status": "pm2 status",
-    "logs": "pm2 logs 'rakuten-room-automator'"
+    "start": "node src/scheduler.js",
+    "stop": "pkill -f 'node src/scheduler.js'",
+    "status": "ps aux | grep -E 'scheduler.js|collect.js|engage.js' | grep -v grep",
+    "logs": "echo 'Scheduler logs are output to the terminal where it is running.'"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
