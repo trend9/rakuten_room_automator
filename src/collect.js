@@ -50,14 +50,14 @@ async function takeScreenshot(page, stepName) {
 
 // 💡 【主婦・日常おしゃれ便利雑貨特化】高クリック率（CTA）文章生成エンジン
 function generateDynamicMessage(title) {
-  // 1. 主婦の共感を引き出す導入フック（ランダム）
+  // 1. 主婦の共感を引き出す導入フック（デパートやリアル店舗では売っていないレア感の強調）
   const intros = [
-    `＼普通のデパートには売ってない、隠れた名品見つけました！✨／`,
-    `お家時間が一気に垢抜ける、ちょっとマニアックでおしゃれな便利グッズのご紹介♪🏠`,
-    `＼これ本当に優秀！／毎日の家事のプチストレスが劇的に解消される隠れ人気アイテム🌟`,
-    `生活感が消えてスッキリ片付く！インテリアのプロも絶賛するおしゃれ雑貨を発見しました😆`,
-    `＼インテリアが垢抜ける！／ネットでしか手に入らない、高見え＆超優秀な日用雑貨です✨`,
-    `普通のホームセンターには置いていない、洗練されたお家時間を演出する大人気アイテム💖`
+    `＼普通のデパートやニトリではまず見かけない、隠れた名作です！✨／`,
+    `お家時間が一気に垢抜ける、ちょっとマニアックでおしゃれな超便利グッズを見つけました♪🏠`,
+    `＼これ、SNSで見かけて気になってたやつ！／普通の雑貨屋さんには中々置いてなくてネットでやっと発見🌟`,
+    `生活感が消えて驚くほどスッキリ片付く！インテリア好き of 主婦の間で密かに大バズり中の名品です😆`,
+    `＼これは本当に家事がラクになる！／近所のお店では売ってない、知る人ぞ知る高見え＆超優秀な日用雑貨です✨`,
+    `普通のホームセンターには置いていない、洗練された暮らしを演出するマニアックで大人気なアイテム💖`
   ];
 
   // 2. マニアックで便利なレアもののベネフィットアピール
@@ -65,33 +65,33 @@ function generateDynamicMessage(title) {
 
   // タイトルからキーワードを自動判別して訴求を最適化
   if (title.includes('収納') || title.includes('ラック') || title.includes('整理') || title.includes('ボックス')) {
-    appeals.push('📦 生活感を完全におしゃれに隠してくれる、デッドスペースをフル活用できる極上の収納アイデアグッズ！');
+    appeals.push('📦 生活感を完全におしゃれに隠してくれる上、デッドスペースをフル活用できる極上の収納アイデアグッズ！');
   } else if (title.includes('キッチン') || title.includes('調理') || title.includes('便利')) {
     appeals.push('🍳 毎日のごはん作りや水回りの作業が劇的にスムーズになる、主婦の知恵が詰まった時短便利ツールです！');
   } else if (title.includes('北欧') || title.includes('インテリア') || title.includes('おしゃれ')) {
-    appeals.push('🌿 お部屋に置いておくだけで、まるでセレクトショップのディスプレイのようにお部屋全体が垢抜けます♪');
+    appeals.push('🌿 お部屋にポンと置いておくだけで、まるでセレクトショップ of ディスプレイのようにお部屋全体が垢抜けます♪');
   } else {
     // 汎用のおしゃれ雑貨アピール
     const genericAppeals = [
-      `🌟 普通の生活雑貨とは一線を画す、細部までこだわり抜かれた機能美とデザイン性に思わず惚れ惚れしてしまいます！`,
-      `✨ 「こんなのが欲しかった！」を形にしたマニアックな名品で、友達をお家に招いたときにも「これどこで買ったの？」と聞かれそう♪`,
-      `👍 毎日の暮らしがちょっと贅沢に、そして劇的に快適になる、知る人ぞ知る暮らしのアイデア商品です。`
+      `🌟 よくある安価な生活雑貨とは一線を画す、細部までこだわり抜かれた機能美とデザイン性に思わず惚れ惚れしてしまいます！`,
+      `✨ 「こういうの本当に欲しかった！」を形にしたマニアックな名品で、遊びに来たお友達にも「これどこで買ったの？」と聞かれること間違いなし♪`,
+      `👍 毎日の暮らしがちょっと贅沢に、そして劇的に快適になる、知る人ぞ知る暮らし of アイデア商品です。`
     ];
     appeals.push(genericAppeals[Math.floor(Math.random() * genericAppeals.length)]);
   }
 
   // 価格帯（3,000円〜5,000円）のアピールと送料無料などのメリット
-  appeals.push('🉐 安っぽく見えない洗練されたクオリティで、お買い物マラソン等の店舗買い回り（店舗稼ぎ）にも絶妙でちょうど良い価格帯です！');
+  appeals.push('🉐 チープに見えない洗練された圧倒的クオリティなのに、お買い物マラソン等の店舗買い回り（店舗追加）にも絶妙にちょうどいい3,000円〜5,000円の価格帯なのが嬉しすぎます！');
 
-  // 3. クリック（CTA）を強力に誘発する感想・誘導文（ランダム）
+  // 3. 宣伝臭を徹底排除した、自然で強烈にクリック（CTA）を誘発する感想・誘導文（ランダム）
   const reviews = [
-    `⚠️ 大人気の隠れ名品のため、楽天市場でよく品切れ（予約待ち）になっています。現在のリアルタイムな在庫状況や、お得なポイント還元状況は今すぐこちらから確認してみてくださいね👇👇`,
-    `🎁 今だけの限定割引クーポンや特別なポイントアップイベント情報は、楽天市場の公式ページで公開されています！損する前にぜひチェックしてみてね👇🔗`,
-    `「本当に買って暮らしが変わった！」というリアルな愛用者たちの感動口コミや、お買い物マラソン期間中の割引状況は楽天市場の公式ページで今すぐチェックできます！👇👇`,
+    `⚠️ 大人気の隠れ名品のため、楽天市場でもよく品切れ（予約待ち）になっています。現在のリアルタイムな在庫状況や、使える限定クーポン情報は今すぐこちらから確認できます👇🔗`,
+    `🎁 今だけの限定割引クーポンや、ポイントアップの最新情報は楽天市場の公式ページで公開されています！損する前にぜひチェックしてみてね👇✨`,
+    `「本当に買って暮らしのQOLが上がった！」というリアルな愛用者たちの絶賛口コミや、現在の割引価格は楽天市場の公式ページで今すぐチェックできます！👇🔗`,
     `これ、本当にすぐ売り切れてしまうので、現在のお得なプライスや在庫の有無は楽天市場の公式ページで今すぐ確認しておくのがおすすめです！🔗👇`
   ];
 
-  // 4. 主婦層のハッシュタグ
+  // 4. 主婦層に特化したハッシュタグ
   const tagSets = [
     ['#楽天市場', '#北欧インテリア', '#便利グッズ', '#暮らしを整える', '#お家時間'],
     ['#楽天市場', '#買ってよかった', '#家事楽', '#すっきり暮らす', '#インテリア雑貨'],
@@ -158,83 +158,21 @@ async function run() {
   const page = await context.newPage();
 
   try {
-    // 💡 GitHub Actions上では楽天市場をスキップ、ローカルでは楽天市場からボタン抽出するハイブリッドルーティング
-    let officialRecommendUrl = null;
-    let useDirectPasteRoute = false;
+    // 💡 楽天市場へのアクセス（ボット規制）と、ROOMコピペフォーム（404等）を完全に回避するため、
+    // 商品URLをエンコードした「自己生成の公式ROOM投稿ワープURL」を組み立ててダイレクト遷移します！
+    const encodedTargetUrl = encodeURIComponent(targetUrl);
+    const officialWarpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodedTargetUrl}`;
     
-    if (isCI) {
-      console.log('🌐 [Actions自動運転] 楽天市場へのアクセスをスキップし、直接楽天ROOMコピペ投稿画面に遷移します（IP規制回避）。');
-      useDirectPasteRoute = true;
-      officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
-    } else {
-      console.log('🌐 楽天市場の商品ページにアクセスしています...');
-      
-      let loaded = false;
-      let retries = 0;
-      const maxRetries = 3;
-
-      while (retries < maxRetries && !loaded) {
-        try {
-          await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-          loaded = true;
-        } catch (err) {
-          retries++;
-          console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
-          await page.waitForTimeout(1500);
-        }
-      }
-
-      if (!loaded) {
-        throw new Error('楽天市場の商品ページのロードに失敗しました（リトライ上限超過）。');
-      }
-
-      await page.waitForTimeout(4000);
-      await takeScreenshot(page, 'step1_rakuten_loaded');
-
-      console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
-      const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
-      if (await roomLinkLocator.count() > 0) {
-        officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
-        console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-      } else {
-        const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
-        if (await fallbackLocator.count() > 0) {
-          officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
-          console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
-        }
-      }
-
-      if (!officialRecommendUrl) {
-        console.log('💡 楽天市場上に公式投稿ボタンがないため、「通常投稿（URLコピペ）ルート」で実行します。');
-        useDirectPasteRoute = true;
-        officialRecommendUrl = 'https://room.rakuten.co.jp/mix/items/create/url';
-      }
-    }
-
-    // -------------------------------------------------------------
-    // ステップ2: 楽天ROOMの投稿画面へ遷移
-    // -------------------------------------------------------------
-    if (useDirectPasteRoute) {
-      console.log(`🌐 投稿作成画面に直接アクセスしています: ${officialRecommendUrl}`);
-      await page.goto(officialRecommendUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await page.waitForTimeout(4000);
-    } else {
-      console.log(`🚀 正規の公式投稿URLへ直接ワープします:\n👉 ${officialRecommendUrl}`);
-      await page.goto(officialRecommendUrl, { waitUntil: 'commit', timeout: 0 });
-    }
-
-    console.log('⏳ 編集・入力画面 of 表示を待っています...');
+    console.log(`🌐 公式投稿ワープURLに直接アクセスしています...\n👉 ${officialWarpUrl}`);
+    await page.goto(officialWarpUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    
+    console.log('⏳ 編集・入力画面の表示を待っています...');
     const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea';
-    const inputSelector = 'input[type="text"], input[placeholder*="URL"], input';
-
-    if (useDirectPasteRoute) {
-      await page.waitForSelector(inputSelector, { timeout: 25000 });
-    } else {
-      await page.waitForSelector(commentAreaSelector, { timeout: 25000 }).catch(async () => {
-        console.warn('⚠️ 編集画面の表示に時間がかかっています。追加で待機します。');
-        await page.waitForTimeout(5000);
-      });
-    }
+    
+    await page.waitForSelector(commentAreaSelector, { timeout: 35000 }).catch(async () => {
+      console.warn('⚠️ 編集画面の表示に時間がかかっています。追加で待機します。');
+      await page.waitForTimeout(5000);
+    });
     await takeScreenshot(page, 'step2_editor_loaded');
 
     // ログインセッションチェック
@@ -250,53 +188,6 @@ async function run() {
       await page.locator('button:has-text("はい"), button:has-text("コレ！する")').first().click().catch(() => {});
       await page.waitForTimeout(3000);
       await takeScreenshot(page, 'step2_modal_bypassed');
-    }
-
-    // -------------------------------------------------------------
-    // 【コピペルートのみ】URLのコピペ入力と商品検索の実行
-    // -------------------------------------------------------------
-    if (useDirectPasteRoute) {
-      console.log('✍️ コピペルート：URL入力欄の特定と入力を行います...');
-      let urlInput = null;
-      const inputs = page.locator('input, textarea');
-      const inputCount = await inputs.count();
-      
-      for (let i = 0; i < inputCount; i++) {
-        const el = inputs.nth(i);
-        if (await el.isVisible()) {
-          const placeholder = await el.getAttribute('placeholder') || '';
-          const type = await el.getAttribute('type') || 'text';
-          const id = await el.getAttribute('id') || '';
-          const className = await el.getAttribute('class') || '';
-
-          const isSearchBox = placeholder.includes('キーワード') || 
-                              placeholder.includes('検索') || 
-                              placeholder.includes('さがす') || 
-                              id.includes('search') || 
-                              className.includes('search');
-          const isHiddenOrAction = type === 'submit' || type === 'button' || type === 'hidden';
-
-          if (!isSearchBox && !isHiddenOrAction && type === 'text') {
-            urlInput = el;
-            break;
-          }
-        }
-      }
-
-      if (!urlInput) {
-        throw new Error('コピペ用URL入力フォームが見つかりませんでした。');
-      }
-
-      await urlInput.fill(targetUrl);
-      await randomSleep(1500, 2500);
-      console.log('⌨️ 入力欄でEnterキーを入力して商品検索を実行します...');
-      await urlInput.press('Enter');
-      
-      console.log('🔍 商品情報の解析中（8秒待機）...');
-      await page.waitForTimeout(8000);
-
-      await page.waitForSelector(commentAreaSelector, { timeout: 15000 });
-      await takeScreenshot(page, 'step2_copypaste_resolved');
     }
 
     // -------------------------------------------------------------

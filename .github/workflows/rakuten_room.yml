@@ -2,20 +2,8 @@ name: 楽天ROOM 完全自動アフィリエイトシステム
 
 on:
   schedule:
-    # ⏰ 1日10回：アクティブ時間帯（日本時間 08:00 〜 22:00）に約1.5時間おきに自動投稿
-    - cron: '0 23 * * *'  # 日本時間 08:00 (前日 23:00 UTC) -> 自動投稿
-    - cron: '30 0 * * *'  # 日本時間 09:30 (00:30 UTC) -> 自動投稿
-    - cron: '0 2 * * *'   # 日本時間 11:00 (02:00 UTC) -> 自動投稿
-    - cron: '30 3 * * *'  # 日本時間 12:30 (03:30 UTC) -> 自動投稿
-    - cron: '0 5 * * *'   # 日本時間 14:00 (05:00 UTC) -> 自動投稿
-    - cron: '30 6 * * *'  # 日本時間 15:30 (06:30 UTC) -> 自動投稿
-    - cron: '0 8 * * *'   # 日本時間 17:00 (08:00 UTC) -> 自動投稿
-    - cron: '30 9 * * *'  # 日本時間 18:30 (09:30 UTC) -> 自動投稿
-    - cron: '0 11 * * *'  # 日本時間 20:00 (11:00 UTC) -> 自動投稿
-    - cron: '0 13 * * *'  # 日本時間 22:00 (13:00 UTC) -> 自動投稿
-    
-    # ⏰ 1日1回：早朝にその日の売れ筋トレンド商品を10件自動リサーチしてキューを補充
-    - cron: '0 21 * * *'  # 日本時間 06:00 (前日 21:00 UTC) -> 自動トレンドリサーチ
+    # ⏰ 1時間に1回（24時間連続）自動的にリサーチ・投稿・いいね巡回を実行
+    - cron: '0 * * * *'
 
   workflow_dispatch: # 手動で即座に実行したい場合
 
@@ -59,14 +47,14 @@ jobs:
           RAKUTEN_STATE_JSON: ${{ secrets.RAKUTEN_STATE_JSON }}
 
       # 💡 仮想画面 Xvfb を通すことで、クラウド上でも「 headless: false 」（有頭ブラウザ）を完全稼働させます！
-      - name: 🔍 トレンド商品の自動リサーチ（1日1回早朝のみ）
-        if: github.event.schedule == '0 21 * * *' || github.event_name == 'workflow_dispatch'
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run research
+      - name: 🔍 トレンド商品の自動リサーチ（キュー補充ガード付き）
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run research || echo "リサーチスキップまたはエラー"
 
-      # 💡 同様に自動投稿も Xvfb を通して完全有頭偽装で実行！
-      - name: 🚀 自動コレ！投稿（1日10回定期実行）
-        if: github.event.schedule != '0 21 * * *' || github.event_name == 'workflow_dispatch'
+      - name: 🚀 自動コレ！投稿（毎時1回）
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run collect
+
+      - name: 💖 周囲への自動いいね・フォロー巡回（毎時1回）
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run engage || echo "いいね巡回スキップまたはエラー"
 
       - name: 💾 投稿履歴とキューリストの自動コミット・保存
         run: |

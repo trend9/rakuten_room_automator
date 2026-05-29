@@ -28,6 +28,13 @@ function saveQueue(data) {
 async function run() {
   console.log('🔍 主婦層ターゲットの「マニアック便利雑貨・垢抜けインテリア（3000円〜5000円）」を自動リサーチしています...');
 
+  const data = loadQueue();
+  const pendingCount = data.queue.filter(p => p.status === 'pending').length;
+  if (pendingCount >= 5) {
+    console.log(`💡 現在のキュー内には ${pendingCount} 件の未投稿商品が残っています。十分に在庫があるため、新規リサーチはスキップします。`);
+    process.exit(0);
+  }
+
   const browser = await chromium.launch({ 
     headless: true,
     channel: 'chrome'
@@ -48,25 +55,28 @@ async function run() {
     });
   });
 
-  const data = loadQueue();
   const foundUrls = new Set();
   const newProducts = [];
 
   // 💡 【超戦略的リサーチ先設定】
-  // 主婦が好み、普通のデパートにはあまりない「おしゃれ日常雑貨・北欧風インテリア・隠れた便利グッズ」がザクザク見つかる
+  // 主婦が好み、普通のデパートにはあまりない「山崎実業tower・浮かせる収納・隠れた時短家事便利グッズ・SNS話題の垢抜け雑貨」がザクザク見つかる
   // 楽天市場のカテゴリ特化URL（価格帯3,000円〜5,000円、評価4.0以上、送料無料に厳密フィルター）
   const targetUrls = [
     {
-      name: '北欧おしゃれインテリア雑貨（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E5%8C%97%E6%AC%A7+%E3%82%A4%E3%83%B3%E3%83%86%E3%82%A3%E3%83%AA%E3%82%A2+%E9%9B%91%E8%B2%A8/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      name: '山崎実業 towerシリーズ 便利収納（3000-5000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E5%B1%B1%E5%B5%8E%E5%AE%9F%E6%A5%AD+tower/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
     },
     {
-      name: '家事が劇的に楽になる隠れた便利グッズ（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E5%AE%B6%E4%BA%8B%E6%A5%BD%E3%80%80%E4%BE%BF%E5%88%A9%E3%82%B0%E3%82%A2%E3%83%83%E3%82%BA/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      name: '家事が劇的に楽になる浮かせる収納（3000-5000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E6%B5%AE%E3%81%8B%E3%81%9B%E3%82%8B%E5%8F%8E%E7%B4%8D/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
     },
     {
-      name: 'キッチン・バスまわりの垢抜け収納アイテム（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E3%81%97%E3%82%83%E3%82%8C%E3%80%80%E5%8F%8E%E7%B4%8D%E3%80%80%E3%83%A9%E3%83%83%E3%82%AF/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      name: '時短お掃除・アイデアキッチン便利ツール（3000-5000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E6%99%82%E7%9F%AD+%E5%AE%B6%E4%BA%8B+%E4%BE%BF%E5%88%A9/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+    },
+    {
+      name: 'SNSで話題の垢抜けインテリア雑貨（3000-5000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/SNS%E8%A9%B1%E9%A1%8C+%E9%9B%91%E8%B2%A8/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
     }
   ];
 
@@ -96,32 +106,69 @@ async function run() {
 
         // 楽天市場の商品リンクを高度に解析・抽出
         const items = await page.evaluate(() => {
-          const cards = Array.from(document.querySelectorAll('div.search-grid-item, div.ri-search-card, a[href*="item.rakuten.co.jp"]'));
-          return cards.map(card => {
-            // 親要素のリンクやテキスト、価格などのメタデータをピンポイント抽出
-            let href = '';
-            let text = '';
-            let priceText = '0';
+          // 1. 各商品を包むカード（コンテナ）を広範囲に探索
+          const cards = Array.from(document.querySelectorAll([
+            'div.search-grid-item', 
+            'div.ri-search-card', 
+            'div[class*="item"]', 
+            'div[class*="Card"]',
+            'tr.shop-item'
+          ].join(',')));
 
-            if (card.tagName.toLowerCase() === 'a') {
-              href = card.href;
-              text = card.innerText || '';
-            } else {
-              const link = card.querySelector('a[href*="item.rakuten.co.jp"]');
-              if (link) {
-                href = link.href;
-                text = link.innerText || '';
+          if (cards.length > 0) {
+            return cards.map(card => {
+              // カード内のすべての商品リンクを取得
+              const links = Array.from(card.querySelectorAll('a[href*="item.rakuten.co.jp"]'));
+              if (links.length === 0) return null;
+
+              // 最も長いテキスト（商品名が入っている可能性が最も高い）を持つリンクを選択
+              let bestLink = links[0];
+              let maxLen = 0;
+              for (const l of links) {
+                const txt = (l.innerText || '').trim();
+                if (txt.length > maxLen) {
+                  maxLen = txt.length;
+                  bestLink = l;
+                }
+              }
+
+              // タイトル要素を別途クラス名検索
+              const titleEl = card.querySelector([
+                '[class*="title"]',
+                '[class*="name"]',
+                'h2',
+                'h3'
+              ].join(','));
+
+              const titleText = titleEl ? (titleEl.innerText || '').trim() : '';
+              const finalTitle = titleText.length > maxLen ? titleText : (bestLink.innerText || '').trim();
+
+              return {
+                href: bestLink.href,
+                text: finalTitle,
+                price: '0'
+              };
+            }).filter(Boolean);
+          }
+
+          // 2. 万が一コンテナが見つからない場合の超強力フォールバック（全aタグ走査）
+          const allLinks = Array.from(document.querySelectorAll('a[href*="item.rakuten.co.jp"]'));
+          const urlMap = new Map();
+          for (const a of allLinks) {
+            const url = a.href.split('?')[0].split('#')[0];
+            const txt = (a.innerText || '').trim();
+            if (txt.length >= 15) {
+              if (!urlMap.has(url) || urlMap.get(url).length < txt.length) {
+                urlMap.set(url, txt);
               }
             }
+          }
 
-            // 価格情報の取得（およその価格帯のダブルチェック用）
-            const priceEl = card.querySelector('.price--XXXX, [class*="price"], [class*="Price"]');
-            if (priceEl) {
-              priceText = priceEl.innerText || '0';
-            }
-
-            return { href, text: text.trim(), price: priceText.replace(/[^0-9]/g, '') };
-          });
+          return Array.from(urlMap.entries()).map(([href, text]) => ({
+            href,
+            text,
+            price: '0'
+          }));
         });
 
         // フィルタリング処理（送料無料、評価の高い店舗商品のみを厳選）
