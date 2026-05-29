@@ -7,7 +7,7 @@ const COLLECT_PATH = path.resolve('src/collect.js');
 const ENGAGE_PATH = path.resolve('src/engage.js');
 
 console.log('⏰ 楽天ROOM完全自動化・超高頻度ローカルスケジューラを起動しました。');
-console.log('このプロセスはローカル常駐し、1時間に1回、確実にリサーチ・投稿・いいね巡回を全自動で実行します。');
+console.log('このプロセスはローカル常駐し、全自動でリサーチ・投稿・いいね巡回を実行します。');
 
 // スクリプトを順次（同期的に）実行するヘルパー関数
 function runScriptSync(scriptPath) {
@@ -27,6 +27,9 @@ function runScriptSync(scriptPath) {
   });
 }
 
+// 毎時のプロセス実行回数をカウントする変数
+let hourCounter = 0;
+
 // -------------------------------------------------------------
 // 毎時0分の完全自動自律稼働スケジュール (1日24回)
 // -------------------------------------------------------------
@@ -37,13 +40,21 @@ cron.schedule('0 * * * *', async () => {
     // 1. キュー補充リサーチ（5件未満の時のみ実際に楽天市場をスクレイピング）
     await runScriptSync(RESEARCH_PATH).catch(() => {});
     
-    // 2. 自動コレ！投稿（1件投稿）
+    // 2. 自動コレ！投稿（毎時1件投稿）
     await runScriptSync(COLLECT_PATH).catch(() => {});
     
-    // 3. 周囲への自動いいね・フォロー巡回
-    await runScriptSync(ENGAGE_PATH).catch(() => {});
+    // 3. 周囲への自動いいね・フォロー巡回（3時間に1回実行＝3回に1回の頻度に制限して安全運用！）
+    if (hourCounter % 3 === 0) {
+      console.log('💖 3時間周期のタイミングです。自動いいね・フォロー巡回を実行します。');
+      await runScriptSync(ENGAGE_PATH).catch(() => {});
+    } else {
+      console.log(`💡 今回はいいね巡回をスキップします（次回実行まであと ${3 - (hourCounter % 3)} 時間）`);
+    }
     
-    console.log(`[${new Date().toLocaleString()}] 💖 毎時の統合プロセスがすべて正常に完了しました！次回まで待機します。`);
+    // カウンターを進める
+    hourCounter++;
+    
+    console.log(`[${new Date().toLocaleString()}] 💖 毎時の統合プロセスが正常に完了しました。次回まで待機します。`);
   } catch (err) {
     console.error('❌ 統合プロセスの実行中に致命的なエラーが発生しました:', err);
   }
@@ -52,7 +63,7 @@ cron.schedule('0 * * * *', async () => {
 console.log('\n--- 📅 登録されたローカル超高頻度スケジュール ---');
 console.log('🔄 毎時0分 (1日24回) に以下をシームレスに連続実行します：');
 console.log('   1. キュー自動補充 (残り5件未満時のみ作動)');
-console.log('   2. 楽天ROOM自動投稿 (マニアック便利雑貨特化・超高CTA)');
-console.log('   3. 周囲への自動いいね・フォロー巡回 (超安全マイルド設計)');
+console.log('   2. 楽天ROOM自動投稿 (毎時1回・マニアック便利雑貨特化・超高CTA)');
+console.log('   3. 周囲への自動いいね・フォロー巡回 (★3時間に1回の超安全マイルド設計)');
 console.log('--------------------------------------------------\n');
-console.log('⏳ 常駐待機モードに入りました。');
+console.log('⏳ 常駐待機モードに入りました。このターミナルを開いたまま最小化しておいてください。');
