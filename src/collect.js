@@ -182,15 +182,12 @@ async function run() {
         await takeScreenshot(page, 'step1_rakuten_loaded');
 
         console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
-        const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"]');
+        const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
         if (await roomLinkLocator.count() > 0) {
-          officialRecommendUrl = await roomLinkLocator.first().getAttribute('href');
-          console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-        } else {
-          const fallbackLocator = page.locator('a:has-text("ROOM"), a[class*="room"]');
-          if (await fallbackLocator.count() > 0) {
-            officialRecommendUrl = await fallbackLocator.first().getAttribute('href');
-            console.log('🎯 フォールバックで公式ROOM投稿URLを検出しました。');
+          const href = await roomLinkLocator.first().getAttribute('href');
+          if (href && (href.includes('room.rakuten.co.jp/recommend') || href.includes('room.rakuten.co.jp/mix'))) {
+            officialRecommendUrl = href;
+            console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
           }
         }
       }

@@ -312,7 +312,7 @@
       "url": "https://item.rakuten.co.jp/roomy/ymz20jan28h04/",
       "title": "［ 折り畳み水切り タワー シリコーントレー付き L ］山崎実業 tower 折り畳み 水切りラック シリコン シンク上 折りたたみ 水切りカゴ 水切りマット ",
       "addedAt": "2026-05-29T12:00:11.843Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -320,9 +320,10 @@
       "url": "https://item.rakuten.co.jp/patie/ymj-00413/",
       "title": "（土・日発送可） [ トレースタンド タワー ] 山崎実業 tower ホワイト/ブラック 5052 5053 キッチン シンプル モダン おしゃれ おすすめ ",
       "addedAt": "2026-05-29T12:00:11.845Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-05-29T13:05:35.444Z"
     },
     {
       "url": "https://item.rakuten.co.jp/alamode/3605-3070/",
@@ -401,6 +402,7 @@
     "https://item.rakuten.co.jp/wwpc/3182550901215/",
     "https://item.rakuten.co.jp/alamode/3605-c910/",
     "https://item.rakuten.co.jp/bellevie-harima/ymj-00413/",
-    "https://item.rakuten.co.jp/k-style/kom01_121_bottle/"
+    "https://item.rakuten.co.jp/k-style/kom01_121_bottle/",
+    "https://item.rakuten.co.jp/patie/ymj-00413/"
   ]
 }
