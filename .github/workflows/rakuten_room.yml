@@ -2,16 +2,20 @@ name: 楽天ROOM 完全自動アフィリエイトシステム
 
 on:
   schedule:
-    # ⏰ 1時間に1回（24時間連続）自動的にリサーチ・投稿・いいね巡回を実行
+    # 毎時0分に自動実行（1日24回）
     - cron: '0 * * * *'
 
-  workflow_dispatch: # 手動で即座に実行したい場合
+  workflow_dispatch: # 手動実行用トリガー
+
+env:
+  GITHUB_ACTIONS: 'true'
 
 jobs:
   run-automator:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
-      contents: write # 履歴(queue.json)を自動コミットしてリポジトリに保存
+      contents: write
 
     steps:
       - name: リポジトリのチェックアウト
@@ -23,41 +27,41 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      # 💡 画面非搭載のLinuxサーバー上に「仮想ディスプレイ (Xvfb)」と「本物Google Chrome」を自動インストール
-      - name: 📺 仮想ディスプレイ(Xvfb)および依存パッケージのインストール
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libgbm-dev
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-
       - name: 依存パッケージのインストール
         run: npm ci
 
       - name: Playwrightブラウザのインストール
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
 
       - name: 🔐 ログイン認証セッションの復元
         run: |
           mkdir -p storage
           echo "${{ secrets.RAKUTEN_STATE_JSON }}" | base64 -d > storage/state.json
+          if [ ! -s storage/state.json ]; then
+            echo "❌ state.json の復元に失敗しました。Secretが未設定か破損しています。"
+            exit 1
+          fi
+          echo "✅ セッションファイル復元完了 ($(wc -c < storage/state.json) bytes)"
 
-      # 💡 仮想画面 Xvfb を通すことで、クラウド上でも「 headless: false 」（有頭ブラウザ）を完全稼働させます！
-      - name: 🔍 トレンド商品の自動リサーチ（キュー補充ガード付き）
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run research || echo "リサーチスキップまたはエラー"
+      - name: 🔄 最新の投稿履歴を自動同期（重複防止）
+        run: node src/sync.js || echo "⚠️ 同期処理でエラーが発生しましたが、続行します"
 
-      - name: 🚀 自動コレ！投稿（毎時1回）
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run collect
+      - name: 🔍 トレンド商品の自動リサーチ（キュー補充）
+        run: node src/research.js || echo "⚠️ リサーチでエラーが発生しましたが、続行します"
 
-      - name: 💖 周囲への自動いいね・フォロー巡回（毎時1回）
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" npm run engage || echo "いいね巡回スキップまたはエラー"
+      - name: 🚀 自動コレ！投稿
+        run: node src/collect.js
+
+      - name: 💖 自動いいね・フォロー巡回
+        run: node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
 
       - name: 💾 投稿履歴とキューリストの自動コミット・保存
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add storage/queue.json
-          git commit -m "💾 投稿履歴とキューを自動更新 [skip ci]" || echo "変更なし"
-          git push
+          git diff --cached --quiet || {
+            git commit -m "💾 投稿履歴とキューを自動更新 [skip ci]"
+            git push
+          }
+          echo "✅ 履歴保存処理完了"

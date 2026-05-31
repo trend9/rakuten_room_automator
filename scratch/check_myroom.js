@@ -21,21 +21,38 @@ async function run() {
 
   const page = await context.newPage();
   try {
-    // 楽天ROOMのマイページにアクセス
-    await page.goto('https://room.rakuten.co.jp/v2/myroom', { waitUntil: 'networkidle', timeout: 60000 });
-    await page.waitForTimeout(5000);
+    const itemsUrl = 'https://room.rakuten.co.jp/jack555/items';
+    console.log(`🌐 ユーザーマイページにアクセスしています: ${itemsUrl}`);
+    await page.goto(itemsUrl, { waitUntil: 'commit', timeout: 60000 });
+    await page.waitForTimeout(10000); // 描画完了を十分に待つ
     
-    // マイページのスクリーンショットを保存
-    const dir = path.resolve('storage/steps');
-    const screenshotPath = path.join(dir, 'myroom_check.png');
-    await page.screenshot({ path: screenshotPath });
-    console.log(`📸 マイページの確認画像を保存しました: ${screenshotPath}`);
+    // スクロールを1回してカードをロードさせる
+    console.log('📜 スクロール実行...');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(3000);
 
-    // 最新の投稿のコメント部分のテキストを取得してみる
-    const posts = page.locator('.room-item-card, [class*="ItemCard"], [class*="item-card"]');
-    const count = await posts.count();
-    console.log(`📝 ページ内の投稿数: ${count}`);
-    
+    // 最初の商品の画像リンク（a.link-image--2kguM）をクリックしてみる
+    const cardLocator = page.locator('a.link-image--2kguM').first();
+    if (await cardLocator.count() > 0) {
+      console.log('🎯 1番目の商品カードをクリックします...');
+      await cardLocator.click();
+      await page.waitForTimeout(6000); // 遷移またはモーダルロード待ち
+      
+      const newUrl = page.url();
+      console.log(`🎯 クリック後のURL: ${newUrl}`);
+
+      // 遷移先またはモーダル内に楽天市場へのリンクがあるか確認
+      const rakutenLink = await page.locator('a[href*="recommend.html?url="], a[href*="item.rakuten.co.jp"]').first().getAttribute('href').catch(() => '');
+      console.log(`🎯 検出された楽天市場URL: ${rakutenLink}`);
+      
+      // スクリーンショット保存
+      const screenshotPath = path.resolve('storage/myroom_debug_clicked.png');
+      await page.screenshot({ path: screenshotPath });
+      console.log(`📸 クリック後のスクリーンショットを保存しました: ${screenshotPath}`);
+    } else {
+      console.log('❌ 商品カードが見つかりませんでした。');
+    }
+
   } catch (error) {
     console.error('❌ エラーが発生しました:', error.message);
   } finally {

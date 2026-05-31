@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import { extractProductKey } from './sync.js';
 
 dotenv.config();
 
@@ -127,24 +128,50 @@ async function run() {
   }
 
   const data = loadQueue();
-  const pendingProduct = data.queue.find(p => p.status === 'pending');
+  let pendingProduct = data.queue.find(p => p.status === 'pending');
 
   if (!pendingProduct) {
-    console.log('💡 投稿待ちの商品がキュー内にありません。');
+    console.log('💡 投稿待ち（pending）の商品がありません。failedになっている直近の商品を pending に復活させてテストを継続します...');
+    const failedProduct = data.queue.find(p => p.status === 'failed');
+    if (failedProduct) {
+      failedProduct.status = 'pending';
+      saveQueue(data);
+      pendingProduct = failedProduct;
+    }
+  }
+
+  if (!pendingProduct) {
+    console.log('💡 投稿待ちおよび復活可能な商品がキュー内にありません。');
     process.exit(0);
   }
 
   const targetUrl = pendingProduct.url;
   const targetTitle = pendingProduct.title;
 
+  // 💡 【事前重複防止ガード】店舗コード＋商品コードでの高度なマッチングにより、余分なブラウザ起動をゼロにします
+  const targetKey = extractProductKey(targetUrl);
+  const alreadyInHistory = data.history && data.history.some(hUrl => {
+    const hKey = extractProductKey(hUrl);
+    return hKey && hKey === targetKey;
+  });
+
+  if (alreadyInHistory) {
+    console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに過去に投稿（コレ！）されています（履歴から重複を検出）。ブラウザ起動前に安全にスキップ（duplicate）します。`);
+    pendingProduct.status = 'duplicate';
+    saveQueue(data);
+    process.exit(0);
+  }
+
   console.log(`📦 今回の自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
 
-  // 仮想ディスプレイ Xvfb で駆動するため、常時 headless: false
+  const isCI = process.env.GITHUB_ACTIONS === 'true';
+
+  // 💡 CI環境（GitHub Actions）上では headless: true、ローカルでは headless: false
   const browser = await chromium.launch({
-    headless: false,
-    channel: 'chrome'
+    headless: isCI ? true : false,
+    channel: isCI ? undefined : 'chrome'
   }).catch(() => chromium.launch({ 
-    headless: false
+    headless: isCI ? true : false
   }));
 
   const context = await browser.newContext({
@@ -204,7 +231,7 @@ async function run() {
     await page.goto(officialRecommendUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     
     console.log('⏳ 編集・入力画面の表示を待っています...');
-    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea';
+    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"]';
     
     await page.waitForSelector(commentAreaSelector, { timeout: 35000 }).catch(async () => {
       console.warn('⚠️ 編集画面の表示に時間がかかっています。追加で待機します。');
@@ -218,13 +245,16 @@ async function run() {
       throw new Error('セッションの有効期限が切れているか、未ログインです。再度 npm run auth を実行してください。');
     }
 
-    // 重複投稿警告ダイアログの自動突破
-    const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！').count() > 0;
+    // 🔥 【重複投稿の絶対防止ガード】
+    // 万が一、事前検知をすり抜けてブラウザ上で重複警告ダイアログが出現した場合は、
+    // アカウントの安全性を最優先し、無理に突破せず即座に安全スキップ（正常終了）します。
+    const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています').count() > 0;
     if (isAlreadyCollectedModal) {
-      console.log('⚠️ すでにコレ！済みのダイアログが出現しました。ダイアログを突破します...');
-      await page.locator('button:has-text("はい"), button:has-text("コレ！する")').first().click().catch(() => {});
-      await page.waitForTimeout(3000);
-      await takeScreenshot(page, 'step2_modal_bypassed');
+      console.log('⚠️ 【重複投稿の絶対防止】この商品はすでに過去にコレ！されています。楽天ROOM側の警告を検知したため、安全にスキップします。');
+      pendingProduct.status = 'duplicate';
+      saveQueue(data);
+      await browser.close();
+      process.exit(0);
     }
 
     // -------------------------------------------------------------

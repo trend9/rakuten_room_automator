@@ -1,8 +1,12 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
+import { extractProductKey } from './sync.js';
+
 
 const QUEUE_PATH = path.resolve('storage/queue.json');
+console.log(`📂 QUEUE_PATH 絶対パス: ${QUEUE_PATH}`);
+console.log(`📂 現在の CWD: ${process.cwd()}`);
 
 // キューデータの読み込み
 function loadQueue() {
@@ -30,15 +34,14 @@ async function run() {
 
   const data = loadQueue();
   const pendingCount = data.queue.filter(p => p.status === 'pending').length;
-  if (pendingCount >= 5) {
+  if (pendingCount >= 10) {
     console.log(`💡 現在のキュー内には ${pendingCount} 件の未投稿商品が残っています。十分に在庫があるため、新規リサーチはスキップします。`);
     process.exit(0);
   }
 
   const browser = await chromium.launch({ 
-    headless: true,
-    channel: 'chrome'
-  }).catch(() => chromium.launch({ headless: true }));
+    headless: true
+  });
 
   const context = await browser.newContext({
     viewport: { width: 1280, height: 1000 },
@@ -64,19 +67,19 @@ async function run() {
   const targetUrls = [
     {
       name: '山崎実業 towerシリーズ 便利収納（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E5%B1%B1%E5%B5%8E%E5%AE%9F%E6%A5%AD+tower/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      url: 'https://search.rakuten.co.jp/search/mall/%E5%B1%B1%E5%B5%8E%E5%AE%9F%E6%A5%AD+tower/min=3000/max=5000/?exch=1&f=1&grp=product&p1=3000&p2=5000&sf=0'
     },
     {
       name: '家事が劇的に楽になる浮かせる収納（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E6%B5%AE%E3%81%8B%E3%81%9B%E3%82%8B%E5%8F%8E%E7%B4%8D/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      url: 'https://search.rakuten.co.jp/search/mall/%E6%B5%AE%E3%81%8B%E3%81%9B%E3%82%8B%E5%8F%8E%E7%B4%8D/min=3000/max=5000/?exch=1&f=1&grp=product&p1=3000&p2=5000&sf=0'
     },
     {
       name: '時短お掃除・アイデアキッチン便利ツール（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E6%99%82%E7%9F%AD+%E5%AE%B6%E4%BA%8B+%E4%BE%BF%E5%88%A9/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      url: 'https://search.rakuten.co.jp/search/mall/%E6%99%82%E7%9F%AD+%E5%AE%B6%E4%BA%8B+%E4%BE%BF%E5%88%A9/min=3000/max=5000/?exch=1&f=1&grp=product&p1=3000&p2=5000&sf=0'
     },
     {
       name: 'SNSで話題の垢抜けインテリア雑貨（3000-5000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/SNS%E8%A9%B1%E9%A1%8C+%E9%9B%91%E8%B2%A8/min=3000/max=5000/?f=1&grp=product&p1=3000&p2=5000&sf=0'
+      url: 'https://search.rakuten.co.jp/search/mall/SNS%E8%A9%B1%E9%A1%8C+%E9%9B%91%E8%B2%A8/min=3000/max=5000/?exch=1&f=1&grp=product&p1=3000&p2=5000&sf=0'
     }
   ];
 
@@ -183,46 +186,114 @@ async function run() {
         if (filteredItems.length > 0) {
           console.log(`🎯 ${target.name} から ${filteredItems.length} 件のおしゃれ雑貨候補を抽出しました。`);
           
-          for (const item of filteredItems) {
-            let url = item.href.split('?')[0].split('#')[0];
-            if (!url.endsWith('/')) url += '/';
+          // 💡 1つの検証用ページを使い回すことで、メモリ消費量を抑えクラッシュを防ぎます！
+          const valPage = await context.newPage();
+          
+          try {
+            for (const item of filteredItems) {
+              let url = item.href.split('?')[0].split('#')[0];
+              if (!url.endsWith('/')) url += '/';
 
-            if (foundUrls.has(url)) continue;
-            foundUrls.add(url);
+              if (foundUrls.has(url)) continue;
+              foundUrls.add(url);
 
-            const alreadyInQueue = data.queue.some(p => p.url === url);
-            const alreadyInHistory = data.history && data.history.includes(url);
-
-            if (!alreadyInQueue && !alreadyInHistory) {
-              let title = item.text.replace(/\s+/g, ' ').replace(/[\n\r]/g, '').trim();
+              const targetKey = extractProductKey(url);
               
-              // ゴミテキストやポイント表記の排除
-              title = title.replace(/^\d+位\s*/, '');
-              title = title.replace(/レビュー高評価|スーパーDEAL|送料無料/gi, '');
+              const alreadyInQueue = data.queue.some(p => {
+                const pKey = extractProductKey(p.url);
+                return pKey && pKey === targetKey;
+              });
+              
+              const alreadyInHistory = data.history && data.history.some(hUrl => {
+                const hKey = extractProductKey(hUrl);
+                return hKey && hKey === targetKey;
+              });
 
-              // あまりに短いものは商品名の体をなしていないためスルー
-              if (title.length < 15 || title.includes('お気に入り商品') || title.includes('レビュー')) {
-                continue;
+              if (!alreadyInQueue && !alreadyInHistory) {
+                let title = item.text.replace(/\s+/g, ' ').replace(/[\n\r]/g, '').trim();
+                
+                // ゴミテキストやポイント表記の排除
+                title = title.replace(/^\d+位\s*/, '');
+                title = title.replace(/レビュー高評価|スーパーDEAL|送料無料/gi, '');
+
+                // あまりに短いものは商品名の体をなしていないためスルー
+                if (title.length < 15 || title.includes('お気に入り商品') || title.includes('レビュー')) {
+                  continue;
+                }
+
+                // 💡 【超強力・事前バリデーション】
+                console.log(`🔎 候補商品の有効性を事前検証中...: ${url}`);
+                let isValid = false;
+                try {
+                  // commitロード ＆ ショートタイムアウトで軽快に処理
+                  await valPage.goto(url, { waitUntil: 'commit', timeout: 15000 });
+                  await valPage.waitForTimeout(4000);
+                  
+                  const pageTitle = await valPage.title().catch(() => '');
+                  const cleanTitleForCheck = title
+                    .replace(/【[^】]+】/g, '')
+                    .replace(/＼[^／]+／/g, '')
+                    .replace(/[\[\]［］()（）「」『』]/g, '')
+                    .trim();
+                  
+                  // 先頭の10文字を固有キーワードとして抽出
+                  const keyword = cleanTitleForCheck.substring(0, 10);
+                  
+                  const h1Texts = await valPage.locator('h1').allInnerTexts().catch(() => []);
+                  const h1Combined = h1Texts.join(' ');
+                  const hasH1Match = h1Combined.includes(keyword) || pageTitle.includes(keyword);
+                  
+                  // 🔥 【究極すり替え転送対策】h1タグまたはタイトルに商品名の固有キーワードが含まれるかチェック！
+                  if (!hasH1Match || pageTitle.includes('店舗のトップページ') || pageTitle.includes('ショップのトップページ')) {
+                    console.log(`❌ 【すり替え転送検知】h1/タイトルに商品名キーワード (${keyword}) が含まれていません。販売終了品として除外します。`);
+                  } else {
+                    const bodyText = await valPage.innerText('body').catch(() => '');
+                    
+                    // 本物の商品詳細ページにしか存在しない「具体的な購入アクションテキスト」を厳密にチェック！
+                    const hasActivePurchaseBtn = 
+                      bodyText.includes('買い物かごに入れる') || 
+                      bodyText.includes('カートに入れる') || 
+                      bodyText.includes('ご購入手続き') || 
+                      bodyText.includes('カートに追加') || 
+                      bodyText.includes('購入手続きへ') || 
+                      bodyText.includes('予約注文する') || 
+                      bodyText.includes('予約する');
+                    
+                    if (hasActivePurchaseBtn) {
+                      isValid = true;
+                    }
+                  }
+                } catch (e) {
+                  console.warn(`⚠️ 商品ページの事前検証中に一時エラーが発生しました: ${e.message}`);
+                }
+
+                if (!isValid) {
+                  console.log(`❌ 売り切れまたは店舗トップへの自動転送（販売終了）を検知したため除外します。`);
+                  continue;
+                }
+                console.log(`✅ 有効な現役商品であることを確認しました！キューに追加します。`);
+
+                // 主婦が思わずクリックしたくなる「マニアックな垢抜け日常雑貨」をキューに追加！
+                newProducts.push({
+                  url: url,
+                  title: title.substring(0, 80),
+                  addedAt: new Date().toISOString(),
+                  status: 'pending',
+                  genre: '主婦向けインテリア・便利雑貨',
+                  targetPrice: '3,000-5,000円'
+                });
               }
 
-              // 主婦が思わずクリックしたくなる「マニアックな垢抜け日常雑貨」をキューに追加！
-              newProducts.push({
-                url: url,
-                title: title.substring(0, 80),
-                addedAt: new Date().toISOString(),
-                status: 'pending',
-                genre: '主婦向けインテリア・便利雑貨',
-                targetPrice: '3,000-5,000円'
-              });
+              // 1回のリサーチで確実な商品を最大5件取得したら終了
+              if (newProducts.length >= 5) break;
             }
 
-            // 1回のリサーチで最大10件取得したら終了
-            if (newProducts.length >= 10) break;
-          }
-
-          if (newProducts.length > 0) {
-            success = true;
-            break; 
+            if (newProducts.length > 0) {
+              success = true;
+              break; 
+            }
+          } finally {
+            await valPage.close().catch(() => {});
           }
         }
       } catch (err) {

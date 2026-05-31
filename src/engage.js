@@ -36,9 +36,8 @@ async function run() {
   console.log(`🤖 稼働環境: ${isCI ? 'GitHub Actions (クラウド自動運転)' : 'ローカル PC'}`);
 
   const browser = await chromium.launch({
-    headless: isCI ? true : false,
-    channel: isCI ? undefined : 'chrome'
-  }).catch(() => chromium.launch({ headless: isCI }));
+    headless: isCI ? true : false
+  });
 
   const context = await browser.newContext({
     storageState: STATE_PATH,
@@ -48,15 +47,12 @@ async function run() {
 
   const page = await context.newPage();
 
-  // 💡 【タイムアウト対策】画像、フォント、広告、解析トラッカーの通信をすべて遮断
+  // 💡 【タイムアウト対策】広告やトラッカーのみを遮断し、UI表示を正常に保ちます
   await page.route('**/*', (route) => {
     const request = route.request();
-    const resourceType = request.resourceType();
     const url = request.url();
 
     if (
-      resourceType === 'image' || 
-      resourceType === 'font' || 
       url.includes('google-analytics') || 
       url.includes('analytics.js') || 
       url.includes('doubleclick') || 
@@ -72,24 +68,41 @@ async function run() {
   try {
     const searchUrl = `https://room.rakuten.co.jp/mix/search/keyword?keyword=${encodeURIComponent(selectedKeyword)}`;
     console.log(`🌐 検索結果ページへ直接遷移します: ${searchUrl}`);
-    // タイムアウトを120秒に設定
-    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
-    await page.waitForTimeout(5000); // 描画完了待ち
+    // タイムアウトを120秒に設定し、SPAの非同期読み込みを確実に待ちます
+    await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 120000 }).catch(() => {});
+    
+    console.log('📜 リストを読み込むために画面をスクロール中...');
+    await page.evaluate(() => window.scrollBy(0, 800));
+    await page.waitForTimeout(5000); // 描画完了・非同期ロード待ち
+
+    // デバッグ用のスクリーンショット
+    const dir = path.resolve('storage/steps');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    await page.screenshot({ path: path.join(dir, 'step_engage_loaded.png') }).catch(() => {});
 
     // ログイン状態の確認
-    const isLoginNeeded = await page.locator('text=ログイン').count() > 0;
+    const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
     if (isLoginNeeded) {
       console.warn('⚠️ セッションが適用されていない可能性があります。正常に「いいね」を行うため、事前に npm run auth を完了してください。');
     }
 
     // いいね（ハートボタン）の検出
-    let likeButtons = page.locator('button:has(svg), button[class*="like"], button[class*="heart"]');
+    // 楽天ROOMの様々な「いいね」ボタンやハートアイコンのDOM構造を強力に網羅
+    let likeButtons = page.locator([
+      'button:has(svg)',
+      'button[class*="like"]',
+      'button[class*="heart"]',
+      '[class*="like-button"]',
+      '[class*="LikeButton"]',
+      '[class*="heart-icon"]',
+      'span[class*="like"]',
+      'div[class*="like"]',
+      'i[class*="heart"]',
+      'button:has-text("いいね")',
+      'button:has-text("コレ！")'
+    ].join(','));
+    
     let count = await likeButtons.count();
-
-    if (count === 0) {
-      likeButtons = page.locator('span[class*="like"], div[class*="like"]');
-      count = await likeButtons.count();
-    }
 
     console.log(`📊 画面上に ${count} 個のリアクション対象要素が見つかりました。`);
 

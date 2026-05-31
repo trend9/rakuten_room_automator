@@ -4,3 +4,8 @@ node_modules/
 storage/state.json
 storage/steps/
 storage/error_*.png
+storage/test_*.png
+storage/test_*.html
+storage/test_*.json
+storage/myroom_debug*.png
+scratch/
