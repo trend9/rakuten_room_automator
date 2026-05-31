@@ -36,12 +36,20 @@ jobs:
       - name: 🔐 ログイン認証セッションの復元
         run: |
           mkdir -p storage
-          echo "${{ secrets.RAKUTEN_STATE_JSON }}" | base64 -d > storage/state.json
+          # シークレットがプレーンなJSONかBase64エンコード済みかを自動判定して復元
+          FIRST_CHAR=$(echo "${{ secrets.RAKUTEN_STATE_JSON }}" | tr -d '[:space:]' | head -c 1)
+          if [ "$FIRST_CHAR" = "{" ]; then
+            echo "${{ secrets.RAKUTEN_STATE_JSON }}" > storage/state.json
+            echo "✅ セッションファイルをプレーンJSON形式から復元しました"
+          else
+            echo "${{ secrets.RAKUTEN_STATE_JSON }}" | base64 -d > storage/state.json
+            echo "✅ セッションファイルをBase64デコードして復元しました"
+          fi
           if [ ! -s storage/state.json ]; then
             echo "❌ state.json の復元に失敗しました。Secretが未設定か破損しています。"
             exit 1
           fi
-          echo "✅ セッションファイル復元完了 ($(wc -c < storage/state.json) bytes)"
+          echo "📊 復元サイズ: ($(wc -c < storage/state.json) bytes)"
 
       - name: 🔄 最新の投稿履歴を自動同期（重複防止）
         run: node src/sync.js || echo "⚠️ 同期処理でエラーが発生しましたが、続行します"

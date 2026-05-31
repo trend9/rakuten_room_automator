@@ -185,37 +185,35 @@ async function run() {
   try {
     let officialRecommendUrl = null;
 
-    // 💡 【超重要】ローカル環境では、まず楽天市場の個別商品ページにアクセスすることで、
-    // 楽天の巨大なドメインをまたぐクロスドメイン認証クッキー（ITP/SameSite規制）を完全にアクティブ化させます！
-    if (!isCI) {
-      console.log('🌐 楽天市場の商品ページにアクセスしています（クッキーのアクティブ化・セッション橋渡しのため）...');
-      let loaded = false;
-      let retries = 0;
-      const maxRetries = 3;
+    // 💡 【超重要】ドメインをまたぐクロスドメイン認証クッキー（ITP/SameSite規制）を完全にアクティブ化させるため、
+    // まず楽天市場の個別商品ページに直接アクセスします。
+    console.log('🌐 楽天市場の商品ページにアクセスしています（クッキーのアクティブ化・セッション橋渡しのため）...');
+    let loaded = false;
+    let retries = 0;
+    const maxRetries = 3;
 
-      while (retries < maxRetries && !loaded) {
-        try {
-          await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-          loaded = true;
-        } catch (err) {
-          retries++;
-          console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
-          await page.waitForTimeout(1500);
-        }
+    while (retries < maxRetries && !loaded) {
+      try {
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        loaded = true;
+      } catch (err) {
+        retries++;
+        console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+        await page.waitForTimeout(1500);
       }
+    }
 
-      if (loaded) {
-        await page.waitForTimeout(4000);
-        await takeScreenshot(page, 'step1_rakuten_loaded');
+    if (loaded) {
+      await page.waitForTimeout(4000);
+      await takeScreenshot(page, 'step1_rakuten_loaded');
 
-        console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
-        const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
-        if (await roomLinkLocator.count() > 0) {
-          const href = await roomLinkLocator.first().getAttribute('href');
-          if (href && (href.includes('room.rakuten.co.jp/recommend') || href.includes('room.rakuten.co.jp/mix'))) {
-            officialRecommendUrl = href;
-            console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-          }
+      console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
+      const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
+      if (await roomLinkLocator.count() > 0) {
+        const href = await roomLinkLocator.first().getAttribute('href');
+        if (href && (href.includes('room.rakuten.co.jp/recommend') || href.includes('room.rakuten.co.jp/mix'))) {
+          officialRecommendUrl = href;
+          console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
         }
       }
     }
