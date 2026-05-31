@@ -47,37 +47,56 @@ async function run() {
 
   const page = await context.newPage();
 
-  // 💡 【タイムアウト対策】広告やトラッカーのみを遮断し、UI表示を正常に保ちます
-  await page.route('**/*', (route) => {
-    const request = route.request();
-    const url = request.url();
-
-    if (
-      url.includes('google-analytics') || 
-      url.includes('analytics.js') || 
-      url.includes('doubleclick') || 
-      url.includes('adsystem') || 
-      url.includes('track')
-    ) {
-      route.abort(); // 読み込み中断
-    } else {
-      route.continue();
-    }
-  });
-
   try {
-    const searchUrl = `https://room.rakuten.co.jp/mix/search/keyword?keyword=${encodeURIComponent(selectedKeyword)}`;
-    console.log(`🌐 検索結果ページへ直接遷移します: ${searchUrl}`);
-    // タイムアウトを120秒に設定し、SPAの非同期読み込みを確実に待ちます
-    await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 120000 }).catch(() => {});
-    
-    console.log('📜 リストを読み込むために画面をスクロール中...');
-    await page.evaluate(() => window.scrollBy(0, 800));
-    await page.waitForTimeout(5000); // 描画完了・非同期ロード待ち
+    // 💡 【超重要】ドメインをまたぐクロスドメイン認証クッキー（SameSite/ITP規制）を完全にアクティブ化させるため、
+    // まず楽天市場のトップページへ直接アクセスします。
+    console.log('🌐 楽天市場のトップページにアクセスしています（セッション活性化のため）...');
+    await page.goto('https://www.rakuten.co.jp/', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(3000);
 
-    // デバッグ用のスクリーンショット
+    const searchUrl = 'https://room.rakuten.co.jp/';
+    console.log(`🔗 楽天市場のページ内にROOMトップへの偽装リンクを動的生成してクリック遷移します:\n👉 ${searchUrl}`);
+    
+    // ページ内にAタグを動的に作成してクリックする
+    await page.evaluate((url) => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.id = 'dummy-room-search-link';
+      a.style.display = 'block';
+      a.style.position = 'fixed';
+      a.style.top = '10px';
+      a.style.left = '10px';
+      a.style.zIndex = '99999';
+      a.innerText = 'Go to ROOM Search';
+      document.body.appendChild(a);
+    }, searchUrl);
+
+    // 作成したAタグをクリックして、別タブではなく現在のタブで遷移させる
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {}),
+      page.locator('#dummy-room-search-link').click()
+    ]);
+    
+    console.log('🌐 検索結果ページへのリンククリック遷移に成功しました！');
+    
+    // 💡 投稿カードがフィード上にロードされるのを確実に待ちます（最大15秒）
+    console.log('⏳ フィードコンテンツの読み込みを待っています...');
+    await page.waitForSelector('[class*="item"], [class*="Item"], [class*="post"], [class*="Post"], [class*="card"], [class*="Card"]', { timeout: 15000 }).catch(() => {
+      console.log('⚠️ 投稿カードの検出タイムアウト。スクロールを開始します。');
+    });
+
+    console.log('📜 リストを読み込むために画面をスクロール中...');
+    // 複数回スクロールを行い、Ajaxロードを強力に促進します
+    for (let s = 0; s < 3; s++) {
+      await page.evaluate(() => window.scrollBy(0, 1000));
+      await page.waitForTimeout(2500);
+    }
+    
+    // デバッグ用のスクリーンショット保存先作成
     const dir = path.resolve('storage/steps');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    // 最新状態をデバッグ用スクリーンショットに保存
     await page.screenshot({ path: path.join(dir, 'step_engage_loaded.png') }).catch(() => {});
 
     // ログイン状態の確認
@@ -87,20 +106,12 @@ async function run() {
     }
 
     // いいね（ハートボタン）の検出
-    // 楽天ROOMの様々な「いいね」ボタンやハートアイコンのDOM構造を強力に網羅
-    let likeButtons = page.locator([
-      'button:has(svg)',
-      'button[class*="like"]',
-      'button[class*="heart"]',
-      '[class*="like-button"]',
-      '[class*="LikeButton"]',
-      '[class*="heart-icon"]',
-      'span[class*="like"]',
-      'div[class*="like"]',
-      'i[class*="heart"]',
-      'button:has-text("いいね")',
-      'button:has-text("コレ！")'
-    ].join(','));
+    // 画面上の「いいね」テキストを持つクリック可能なすべての要素（button, div, span等）を極めて正確に補足します
+    let likeButtons = page.locator('button, div, span, a').filter({ hasText: /^いいね$/ }).or(
+      page.locator('[class*="like" i], [class*="heart" i]').filter({ hasText: 'いいね' })
+    ).or(
+      page.locator('button:has-text("いいね")')
+    );
     
     let count = await likeButtons.count();
 

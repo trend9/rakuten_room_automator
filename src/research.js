@@ -86,7 +86,10 @@ async function run() {
   try {
     let success = false;
 
-    for (const target of targetUrls) {
+    // 💡 毎回towerばかりになる偏りを排除するため、検索ターゲットURLをランダムにシャッフルします！
+    const shuffledTargets = targetUrls.sort(() => Math.random() - 0.5);
+
+    for (const target of shuffledTargets) {
       console.log(`\n🌐 「${target.name}」の選定ページにアクセスしています...`);
       try {
         await page.goto(target.url, { 
