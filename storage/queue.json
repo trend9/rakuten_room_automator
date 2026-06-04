@@ -795,9 +795,10 @@
       "url": "https://item.rakuten.co.jp/yamasoro/3605-i530/",
       "title": "【365日出荷&当店限定特典付き】山崎実業 熱湯が注げる冷水筒 タワー ラウンド 1.2L tower 公式 ピッチャー 1.2リットル 麦茶ポット ドアポケッ",
       "addedAt": "2026-06-03T00:42:52.205Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-04T16:38:25.505Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy/hnw25apr15h08/",
@@ -859,6 +860,38 @@
       "url": "https://item.rakuten.co.jp/interiorworks/4304/",
       "title": "シンク下ボトルストッカー 4段 タワー 収納ストッカー 収納ラック シンク下 洗面下 収納 ボトル 酢 醤油 みりん 油 ペットボトル ストック キッチン 取り",
       "addedAt": "2026-06-03T22:44:38.516Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/monogallery/074a-999251/",
+      "title": "ディッシュスタンド ディッシュラック 【全8種】 皿立て おしゃれ 引き出し キッチン雑貨 インテリア雑貨 北欧 タワーシリーズ towerシリーズ 公式 ya",
+      "addedAt": "2026-06-04T16:35:50.584Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/tamatoshi/100-0219/",
+      "title": "[ ワイドジャグボトルスタンド タワー ] 山崎実業 tower ワイド ジャグボトルスタンド 水切りラック 水切り タワー 棚 キッチン ホワイト ブラック ",
+      "addedAt": "2026-06-04T16:36:20.052Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/importshopaqua/twr-sbs4/",
+      "title": "山崎実業 ボトルラック ボトルストッカー キッチンラック ボトルスタンド 缶ストッカー 缶ラック ラック スリム おしゃれ 奥行20 スチール 4段 ボトル キ",
+      "addedAt": "2026-06-04T16:36:34.754Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/apricot-r/27-4330/",
+      "title": "【365日出荷】山崎実業 ワイドジャグボトルスタンド タワー tower 公式 水切り マグ ボトル 水筒 哺乳瓶 シンプル タンブラー ボトルスタンド スタン",
+      "addedAt": "2026-06-04T16:36:49.593Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -958,6 +991,8 @@
     "https://hb.afl.rakuten.co.jp/hgc/5482a2c6.0343d3bf.5482a2c7.0ba2fbfd/_RTroom06744998_380748961_pc/",
     "https://item.rakuten.co.jp/ponsshoponline/k-416/",
     "https://hb.afl.rakuten.co.jp/hgc/547e12cd.33a9727e.547e12d9.d56d4447/_RTroom06744998_380782354_pc/",
-    "https://item.rakuten.co.jp/avivare/71978/"
+    "https://item.rakuten.co.jp/avivare/71978/",
+    "https://hb.afl.rakuten.co.jp/hgc/54895e44.f230072d.54895e45.a5083438/_RTroom06744998_380821872_pc/",
+    "https://item.rakuten.co.jp/yamasoro/3605-i530/"
   ]
 }
