@@ -831,9 +831,10 @@
       "url": "https://item.rakuten.co.jp/assistone/84006962/",
       "title": "【ネコポス】 [ コースター タワー 角型 丸型 （全8種） ] 山崎実業 タワーシリーズ tower コースター おしゃれ シリコン スタンド 滑り止め スマ",
       "addedAt": "2026-06-03T22:43:37.931Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-05T03:01:09.212Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy-garden/ymz19jan24h35/",
@@ -895,6 +896,46 @@
       "url": "https://item.rakuten.co.jp/apricot-r/27-4330/",
       "title": "【365日出荷】山崎実業 ワイドジャグボトルスタンド タワー tower 公式 水切り マグ ボトル 水筒 哺乳瓶 シンプル タンブラー ボトルスタンド スタン",
       "addedAt": "2026-06-04T16:36:49.593Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-418/",
+      "title": "スクイーズ パンケーキ いちご シリコン もちもち やみつき弾力 おもちゃ ストレス解消 癒し グッズ 食品サンプル リアル SNS話題 かわいい 雑貨 子供 ",
+      "addedAt": "2026-06-05T02:58:27.567Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-422/",
+      "title": "スクイーズ ぶた PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 雑",
+      "addedAt": "2026-06-05T02:58:43.533Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/berush/ba-sty8np54nvqxx/",
+      "title": "【楽天スーパーSALE】2個セット かわいい ぽこぽこ 電卓 SNS話題 カラフル電卓 透明 丸ボタン 軽量 薄型 卓上電卓 使いやすい かわいい電卓 電池 計",
+      "addedAt": "2026-06-05T02:58:58.603Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-423/",
+      "title": "スクイーズ ねこ PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 雑",
+      "addedAt": "2026-06-05T02:59:14.549Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-415/",
+      "title": "スクイーズ ミルク餅 ミルク HDL-5858 もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフ",
+      "addedAt": "2026-06-05T02:59:30.338Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1002,6 +1043,8 @@
     "https://hb.afl.rakuten.co.jp/hgc/544cb158.b26b9590.544cb163.c9e36169/_RTroom06744998_380854338_pc/",
     "https://item.rakuten.co.jp/e-goods/ry1001019/",
     "https://hb.afl.rakuten.co.jp/hgc/544cb160.df8cd5ac.544cb16c.722fa7fd/_RTroom06744998_380861658_pc/",
-    "https://item.rakuten.co.jp/roomy/ymz19dec23h04/"
+    "https://item.rakuten.co.jp/roomy/ymz19dec23h04/",
+    "https://hb.afl.rakuten.co.jp/hgc/544cb158.b26b9590.544cb163.c9e36169/_RTroom06744998_380872879_pc/",
+    "https://item.rakuten.co.jp/assistone/84006962/"
   ]
 }
