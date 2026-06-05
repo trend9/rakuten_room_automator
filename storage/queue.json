@@ -876,9 +876,10 @@
       "url": "https://item.rakuten.co.jp/monogallery/074a-999251/",
       "title": "ディッシュスタンド ディッシュラック 【全8種】 皿立て おしゃれ 引き出し キッチン雑貨 インテリア雑貨 北欧 タワーシリーズ towerシリーズ 公式 ya",
       "addedAt": "2026-06-04T16:35:50.584Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-05T20:05:50.118Z"
     },
     {
       "url": "https://item.rakuten.co.jp/tamatoshi/100-0219/",
@@ -940,6 +941,46 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-415/",
       "title": "スクイーズ ミルク餅 ミルク HDL-5858 もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフ",
       "addedAt": "2026-06-05T02:59:30.338Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-420/",
+      "title": "スクイーズ えびむすび もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフト プレゼント おままご",
+      "addedAt": "2026-06-05T20:02:32.450Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-414/",
+      "title": "スクイーズ ミルク餅 チョコ HDL-5858 もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフ",
+      "addedAt": "2026-06-05T20:02:47.291Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-421/",
+      "title": "スクイーズ バター PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 ",
+      "addedAt": "2026-06-05T20:03:02.056Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-419/",
+      "title": "スクイーズ ワッフルロール もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフト プレゼント おま",
+      "addedAt": "2026-06-05T20:03:32.625Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/willsmile/lt0522/",
+      "title": "電卓 カラフル電卓 おしゃれ 透明電卓 10桁 12桁 卓上電卓 3デザイン 打ち やすい 使いやすい 持ち運び便利 簿記 日常 オフィス 家庭 学校用 ハンド",
+      "addedAt": "2026-06-05T20:04:17.603Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1057,6 +1098,8 @@
     "https://hb.afl.rakuten.co.jp/hgc/549489ab.034f1b5d.549489ac.e087c472/_RTroom06744998_380972257_pc/",
     "https://item.rakuten.co.jp/livingut/4903208028479/",
     "https://hb.afl.rakuten.co.jp/hgc/5453aad9.dbfd4a7d.5453aadb.24061fdb/_RTroom06744998_381010087_pc/",
-    "https://item.rakuten.co.jp/interiorworks/4304/"
+    "https://item.rakuten.co.jp/interiorworks/4304/",
+    "https://hb.afl.rakuten.co.jp/hgc/54502bce.20be806d.54502bd0.240c4bd3/_RTroom06744998_381020392_pc/",
+    "https://item.rakuten.co.jp/monogallery/074a-999251/"
   ]
 }
