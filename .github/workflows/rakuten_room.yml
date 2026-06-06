@@ -2,13 +2,14 @@ name: 楽天ROOM 完全自動アフィリエイトシステム
 
 on:
   schedule:
-    # 毎時0分に自動実行（1日24回）
-    - cron: '0 * * * *'
+    # 毎30分に自動実行（1日48回）
+    - cron: '0,30 * * * *'
 
   workflow_dispatch: # 手動実行用トリガー
 
 env:
   GITHUB_ACTIONS: 'true'
+  HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
 
 jobs:
   run-automator:
@@ -57,7 +58,7 @@ jobs:
       - name: 🔍 トレンド商品の自動リサーチ（キュー補充）
         run: node src/research.js || echo "⚠️ リサーチでエラーが発生しましたが、続行します"
 
-      - name: 🚀 自動コレ！投稿
+      - name: 🚀 自動コレ！投稿（最大3件連続）
         run: node src/collect.js
 
       - name: 💖 自動いいね・フォロー巡回

@@ -6,149 +6,160 @@ import { extractProductKey } from './sync.js';
 
 dotenv.config();
 
-const STATE_PATH = path.resolve('storage/state.json');
-const CONFIG_PATH = path.resolve('config.json');
-const QUEUE_PATH = path.resolve('storage/queue.json');
+// 1回の実行で最大何件を連続投稿するか
+const MAX_POSTS_PER_RUN = 3;
 
-// 設定の読み込み
+const STATE_PATH  = path.resolve('storage/state.json');
+const CONFIG_PATH = path.resolve('config.json');
+const QUEUE_PATH  = path.resolve('storage/queue.json');
+
 const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
 
-// キューデータの読み込み
 function loadQueue() {
   if (fs.existsSync(QUEUE_PATH)) {
-    try {
-      return JSON.parse(fs.readFileSync(QUEUE_PATH, 'utf-8'));
-    } catch (e) {
-      return { queue: [], history: [] };
-    }
+    try { return JSON.parse(fs.readFileSync(QUEUE_PATH, 'utf-8')); }
+    catch (e) { return { queue: [], history: [] }; }
   }
   return { queue: [], history: [] };
 }
-
-// キューデータの保存
 function saveQueue(data) {
   fs.writeFileSync(QUEUE_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-// ランダムな待機時間を生成する関数
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const randomSleep = async (min = config.minDelayMs, max = config.maxDelayMs) => {
-  const ms = Math.floor(Math.random() * (max - min + 1) + min);
-  console.log(`⏱️ 安全のため ${ms / 1000} 秒間待機します...`);
-  await sleep(ms);
-};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 安全にスクリーンショットを撮影するヘルパー関数
 async function takeScreenshot(page, stepName) {
   const dir = path.resolve('storage/steps');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  const screenshotPath = path.join(dir, `${stepName}.png`);
-  await page.screenshot({ path: screenshotPath }).catch(() => {});
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  await page.screenshot({ path: path.join(dir, `${stepName}.png`) }).catch(() => {});
   console.log(`📸 [デバッグ録画] ${stepName}.png を保存しました。`);
 }
 
-// 💡 【主婦・日常おしゃれ便利雑貨特化】高クリック率（CTA）文章生成エンジン
-function generateDynamicMessage(title) {
-  // 1. 主婦の共感を引き出す導入フック（デパートやリアル店舗では売っていないレア感の強調）
-  const intros = [
-    `＼普通のデパートやニトリではまず見かけない、隠れた名作です！✨／`,
-    `お家時間が一気に垢抜ける、ちょっとマニアックでおしゃれな超便利グッズを見つけました♪🏠`,
-    `＼これ、SNSで見かけて気になってたやつ！／普通の雑貨屋さんには中々置いてなくてネットでやっと発見🌟`,
-    `生活感が消えて驚くほどスッキリ片付く！インテリア好き of 主婦の間で密かに大バズり中の名品です😆`,
-    `＼これは本当に家事がラクになる！／近所のお店では売ってない、知る人ぞ知る高見え＆超優秀な日用雑貨です✨`,
-    `普通のホームセンターには置いていない、洗練された暮らしを演出するマニアックで大人気なアイテム💖`
-  ];
+// =============================================================
+// 💡 LLM高CTA文章生成エンジン（HuggingFace Inference API経由）
+//   HF_API_TOKEN 環境変数を設定するだけで即起動。
+//   失敗時はテンプレートベースのフォールバックへ自動切替。
+// =============================================================
 
-  // 2. マニアックで便利なレアもののベネフィットアピール
-  let appeals = [];
-
-  // タイトルからキーワードを自動判別して訴求を最適化
-  if (title.includes('収納') || title.includes('ラック') || title.includes('整理') || title.includes('ボックス')) {
-    appeals.push('📦 生活感を完全におしゃれに隠してくれる上、デッドスペースをフル活用できる極上の収納アイデアグッズ！');
-  } else if (title.includes('キッチン') || title.includes('調理') || title.includes('便利')) {
-    appeals.push('🍳 毎日のごはん作りや水回りの作業が劇的にスムーズになる、主婦の知恵が詰まった時短便利ツールです！');
-  } else if (title.includes('北欧') || title.includes('インテリア') || title.includes('おしゃれ')) {
-    appeals.push('🌿 お部屋にポンと置いておくだけで、まるでセレクトショップ of ディスプレイのようにお部屋全体が垢抜けます♪');
-  } else {
-    // 汎用のおしゃれ雑貨アピール
-    const genericAppeals = [
-      `🌟 よくある安価な生活雑貨とは一線を画す、細部までこだわり抜かれた機能美とデザイン性に思わず惚れ惚れしてしまいます！`,
-      `✨ 「こういうの本当に欲しかった！」を形にしたマニアックな名品で、遊びに来たお友達にも「これどこで買ったの？」と聞かれること間違いなし♪`,
-      `👍 毎日の暮らしがちょっと贅沢に、そして劇的に快適になる、知る人ぞ知る暮らし of アイデア商品です。`
-    ];
-    appeals.push(genericAppeals[Math.floor(Math.random() * genericAppeals.length)]);
-  }
-
-  // 価格帯（3,000円〜5,000円）のアピールと送料無料などのメリット
-  appeals.push('🉐 チープに見えない洗練された圧倒的クオリティなのに、お買い物マラソン等の店舗買い回り（店舗追加）にも絶妙にちょうどいい3,000円〜5,000円の価格帯なのが嬉しすぎます！');
-
-  // 3. 宣伝臭を徹底排除した、自然で強烈にクリック（CTA）を誘発する感想・誘導文（ランダム）
-  const reviews = [
-    `⚠️ 大人気の隠れ名品のため、楽天市場でもよく品切れ（予約待ち）になっています。現在のリアルタイムな在庫状況や、使える限定クーポン情報は今すぐこちらから確認できます👇🔗`,
-    `🎁 今だけの限定割引クーポンや、ポイントアップの最新情報は楽天市場の公式ページで公開されています！損する前にぜひチェックしてみてね👇✨`,
-    `「本当に買って暮らしのQOLが上がった！」というリアルな愛用者たちの引退口コミや、現在の割引価格は楽天市場の公式ページで今すぐチェックできます！👇🔗`,
-    `これ、本当にすぐ売り切れてしまうので、現在のお得なプライスや在庫の有無は楽天市場の公式ページで今すぐ確認しておくのがおすすめです！🔗👇`
-  ];
-
-  // 4. 主婦層に特化したハッシュタグ
-  const tagSets = [
-    ['#楽天市場', '#北欧インテリア', '#便利グッズ', '#暮らしを整える', '#お家時間'],
-    ['#楽天市場', '#買ってよかった', '#家事楽', '#すっきり暮らす', '#インテリア雑貨'],
-    ['#楽天市場', '#おしゃれインテリア', '#暮らしの知恵', '#主婦の味方', '#お買い物'],
-    ['#楽天市場', '#北欧ナチュラル', '#買ってよかった', '#垢抜け部屋', '#リピ買い'],
-    ['#楽天市場', '#便利グッズ', '#買ってよかった', '#お買い物マラソン', '#買い回り']
-  ];
-
-  const intro = intros[Math.floor(Math.random() * intros.length)];
-  const appeal = appeals.join('\n');
-  const review = reviews[Math.floor(Math.random() * reviews.length)];
-  const tags = tagSets[Math.floor(Math.random() * tagSets.length)].join(' ');
-
-  // クレンジング：余計な記号を排除
+/** フォールバック用テンプレートベースの文章生成 */
+function generateFallbackMessage(title) {
   const cleanTitle = title
     .replace(/【[^】]+】/g, '')
     .replace(/＼[^／]+／/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  // 楽天ROOMの500文字制限に美しく収める
-  const fullText = `${intro}\n\n【商品名】\n${cleanTitle.substring(0, 65)}...\n\n${appeal}\n\n${review}\n\n${tags}`;
-  
-  return fullText.substring(0, 490);
+  const intros = [
+    '普通のデパートやニトリではまず見かけない、隠れた名作を見つけちゃった✨',
+    'お家時間が一気に垢抜ける！ちょっとマニアックな超便利グッズを発見🏠',
+    'SNSで話題になってたやつをやっとゲット！普通の雑貨屋には置いてないんだよね🌟',
+    '生活感が消えて驚くほどスッキリ片付く！インテリア好き主婦の間で密かに大バズり中の名品😆',
+    'これ、本当に家事がラクになるやつ！知る人ぞ知る高見えアイテムです✨',
+  ];
+  const ctaList = [
+    '\n\n⚠️ 大人気のため品切れ多発中。リアルタイムな在庫状況や限定クーポンは今すぐ楽天市場公式ページで確認してね👇',
+    '\n\n🎁 今だけの限定割引クーポンやポイントアップ最新情報は楽天市場公式ページで公開中！損する前にチェックして👇✨',
+    '\n\n💬 愛用者のリアル口コミや現在の割引価格は楽天市場公式ページで今すぐ確認できます！👇🔗',
+  ];
+  const tagSets = [
+    '#楽天市場 #北欧インテリア #便利グッズ #暮らしを整える #お家時間',
+    '#楽天市場 #買ってよかった #家事楽 #すっきり暮らす #インテリア雑貨',
+    '#楽天市場 #おしゃれインテリア #暮らしの知恵 #主婦の味方 #お買い物',
+    '#楽天市場 #北欧ナチュラル #買ってよかった #垢抜け部屋 #リピ買い',
+    '#楽天市場 #便利グッズ #買ってよかった #お買い物マラソン #買い回り',
+  ];
+
+  const intro = intros[Math.floor(Math.random() * intros.length)];
+  const cta   = ctaList[Math.floor(Math.random() * ctaList.length)];
+  const tags  = tagSets[Math.floor(Math.random() * tagSets.length)];
+
+  return `${intro}\n\n${cleanTitle.substring(0, 70)}...${cta}\n\n${tags}`.substring(0, 490);
 }
 
-async function run() {
-  console.log('🚀 自動コレ！（投稿）スクリプトを開始します。');
-
-  if (!fs.existsSync(STATE_PATH)) {
-    console.error('❌ セッションファイルが存在しません。先に npm run auth を実行してログインを完了してください。');
-    process.exit(1);
+/**
+ * HuggingFace Inference API 経由でLLMに高CTA日本語文章を生成させる。
+ * 失敗またはHF_API_TOKENが未設定の場合はフォールバックを返す。
+ */
+async function generateLLMMessage(title) {
+  const hfToken = process.env.HF_API_TOKEN;
+  if (!hfToken) {
+    console.log('⚠️ HF_API_TOKENが未設定。フォールバックで生成します。');
+    return generateFallbackMessage(title);
   }
 
-  const data = loadQueue();
-  let pendingProduct = data.queue.find(p => p.status === 'pending');
+  const cleanTitle = title
+    .replace(/【[^】]+】/g, '')
+    .replace(/＼[^／]+／/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  if (!pendingProduct) {
-    console.log('💡 投稿待ち（pending）の商品がありません。failedになっている直近の商品を pending に復活させてテストを継続します...');
-    const failedProduct = data.queue.find(p => p.status === 'failed');
-    if (failedProduct) {
-      failedProduct.status = 'pending';
-      saveQueue(data);
-      pendingProduct = failedProduct;
+  const prompt = `あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。
+以下の商品を主婦向けに「自然に購入欲をかきたてる」高CTA（クリック誘発）の日本語コメントを書いてください。
+
+【ルール】
+- 文字数は400文字以内（楽天ROOMの制限）
+- 語尾は話し言葉で親しみやすく（「〜だよ！」「〜なんです♪」など）
+- 宣伝と分からないよう自然に書く（「PR」「広告」禁止）
+- 絵文字を効果的に使う（5〜8個程度）
+- 最後にハッシュタグを3〜5個つける（#楽天市場 は必須）
+- 品切れ・レア感・限定感を匂わせてCTAを高める
+- 「レビュー」「口コミ」「在庫確認はこちら」などで締める
+
+【商品名】
+${cleanTitle.substring(0, 100)}
+
+【コメント本文のみ出力。前置きや説明文は不要】`;
+
+  try {
+    const response = await fetch(
+      'https://router.huggingface.co/novita/v3/openai/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${hfToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'qwen/qwen2.5-72b-instruct',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 400,
+          temperature: 0.85,
+        }),
+        signal: AbortSignal.timeout(20000),
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`⚠️ HF API エラー (${response.status})。フォールバックを使用します。`);
+      return generateFallbackMessage(title);
     }
-  }
 
-  if (!pendingProduct) {
-    console.log('💡 投稿待ちおよび復活可能な商品がキュー内にありません。');
-    process.exit(0);
-  }
+    const json = await response.json();
+    const generated = json?.choices?.[0]?.message?.content?.trim();
 
-  const targetUrl = pendingProduct.url;
+    if (!generated || generated.length < 30) {
+      console.warn('⚠️ LLMの出力が短すぎます。フォールバックを使用します。');
+      return generateFallbackMessage(title);
+    }
+
+    const finalText = generated.substring(0, 490);
+    console.log(`🤖 LLM生成成功！(${finalText.length}文字)`);
+    return finalText;
+
+  } catch (err) {
+    console.warn(`⚠️ LLM生成エラー: ${err.message}。フォールバックを使用します。`);
+    return generateFallbackMessage(title);
+  }
+}
+
+// =============================================================
+// メイン投稿処理（1商品）
+// =============================================================
+async function postOneProduct(pendingProduct, data) {
+  const targetUrl   = pendingProduct.url;
   const targetTitle = pendingProduct.title;
 
-  // 💡 【事前重複防止ガード】店舗コード＋商品コードでの高度なマッチングにより、余分なブラウザ起動をゼロにします
+  // 重複防止ガード（投稿前チェック）
   const targetKey = extractProductKey(targetUrl);
   const alreadyInHistory = data.history && data.history.some(hUrl => {
     const hKey = extractProductKey(hUrl);
@@ -156,58 +167,46 @@ async function run() {
   });
 
   if (alreadyInHistory) {
-    console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに過去に投稿（コレ！）されています（履歴から重複を検出）。ブラウザ起動前に安全にスキップ（duplicate）します。`);
+    console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに投稿済みです。スキップします。`);
     pendingProduct.status = 'duplicate';
     saveQueue(data);
-    process.exit(0);
+    return false; // 重複スキップ
   }
 
-  console.log(`📦 今回の自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
+  console.log(`📦 自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
 
   const isCI = process.env.GITHUB_ACTIONS === 'true';
-
-  // 💡 CI環境（GitHub Actions）上では headless: true、ローカルでは headless: false
   const browser = await chromium.launch({
     headless: isCI ? true : false,
-    channel: isCI ? undefined : 'chrome'
-  }).catch(() => chromium.launch({ 
-    headless: isCI ? true : false
-  }));
-
-  const context = await browser.newContext({
-    storageState: STATE_PATH,
-    viewport: { width: 1280, height: 800 },
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-  });
-
-  const page = await context.newPage();
+    channel:  isCI ? undefined : 'chrome',
+  }).catch(() => chromium.launch({ headless: true }));
 
   try {
-    let officialRecommendUrl = null;
+    const context = await browser.newContext({
+      storageState: STATE_PATH,
+      viewport: { width: 1280, height: 800 },
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    });
+    const page = await context.newPage();
 
-    // 💡 【超重要】ドメインをまたぐクロスドメイン認証クッキー（ITP/SameSite規制）を完全にアクティブ化させるため、
-    // まず楽天市場の個別商品ページに直接アクセスします。
-    console.log('🌐 楽天市場の商品ページにアクセスしています（クッキーのアクティブ化・セッション橋渡しのため）...');
+    // ── ステップ1: 楽天市場へ事前アクセス（クッキー活性化） ──
+    console.log('🌐 楽天市場の商品ページにアクセスしています（クッキー活性化・セッション橋渡しのため）...');
     let loaded = false;
-    let retries = 0;
-    const maxRetries = 3;
-
-    while (retries < maxRetries && !loaded) {
+    for (let retries = 0; retries < 3 && !loaded; retries++) {
       try {
         await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
         loaded = true;
       } catch (err) {
-        retries++;
-        console.warn(`⚠️ アクセス一時エラー: ${err.message}。1.5秒後にリトライします...`);
+        console.warn(`⚠️ アクセス一時エラー: ${err.message}。リトライします...`);
         await page.waitForTimeout(1500);
       }
     }
 
+    let officialRecommendUrl = null;
     if (loaded) {
       await page.waitForTimeout(4000);
       await takeScreenshot(page, 'step1_rakuten_loaded');
 
-      console.log('🔍 ページ内から「ROOMに投稿」ボタンを探しています...');
       const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
       if (await roomLinkLocator.count() > 0) {
         const href = await roomLinkLocator.first().getAttribute('href');
@@ -218,161 +217,170 @@ async function run() {
       }
     }
 
-    // 検出できなかった場合、またはGitHub Actions（CI）上では、自己生成のワープURLを使用します。
     if (!officialRecommendUrl) {
-      const encodedTargetUrl = encodeURIComponent(targetUrl);
-      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodedTargetUrl}`;
+      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
       console.log('🌐 公式投稿ワープURLを生成しました。');
     }
-    
-    console.log(`🚀 正規の公式投稿URLへ遷移します:\n👉 ${officialRecommendUrl}`);
+
+    // ── ステップ2: ROOMの投稿編集画面へ遷移 ──
+    console.log(`🚀 公式投稿URLへ遷移します:\n👉 ${officialRecommendUrl}`);
     await page.goto(officialRecommendUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    
-    console.log('⏳ 編集・入力画面の表示を待っています...');
+
     const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"]';
-    
     await page.waitForSelector(commentAreaSelector, { timeout: 35000 }).catch(async () => {
       console.warn('⚠️ 編集画面の表示に時間がかかっています。追加で待機します。');
       await page.waitForTimeout(5000);
     });
     await takeScreenshot(page, 'step2_editor_loaded');
 
-    // ログインセッションチェック
+    // ログインチェック
     const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
     if (isLoginNeeded) {
-      throw new Error('セッションの有効期限が切れているか、未ログインです。再度 npm run auth を実行してください。');
+      throw new Error('セッション切れ。再度 npm run auth を実行してください。');
     }
 
-    // 🔥 【重複投稿の絶対防止ガード】
-    // 万が一、事前検知をすり抜けてブラウザ上で重複警告ダイアログが出現した場合は、
-    // アカウントの安全性を最優先し、無理に突破せず即座に安全スキップ（正常終了）します。
+    // ブラウザ上の重複ダイアログチェック
     const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています').count() > 0;
     if (isAlreadyCollectedModal) {
-      console.log('⚠️ 【重複投稿の絶対防止】この商品はすでに過去にコレ！されています。楽天ROOM側の警告を検知したため、安全にスキップします。');
+      console.log('⚠️ 【重複投稿防止】楽天ROOM側の警告を検知。安全にスキップします。');
       pendingProduct.status = 'duplicate';
       saveQueue(data);
-      await browser.close();
-      process.exit(0);
+      return false;
     }
 
-    // -------------------------------------------------------------
-    // ステップ3: 商品名（Name）入力欄の自動穴埋め
-    // -------------------------------------------------------------
-    console.log('✍️ 商品名入力欄（Name）のチェックと自動入力を試みています...');
+    // ── ステップ3: 商品名入力欄の自動穴埋め ──
     const nameInputSelector = 'input[placeholder*="商品名"], input[placeholder*="タイトル"], input[name*="title"], input[name*="name"], input[type="text"]';
     const nameInput = page.locator(nameInputSelector).first();
-    
     if (await nameInput.isVisible()) {
       const currentName = await nameInput.inputValue();
       if (!currentName || currentName.trim() === '') {
-        console.log('📝 商品名が空欄であることを検知したため、正しい商品名を入力します。');
+        const cleanTitle = targetTitle.replace(/【[^】]+】/g, '').trim();
         await nameInput.focus();
         await nameInput.click();
         await page.keyboard.press('Meta+A').catch(() => {});
         await page.keyboard.press('Control+A').catch(() => {});
         await page.keyboard.press('Backspace');
         await page.waitForTimeout(300);
-        
-        const cleanTitle = targetTitle.replace(/【[^】]+】/g, '').trim();
         await page.keyboard.insertText(cleanTitle.substring(0, 50));
         console.log(`✅ 商品名を入力しました: ${cleanTitle.substring(0, 50)}`);
       } else {
-        console.log(`✅ すでに商品名が自動入力されています: ${currentName}`);
+        console.log(`✅ 商品名は自動入力済みです: ${currentName}`);
       }
-    } else {
-      console.log('💡 商品名入力欄は表示されていない、または自動入力済みです。');
     }
     await takeScreenshot(page, 'step3_name_checked');
 
-    // -------------------------------------------------------------
-    // ステップ4: 紹介コメント（メッセージ）のタイピング入力
-    // -------------------------------------------------------------
+    // ── ステップ4: LLM高CTA紹介コメントの入力 ──
     const commentArea = page.locator(commentAreaSelector).first();
-    let commentInputSuccess = false;
-
-    if (await commentArea.isVisible()) {
-      // 💡 超インテリジェント高クリック率（CTA）紹介文を自動生成！
-      const customComment = generateDynamicMessage(targetTitle);
-      
-      console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
-      await commentArea.focus();
-      await commentArea.click();
-      
-      // 🔥 Reactの入力トラッキング（Value Setterフック）を突破する魔法のコード
-      // これにより、ReactのStateに文字が100%バインドされ、送信時に絶対に消えなくなります。
-      await commentArea.evaluate((el, val) => {
-        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
-        nativeSetter.call(el, val);
-        // Reactの変更検知イベントをバブリングで発火
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, customComment);
-      
-      await page.waitForTimeout(1000);
-      
-      // テキストエリアからフォーカスを外して値を確定させる
-      await commentArea.blur();
-      await page.waitForTimeout(1000);
-      
-      console.log('✅ おすすめ紹介メッセージとハッシュタグをReactステートに完全同期しました！');
-      commentInputSuccess = true;
+    if (!(await commentArea.isVisible())) {
+      throw new Error('コメント入力欄が表示されませんでした。');
     }
 
-    if (!commentInputSuccess) {
-      throw new Error('アフィリエイト編集画面に正常に入力できませんでした。');
-    }
+    const customComment = await generateLLMMessage(targetTitle);
+    console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
+    await commentArea.focus();
+    await commentArea.click();
+    await commentArea.evaluate((el, val) => {
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+      nativeSetter.call(el, val);
+      el.dispatchEvent(new Event('input',  { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }, customComment);
+    await page.waitForTimeout(1000);
+    await commentArea.blur();
+    await page.waitForTimeout(1000);
+    console.log('✅ おすすめ紹介メッセージとハッシュタグをReactステートに完全同期しました！');
     await takeScreenshot(page, 'step4_message_typed');
 
-    // -------------------------------------------------------------
-    // ステップ5: ページ最下部へスクロールして確定ボタンの表示
-    // -------------------------------------------------------------
+    // ── ステップ5: 投稿確定ボタンを押す ──
     console.log('📜 投稿完了ボタンを表示させるため、画面の最下部へスクロールします...');
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(2000);
     await takeScreenshot(page, 'step5_scrolled_to_bottom');
 
-    // -------------------------------------------------------------
-    // ステップ6: 投稿完了確定
-    // -------------------------------------------------------------
-    console.log('🚀 投稿確定（完了）ボタンを探しています...');
-    const submitBtnSelector = 'button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"]';
-    const submitBtn = page.locator(submitBtnSelector).first();
-    
-    if (await submitBtn.isVisible() && await submitBtn.isEnabled()) {
-      await takeScreenshot(page, 'step6_before_click');
-      await submitBtn.click();
-      console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
-      
-      console.log('⏳ 楽天のサーバー側で投稿処理が完了するのを待っています（最大20秒）...');
-      await page.waitForTimeout(6000);
-      
-      await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {
-        console.log('⚠️ 投稿完了後の画面切り替え待ちタイムアウト。');
-      });
-      await page.waitForTimeout(5000);
-      await takeScreenshot(page, 'step7_final_success');
-
-      // キューデータのステータスを更新して保存
-      pendingProduct.status = 'posted';
-      pendingProduct.postedAt = new Date().toISOString();
-      if (!data.history) data.history = [];
-      data.history.push(targetUrl);
-      saveQueue(data);
-      console.log('💾 投稿キューと履歴を更新しました。正常終了！');
-    } else {
+    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"]').first();
+    if (!(await submitBtn.isVisible()) || !(await submitBtn.isEnabled())) {
       throw new Error('投稿確定ボタンが見つかりませんでした。');
     }
 
+    await takeScreenshot(page, 'step6_before_click');
+    await submitBtn.click();
+    console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
+
+    await page.waitForTimeout(6000);
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {
+      console.log('⚠️ 投稿完了後の画面切り替え待ちタイムアウト。');
+    });
+    await page.waitForTimeout(5000);
+    await takeScreenshot(page, 'step7_final_success');
+
+    // キューと履歴を更新
+    pendingProduct.status   = 'posted';
+    pendingProduct.postedAt = new Date().toISOString();
+    if (!data.history) data.history = [];
+    data.history.push(targetUrl);
+    saveQueue(data);
+    console.log('💾 投稿キューと履歴を更新しました。正常終了！');
+    return true; // 投稿成功
+
   } catch (error) {
     console.error('❌ 投稿実行中にエラーが発生しました:', error.message);
-    await takeScreenshot(page, 'step_error_occurred');
+    await browser.contexts()[0]?.pages()[0]?.screenshot({ path: path.resolve('storage/steps/step_error_occurred.png') }).catch(() => {});
     pendingProduct.status = 'failed';
     saveQueue(data);
+    return false; // 投稿失敗
   } finally {
-    await browser.close();
+    await browser.close().catch(() => {});
     console.log('\n🚪 ブラウザを閉じ、自動投稿処理を終了しました。');
   }
 }
 
-const isCI = process.env.GITHUB_ACTIONS === 'true';
+// =============================================================
+// エントリーポイント（最大 MAX_POSTS_PER_RUN 件連続投稿）
+// =============================================================
+async function run() {
+  console.log(`🚀 自動コレ！（投稿）スクリプトを開始します。最大 ${MAX_POSTS_PER_RUN} 件連続投稿モード。`);
+
+  if (!fs.existsSync(STATE_PATH)) {
+    console.error('❌ セッションファイルが存在しません。先に npm run auth を実行してください。');
+    process.exit(1);
+  }
+
+  let postedCount = 0;
+
+  for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
+    const data = loadQueue();
+    let pendingProduct = data.queue.find(p => p.status === 'pending');
+
+    // pending がなければ、1回目のみ failed を復活させる
+    if (!pendingProduct && round === 0) {
+      console.log('💡 pending商品なし。failed商品を pending に復活させます...');
+      const failed = data.queue.find(p => p.status === 'failed');
+      if (failed) {
+        failed.status = 'pending';
+        saveQueue(data);
+        pendingProduct = failed;
+      }
+    }
+
+    if (!pendingProduct) {
+      console.log(`💡 投稿待ちの商品がありません。今回は ${postedCount} 件投稿して終了します。`);
+      break;
+    }
+
+    console.log(`\n━━━ ラウンド ${round + 1}/${MAX_POSTS_PER_RUN} ━━━`);
+    const success = await postOneProduct(pendingProduct, data);
+    if (success) {
+      postedCount++;
+    }
+
+    // 次ラウンドまで30秒間隔
+    if (round < MAX_POSTS_PER_RUN - 1) {
+      console.log('⏱️ 次の投稿まで30秒待機します...');
+      await sleep(30000);
+    }
+  }
+
+  console.log(`\n🏁 今回の実行で合計 ${postedCount} 件のコレ！を自動投稿しました！`);
+}
+
 run();

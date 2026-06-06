@@ -336,7 +336,7 @@ async function run() {
 }
 
 // スクリプトが直接実行された場合のみ動作
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1].endsWith('sync.js')) {
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('sync.js')) {
   run();
 }
 
