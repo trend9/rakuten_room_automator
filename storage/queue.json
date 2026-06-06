@@ -686,7 +686,7 @@
       "url": "https://item.rakuten.co.jp/lifeonproducts/lcakc001/",
       "title": "【SS期間クーポン配布&ポイント10倍】【楽天1位】めざましテレビ/Nスタ/ZIP!/THE TIME,/DayDay.で紹介されました!お弁当用クールファン ",
       "addedAt": "2026-06-06T07:06:16.901Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -694,7 +694,7 @@
       "url": "https://item.rakuten.co.jp/long-lifeservice/wx2229/",
       "title": "【5日限定10％OFFクーポン】キッチン 補助テーブル タオルハンガー キッチン作業台 折りたたみ式 省スペース サポート家事時短 テーブル 調理補助台 多機能",
       "addedAt": "2026-06-06T07:06:31.946Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -702,9 +702,10 @@
       "url": "https://item.rakuten.co.jp/ashop/sg165/",
       "title": "「クーポンで⇒735円」【先着半額】★ランキング1位★【TVで話題！有名雑誌紹介】解凍プレート ヒルナンデス 家事ヤロウ 急速解凍プレート 正規品 最新版 最速",
       "addedAt": "2026-06-06T07:06:47.034Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-06T13:12:54.163Z"
     },
     {
       "url": "https://item.rakuten.co.jp/alamode/3605-c960/",
@@ -830,6 +831,7 @@
     "https://hb.afl.rakuten.co.jp/hgc/547e12cd.33a9727e.547e12d9.d56d4447/_RTroom06744998_380707448_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/549659e7.64c500ae.549659e8.c02a41e5/_RTroom06744998_381028027_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/544cb15b.11e9ea89.544cb167.2a60526f/_RTroom06744998_380933425_pc/",
-    "https://hb.afl.rakuten.co.jp/hgc/545fd127.a805faff.545fd128.250ea6e5/_RTroom06744998_380850383_pc/"
+    "https://hb.afl.rakuten.co.jp/hgc/545fd127.a805faff.545fd128.250ea6e5/_RTroom06744998_380850383_pc/",
+    "https://item.rakuten.co.jp/ashop/sg165/"
   ]
 }
