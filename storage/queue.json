@@ -711,7 +711,7 @@
       "url": "https://item.rakuten.co.jp/alamode/3605-c960/",
       "title": "【当店限定特典付き】山崎実業 水切りネットが交換しやすい排水口ネットホルダー ネットの水切りができるキッチン排水口ネットホルダー タワー tower 公式 排水",
       "addedAt": "2026-06-06T07:07:02.295Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -719,7 +719,7 @@
       "url": "https://item.rakuten.co.jp/avivare/71978/",
       "title": "即納★ 泡立つ洗濯せっけんケース [Z3003-Z3233]ブラシ付き 石鹸ケース 予洗い こすり洗い 洗濯用品 ランドリーグッズ 時短 便利 襟 袖 汚れ 子",
       "addedAt": "2026-06-06T07:07:17.355Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -727,7 +727,7 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-413/",
       "title": "スクイーズ パンケーキ シリコン もちもち やみつき弾力 おもちゃ ストレス解消 癒し グッズ 食品サンプル リアル SNS話題 かわいい 雑貨 子供 大人 プ",
       "addedAt": "2026-06-06T11:21:03.794Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -759,6 +759,46 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-418/",
       "title": "スクイーズ パンケーキ いちご シリコン もちもち やみつき弾力 おもちゃ ストレス解消 癒し グッズ 食品サンプル リアル SNS話題 かわいい 雑貨 子供 ",
       "addedAt": "2026-06-06T11:22:08.825Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/zakkkaluna/za-2816/",
+      "title": "SNS話題 おさる ぬいぐるみ カップル サル 猿 抱き枕 添い寝 ふわふわ かわいい 癒し系 インテリア キッズ 北欧 韓国風 写真小道具 飾り物 プレゼント",
+      "addedAt": "2026-06-06T14:44:22.033Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-422/",
+      "title": "スクイーズ ぶた PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 雑",
+      "addedAt": "2026-06-06T14:44:39.659Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-415/",
+      "title": "スクイーズ ミルク餅 ミルク HDL-5858 もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフ",
+      "addedAt": "2026-06-06T14:45:09.978Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/bandpshop/bandcq6st-copy/",
+      "title": "sns話題キッチン収納キッチンスタンド 2段/3段 調味料ラック カップ収納 食品ラック 収納棚 整理棚 キッチン収納 収納ラック 省スペース 見せる収納 小物",
+      "addedAt": "2026-06-06T14:45:24.810Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-423/",
+      "title": "スクイーズ ねこ PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 雑",
+      "addedAt": "2026-06-06T14:45:40.137Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -832,6 +872,10 @@
     "https://hb.afl.rakuten.co.jp/hgc/549659e7.64c500ae.549659e8.c02a41e5/_RTroom06744998_381028027_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/544cb15b.11e9ea89.544cb167.2a60526f/_RTroom06744998_380933425_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/545fd127.a805faff.545fd128.250ea6e5/_RTroom06744998_380850383_pc/",
-    "https://item.rakuten.co.jp/ashop/sg165/"
+    "https://item.rakuten.co.jp/ashop/sg165/",
+    "https://hb.afl.rakuten.co.jp/hgc/5473b8f2.8edf4cd0.5473b900.15ec31e5/_RTroom06744998_381142026_pc/",
+    "https://hb.afl.rakuten.co.jp/hgc/5464588e.ac9bf7b3.5464588f.de52e032/_RTroom06744998_381023718_pc/",
+    "https://hb.afl.rakuten.co.jp/hgc/5467cdf6.5896ad9d.5467cdf7.683f290a/_RTroom06744998_380899247_pc/",
+    "https://hb.afl.rakuten.co.jp/hgc/54895e44.f230072d.54895e45.a5083438/_RTroom06744998_380821872_pc/"
   ]
 }
