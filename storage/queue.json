@@ -735,7 +735,7 @@
       "url": "https://item.rakuten.co.jp/r-u-n/lt0522/",
       "title": "＼スーパーSALE限定！最大70%OFFクーポン配布中！／【楽天1位】【即日発送】SNS話題 電卓 電卓 かわいい ぽこぽこ 透明 丸ボタン デザイン電卓 10",
       "addedAt": "2026-06-06T11:21:18.856Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -743,7 +743,7 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-424/",
       "title": "スクイーズ トースト ハートPUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供",
       "addedAt": "2026-06-06T11:21:35.613Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -751,7 +751,7 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-416/",
       "title": "スクイーズ ミチーズパンもちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフト プレゼント おままご",
       "addedAt": "2026-06-06T11:21:52.184Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -799,6 +799,46 @@
       "url": "https://item.rakuten.co.jp/ponsshoponline/k-423/",
       "title": "スクイーズ ねこ PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 雑",
       "addedAt": "2026-06-06T14:45:40.137Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-420/",
+      "title": "スクイーズ えびむすび もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフト プレゼント おままご",
+      "addedAt": "2026-06-06T16:08:36.148Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-414/",
+      "title": "スクイーズ ミルク餅 チョコ HDL-5858 もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフ",
+      "addedAt": "2026-06-06T16:09:07.195Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-419/",
+      "title": "スクイーズ ワッフルロール もちもち ぷにぷに 弾力 やみつき SNS話題 かわいい 癒し ストレス解消 食品サンプル おもちゃ 雑貨 ギフト プレゼント おま",
+      "addedAt": "2026-06-06T16:09:23.197Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/ponsshoponline/k-421/",
+      "title": "スクイーズ バター PUスクイーズ もちもち ふわふわ ホットケーキ 猫 おもちゃ ストレス解消 癒し グッズ 低反発 玩具 SNS話題 かわいい 子供 大人 ",
+      "addedAt": "2026-06-06T16:09:39.174Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/berush/ba-sty8np54nvqxx/",
+      "title": "【楽天スーパーSALE】2個セット かわいい ぽこぽこ 電卓 SNS話題 カラフル電卓 透明 丸ボタン 軽量 薄型 卓上電卓 使いやすい かわいい電卓 電池 計",
+      "addedAt": "2026-06-06T16:09:54.255Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
