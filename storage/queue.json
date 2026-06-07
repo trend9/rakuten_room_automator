@@ -1020,7 +1020,7 @@
       "url": "https://item.rakuten.co.jp/shugale/5208259/",
       "title": "【ヒルナンデスで紹介！】Toffy トフィー セーフティープッシュスライサー トフィー 野菜スライサー カッター 手動 千切り 細切り 平切り 保存容器 折り畳",
       "addedAt": "2026-06-07T11:23:20.457Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1028,15 +1028,16 @@
       "url": "https://item.rakuten.co.jp/r-e-zakkaya/033777238/",
       "title": "スライサー 千切り 7点セット 燕三条 安全ホルダー スリムスタンドスライサー7点セット ピーラー ステンレス 日本製 キャベツスライサー 千切りスライサー お",
       "addedAt": "2026-06-07T11:23:38.033Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-07T16:31:04.174Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy/ymz19dec23h04/",
       "title": "［ 折り畳みガスコンロカバー タワー ワイド ］山崎実業 tower ガスコンロ コンロ上 カバー ガス台カバー 作業台 作業スペース 調理スペース 一時置き ",
       "addedAt": "2026-06-07T11:23:53.210Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1210,6 +1211,10 @@
     "https://hb.afl.rakuten.co.jp/hgc/545fd127.a805faff.545fd128.250ea6e5/_RTroom06744998_381288881_pc/",
     "https://item.rakuten.co.jp/alamode/3605-2600/",
     "https://item.rakuten.co.jp/bellevie-harima/ymj-01379/",
-    "https://item.rakuten.co.jp/sommelier/ymj-01571/"
+    "https://item.rakuten.co.jp/sommelier/ymj-01571/",
+    "https://hb.afl.rakuten.co.jp/hgc/54502bcc.443cee2e.54502bcd.d9a3ac43/_RTroom06744998_381304580_pc/",
+    "https://hb.afl.rakuten.co.jp/hgc/544cbd6f.d50d40b4.544cbd71.3e5fb0fc/_RTroom06744998_381304417_pc/",
+    "https://hb.afl.rakuten.co.jp/hgc/544cb16d.9ac06ec3.544cb16e.12779b2f/_RTroom06744998_381304263_pc/",
+    "https://item.rakuten.co.jp/r-e-zakkaya/033777238/"
   ]
 }
