@@ -1045,7 +1045,7 @@
       "url": "https://item.rakuten.co.jp/roomy/hnw25apr15h08/",
       "title": "【特典付き】粗熱取り お弁当 冷ます 冷やす 急冷 熱々のお弁当 扇風機 小型 離乳食 幼児食 作り置き 冷却 ファン 時短 コンパクト コードレス 充電式 食",
       "addedAt": "2026-06-07T11:24:08.340Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1053,7 +1053,7 @@
       "url": "https://item.rakuten.co.jp/yamasoro/3605-i530/",
       "title": "【365日出荷&当店限定特典付き】山崎実業 熱湯が注げる冷水筒 タワー ラウンド 1.2L tower 公式 ピッチャー 1.2リットル 麦茶ポット ドアポケッ",
       "addedAt": "2026-06-07T11:24:23.472Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1061,9 +1061,10 @@
       "url": "https://item.rakuten.co.jp/alamode/27-4890/",
       "title": "【365日出荷】山崎実業 フィルムフック サニタリーラック 1段 2段 タワー tower 公式 貼って剥がせる ラック トレー 歯ブラシ コップ 化粧水 収納",
       "addedAt": "2026-06-07T15:12:51.985Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-07T18:11:32.254Z"
     },
     {
       "url": "https://item.rakuten.co.jp/apricot-r/27-4790/",
@@ -1093,6 +1094,46 @@
       "url": "https://item.rakuten.co.jp/sommelier/ymj-01422/",
       "title": "[ フィルムフック差し込み式歯ブラシ&チューブホルダー タワー W18 ] 山崎実業 公式 tower 1497 1498 ホワイト ブラック / 浮かせる 歯",
       "addedAt": "2026-06-07T15:14:06.992Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/patie/ymj-01367/",
+      "title": "【セット購入】[ マグネットサニタリーシリコーンスポンジ / フィルムシートマグネット用ベース タワー ] 山崎実業 公式 tower 1842 1843 19",
+      "addedAt": "2026-06-07T18:04:52.096Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-01055/",
+      "title": "[ フィルムフック 歯ブラシホルダー タワー 5連 ] 山崎実業 公式 tower ホワイト/ブラック 4520 4521 / ハブラシ 5本 吊り下げ 収納 ",
+      "addedAt": "2026-06-07T18:05:07.532Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/alamode/27-5650/",
+      "title": "【365日出荷&当店限定特典付き】山崎実業 マグネット 引っ掛け 水切りワイパー タワー S M L tower 公式 ハンドワイパー ハンディー スキージー ",
+      "addedAt": "2026-06-07T18:05:22.608Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00660/",
+      "title": "[ マグネットバスルームチューブ＆ボトルホルダー タワー L ] 山崎実業 公式 tower マグネット お風呂 5508 5509 / 浴室 浮かせる収納 壁",
+      "addedAt": "2026-06-07T18:05:37.586Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/sommelier/ymj-01421/",
+      "title": "[ フィルムフック差し込み式歯ブラシ&チューブホルダー タワー W9 ] 山崎実業 公式 tower 1495 1496 ホワイト ブラック / 歯ブラシホルダ",
+      "addedAt": "2026-06-07T18:05:52.899Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1215,6 +1256,8 @@
     "https://hb.afl.rakuten.co.jp/hgc/54502bcc.443cee2e.54502bcd.d9a3ac43/_RTroom06744998_381304580_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/544cbd6f.d50d40b4.544cbd71.3e5fb0fc/_RTroom06744998_381304417_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/544cb16d.9ac06ec3.544cb16e.12779b2f/_RTroom06744998_381304263_pc/",
-    "https://item.rakuten.co.jp/r-e-zakkaya/033777238/"
+    "https://item.rakuten.co.jp/r-e-zakkaya/033777238/",
+    "https://hb.afl.rakuten.co.jp/hgc/54aa181e.a1bb701e.54aa181f.49447550/_RTroom06744998_381308232_pc/",
+    "https://item.rakuten.co.jp/alamode/27-4890/"
   ]
 }
