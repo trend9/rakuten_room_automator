@@ -890,23 +890,25 @@
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-01480/",
       "title": "[ ウォール洗面収納ケース タワー 石こうボード壁対応 ] 山崎実業 公式 tower 1355 1356 ホワイト ブラック / コスメ収納 洗面台 洗面所 ",
       "addedAt": "2026-06-06T19:05:55.661Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-07T05:23:26.984Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy-garden/ymz25dec15a05/",
       "title": "【特典付き】［ テーブル横マルチラック タワー ］山崎実業 tower デスク横 ラック ドリンクホルダー マグカップ タンブラー コップ スマホ リモコン 収",
       "addedAt": "2026-06-06T21:54:19.386Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-07T05:25:30.679Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy-garden/ymz19jan24h35/",
       "title": "［ シンク下ボトルストッカー 4段 タワー ］山崎実業 tower シンク下 ボトルストッカー 調味料 ボトルラック キッチン収納 ラック 棚 洗面所 洗面 脱",
       "addedAt": "2026-06-06T21:54:34.469Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1063,6 +1065,8 @@
     "https://hb.afl.rakuten.co.jp/hgc/547e12cd.33a9727e.547e12d9.d56d4447/_RTroom06744998_381173199_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/547ccc6f.4c384f27.547ccc71.6808f456/_RTroom06744998_381180914_pc/",
     "https://hb.afl.rakuten.co.jp/hgc/544cbd6f.d50d40b4.544cbd71.3e5fb0fc/_RTroom06744998_381180731_pc/",
-    "https://hb.afl.rakuten.co.jp/hgc/54502bcf.f858c541.54502bd1.10f7b5d8/_RTroom06744998_381173424_pc/"
+    "https://hb.afl.rakuten.co.jp/hgc/54502bcf.f858c541.54502bd1.10f7b5d8/_RTroom06744998_381173424_pc/",
+    "https://item.rakuten.co.jp/bellevie-harima/ymj-01480/",
+    "https://item.rakuten.co.jp/roomy-garden/ymz25dec15a05/"
   ]
 }
