@@ -9,7 +9,7 @@ on:
 
 env:
   GITHUB_ACTIONS: 'true'
-  HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+  COLAB_API_URL: ${{ secrets.COLAB_API_URL }}
 
 jobs:
   run-automator:

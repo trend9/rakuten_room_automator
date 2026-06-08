@@ -77,13 +77,13 @@ function generateFallbackMessage(title) {
 }
 
 /**
- * HuggingFace Inference API 経由でLLMに高CTA日本語文章を生成させる。
- * 失敗またはHF_API_TOKENが未設定の場合はフォールバックを返す。
+ * Colab API 経由でLLMに高CTA日本語文章を生成させる。
+ * 失敗またはCOLAB_API_URLが未設定の場合はフォールバックを返す。
  */
 async function generateLLMMessage(title) {
-  const hfToken = process.env.HF_API_TOKEN;
-  if (!hfToken) {
-    console.log('⚠️ HF_API_TOKENが未設定。フォールバックで生成します。');
+  const colabUrl = process.env.COLAB_API_URL;
+  if (!colabUrl) {
+    console.log('⚠️ COLAB_API_URLが未設定。フォールバックで生成します。');
     return generateFallbackMessage(title);
   }
 
@@ -93,8 +93,7 @@ async function generateLLMMessage(title) {
     .replace(/\s+/g, ' ')
     .trim();
 
-  const prompt = `あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。
-以下の商品を主婦向けに「自然に購入欲をかきたてる」高CTA（クリック誘発）の日本語コメントを書いてください。
+  const prompt = `以下の商品を主婦向けに「自然に購入欲をかきたてる」高CTA（クリック誘発）の日本語コメントを書いてください。
 
 【ルール】
 - 文字数は400文字以内（楽天ROOMの制限）
@@ -112,30 +111,27 @@ ${cleanTitle.substring(0, 100)}
 
   try {
     const response = await fetch(
-      'https://router.huggingface.co/novita/v3/openai/chat/completions',
+      `${colabUrl.replace(/\/$/, '')}/generate/text`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${hfToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'qwen/qwen2.5-72b-instruct',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 400,
-          temperature: 0.85,
+          system_prompt: 'あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。',
+          user_prompt: prompt,
         }),
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(30000),
       }
     );
 
     if (!response.ok) {
-      console.warn(`⚠️ HF API エラー (${response.status})。フォールバックを使用します。`);
+      console.warn(`⚠️ Colab API エラー (${response.status})。フォールバックを使用します。`);
       return generateFallbackMessage(title);
     }
 
     const json = await response.json();
-    const generated = json?.choices?.[0]?.message?.content?.trim();
+    const generated = json?.result?.trim();
 
     if (!generated || generated.length < 30) {
       console.warn('⚠️ LLMの出力が短すぎます。フォールバックを使用します。');
