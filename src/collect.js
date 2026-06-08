@@ -9,6 +9,14 @@ dotenv.config();
 // 1回の実行で最大何件を連続投稿するか
 const MAX_POSTS_PER_RUN = 3;
 
+// Colab API URL
+let COLAB_API_URL = process.argv.find(arg => arg.startsWith("http://") || arg.startsWith("https://"))
+  || process.env.COLAB_API_URL;
+
+if (COLAB_API_URL) {
+  COLAB_API_URL = COLAB_API_URL.replace(/\/$/, '');
+}
+
 const STATE_PATH  = path.resolve('storage/state.json');
 const CONFIG_PATH = path.resolve('config.json');
 const QUEUE_PATH  = path.resolve('storage/queue.json');
@@ -81,7 +89,7 @@ function generateFallbackMessage(title) {
  * 失敗またはCOLAB_API_URLが未設定の場合はフォールバックを返す。
  */
 async function generateLLMMessage(title) {
-  const colabUrl = process.env.COLAB_API_URL;
+  const colabUrl = COLAB_API_URL;
   if (!colabUrl) {
     console.log('⚠️ COLAB_API_URLが未設定。フォールバックで生成します。');
     return generateFallbackMessage(title);
