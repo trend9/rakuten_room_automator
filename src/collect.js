@@ -170,6 +170,9 @@ async function postOneProduct(pendingProduct, data) {
   }
 
   console.log(`📦 自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
+  
+  // ブラウザ起動・遷移の前にLLM文章生成を終わらせておく（遷移後のアイドル時間によるセッション切れ・エラー防止）
+  const customComment = await generateLLMMessage(targetTitle);
 
   const isCI = process.env.GITHUB_ACTIONS === 'true';
   const browser = await chromium.launch({
@@ -252,7 +255,7 @@ async function postOneProduct(pendingProduct, data) {
       if (!currentName || currentName.trim() === '') {
         const cleanTitle = targetTitle.replace(/【[^】]+】/g, '').trim();
         await nameInput.focus();
-        await nameInput.click();
+        await nameInput.click({ force: true }).catch(() => {});
         await page.keyboard.press('Meta+A').catch(() => {});
         await page.keyboard.press('Control+A').catch(() => {});
         await page.keyboard.press('Backspace');
@@ -271,10 +274,9 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('コメント入力欄が表示されませんでした。');
     }
 
-    const customComment = await generateLLMMessage(targetTitle);
     console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
     await commentArea.focus();
-    await commentArea.click();
+    await commentArea.click({ force: true }).catch(() => {});
     await commentArea.evaluate((el, val) => {
       const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
       nativeSetter.call(el, val);
@@ -299,7 +301,7 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     await takeScreenshot(page, 'step6_before_click');
-    await submitBtn.click();
+    await submitBtn.click({ force: true });
     console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
 
     await page.waitForTimeout(6000);
