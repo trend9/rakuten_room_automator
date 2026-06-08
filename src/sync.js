@@ -53,7 +53,13 @@ export function extractProductKey(url) {
 }
 
 // マイページの全カードをスクロールで完全に描画させるヘルパー
-async function ensureAllCardsLoaded(page) {
+async function ensureAllCardsLoaded(page, maxSyncCount) {
+  if (maxSyncCount <= 3) {
+    // 少量同期ならスクロールをスキップして高速化
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await page.waitForTimeout(1000);
+    return;
+  }
   // 段階的にスクロールして、React仮想DOMの遅延ロードを全て発火させる
   const scrollSteps = 6;
   for (let s = 1; s <= scrollSteps; s++) {
@@ -111,7 +117,8 @@ async function run() {
 
     // 全カードをスクロールで描画
     console.log('📜 マイページをスクロールして全商品カードをロード中...');
-    await ensureAllCardsLoaded(page);
+    const maxSyncCount = 2; // 一度にコレ！する数程度（直近2件）に絞って同期を高速化
+    await ensureAllCardsLoaded(page, maxSyncCount);
 
     const cardSelector = 'a.link-image--2kguM';
     const cardCount = await page.locator(cardSelector).count();
@@ -126,7 +133,6 @@ async function run() {
     }
 
     const uniqueUrls = [];
-    const maxSyncCount = Math.min(cardCount, 15);
 
     for (let i = 0; i < maxSyncCount; i++) {
       try {
@@ -277,7 +283,7 @@ async function run() {
           await page.goto(myItemsUrl, { waitUntil: 'commit', timeout: 20000 }).catch(() => {});
           await page.waitForTimeout(8000);
           // リカバリ後は全カードを再描画する
-          await ensureAllCardsLoaded(page);
+          await ensureAllCardsLoaded(page, maxSyncCount);
         }
 
       } catch (cardErr) {
@@ -285,7 +291,7 @@ async function run() {
         console.log('   🔄 マイページへ再アクセスしてリカバリします...');
         await page.goto(myItemsUrl, { waitUntil: 'commit', timeout: 30000 }).catch(() => {});
         await page.waitForTimeout(8000);
-        await ensureAllCardsLoaded(page);
+        await ensureAllCardsLoaded(page, maxSyncCount);
       }
     }
 

@@ -274,6 +274,10 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('コメント入力欄が表示されませんでした。');
     }
 
+    if (!customComment || customComment.trim() === '') {
+      throw new Error('紹介コメントが空です。投稿を中止します。');
+    }
+
     console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
     await commentArea.focus();
     await commentArea.click({ force: true }).catch(() => {});
@@ -284,9 +288,24 @@ async function postOneProduct(pendingProduct, data) {
       el.dispatchEvent(new Event('change', { bubbles: true }));
     }, customComment);
     await page.waitForTimeout(1000);
+    
+    // 入力の検証とPlaywrightによる直接フォールバック
+    let verifiedValue = await commentArea.inputValue();
+    if (!verifiedValue || verifiedValue.trim() === '') {
+      console.log('⚠️ 値が空のため、Playwright直接入力で再試行します。');
+      await commentArea.focus();
+      await commentArea.fill(customComment);
+      await page.waitForTimeout(1000);
+      verifiedValue = await commentArea.inputValue();
+    }
+
+    if (!verifiedValue || verifiedValue.trim() === '') {
+      throw new Error('紹介コメントの入力検証に失敗しました。空のまま投稿されるのを防ぐため、中止します。');
+    }
+
+    console.log(`✅ コメント入力の検証に成功しました (文字数: ${verifiedValue.length})`);
     await commentArea.blur();
     await page.waitForTimeout(1000);
-    console.log('✅ おすすめ紹介メッセージとハッシュタグをReactステートに完全同期しました！');
     await takeScreenshot(page, 'step4_message_typed');
 
     // ── ステップ5: 投稿確定ボタンを押す ──
