@@ -1256,23 +1256,25 @@
       "url": "https://item.rakuten.co.jp/iwailoft/iw-wrj250071/",
       "title": "SNS話題 フラワー 帽子クリップ ハットクリップ キャップクリップ キーホルダー アクセサリー 強力マグネット 磁石 帽子/メガネ 収納 ホルダー バッグチャ",
       "addedAt": "2026-06-08T17:02:13.564Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-08T23:00:10.758Z"
     },
     {
       "url": "https://item.rakuten.co.jp/bourgeonner/ck-sticker-kuri/",
       "title": "ちいかわ ミニ デコ ステッカー くりまんじゅう 208565 なんか小さくてかわいいやつ 耐水 耐光 シール 日本製 雑貨 SNS 話題 大人気 ツイッター ",
       "addedAt": "2026-06-08T17:02:28.802Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-08T23:02:21.281Z"
     },
     {
       "url": "https://item.rakuten.co.jp/unitedcollection/1de100memo_01b/",
       "title": "【1冊】★1万円de百万円そっくりメモ！色々使える楽しいメモ帳！SNS 話題 百万円 面白 100万円 札束 お金 文房具 文具 雑貨 ギャグ パロディ ジョー",
       "addedAt": "2026-06-08T17:02:44.058Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
     },
@@ -1312,6 +1314,14 @@
       "url": "https://item.rakuten.co.jp/thevoyages/a520/",
       "title": "A5 バインダー リフィル20枚付き トレカカード160枚収納可能 【】波模様 半透明 ブック 透明 写真収納 一式 トレカ ケース SNS 話題 雑貨 システ",
       "addedAt": "2026-06-08T19:30:11.320Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/importshopaqua/twr-sbs4/",
+      "title": "山崎実業 ボトルラック ボトルストッカー キッチンラック ボトルスタンド 缶ストッカー 缶ラック ラック スリム おしゃれ 奥行20 スチール 4段 ボトル キ",
+      "addedAt": "2026-06-08T22:58:18.256Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1458,6 +1468,8 @@
     "https://item.rakuten.co.jp/livingut/418614/",
     "https://item.rakuten.co.jp/nikonikofa/blms280820102/",
     "https://item.rakuten.co.jp/willsmile/lt0522/",
-    "https://item.rakuten.co.jp/ponsshoponline/k-417/"
+    "https://item.rakuten.co.jp/ponsshoponline/k-417/",
+    "https://item.rakuten.co.jp/iwailoft/iw-wrj250071/",
+    "https://item.rakuten.co.jp/bourgeonner/ck-sticker-kuri/"
   ]
 }
