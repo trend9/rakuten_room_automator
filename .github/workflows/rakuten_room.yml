@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: hf-models-lcm-sd15
+          key: hf-models-lcm-sd1.5
           restore-keys: |
             hf-models-
 
@@ -69,7 +69,7 @@ jobs:
           app = FastAPI()
           
           print("Loading LCM Stable Diffusion model on CPU...")
-          pipe = DiffusionPipeline.from_pretrained("latent-consistency/lcm-sd15", torch_dtype=torch.float32)
+          pipe = DiffusionPipeline.from_pretrained("latent-consistency/lcm-sd1.5", torch_dtype=torch.float32)
           pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
           pipe.to("cpu")
           print("LCM Model loaded successfully.")
