@@ -9,7 +9,7 @@ on:
 
 env:
   GITHUB_ACTIONS: 'true'
-  COLAB_API_URL: ${{ secrets.COLAB_API_URL }}
+  COLAB_API_URL: "http://127.0.0.1:8000"
 
 jobs:
   run-automator:
@@ -21,6 +21,106 @@ jobs:
     steps:
       - name: リポジトリのチェックアウト
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install diffusers transformers accelerate fastapi uvicorn requests pillow pydantic
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama & Local API Server
+        run: |
+          # Start Ollama
+          ollama serve &
+          
+          # Write local API server script
+          cat << 'EOF' > local_api_server.py
+          import base64
+          import torch
+          import requests
+          from fastapi import FastAPI, HTTPException
+          from pydantic import BaseModel
+          from diffusers import DiffusionPipeline, LCMScheduler
+          
+          app = FastAPI()
+          
+          print("Loading LCM Stable Diffusion model on CPU...")
+          pipe = DiffusionPipeline.from_pretrained("latent-consistency-models/lcm-sd15", torch_dtype=torch.float32)
+          pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+          pipe.to("cpu")
+          print("LCM Model loaded successfully.")
+          
+          class TextRequest(BaseModel):
+              system_prompt: str
+              user_prompt: str
+          
+          class ImageRequest(BaseModel):
+              prompt: str
+              width: int = 512
+              height: int = 512
+          
+          @app.post("/generate/text")
+          async def generate_text(req: TextRequest):
+              try:
+                  url = "http://localhost:11434/api/chat"
+                  payload = {
+                      "model": "gemma2:2b",
+                      "messages": [
+                          {"role": "system", "content": req.system_prompt},
+                          {"role": "user", "content": req.user_prompt}
+                      ],
+                      "stream": False
+                  }
+                  res = requests.post(url, json=payload, timeout=180)
+                  if res.status_code == 200:
+                      return {"result": res.json().get("message", {}).get("content", "")}
+                  raise HTTPException(status_code=500, detail="Ollama returned error")
+              except Exception as e:
+                  raise HTTPException(status_code=500, detail=str(e))
+          
+          @app.post("/generate/image")
+          async def generate_image(req: ImageRequest):
+              try:
+                  image = pipe(
+                      prompt=req.prompt,
+                      num_inference_steps=4,
+                      guidance_scale=8.0,
+                      width=req.width,
+                      height=req.height
+                  ).images[0]
+                  
+                  import io
+                  buf = io.BytesIO()
+                  image.save(buf, format="JPEG", quality=90)
+                  return {"image_base64": base64.b64encode(buf.getvalue()).decode("utf-8")}
+              except Exception as e:
+                  raise HTTPException(status_code=500, detail=str(e))
+          
+          if __name__ == "__main__":
+              import uvicorn
+              uvicorn.run(app, host="127.0.0.1", port=8000)
+          EOF
+          
+          # Wait for Ollama to start
+          echo "Waiting for Ollama to start..."
+          until curl -s http://localhost:11434 > /dev/null; do sleep 1; done
+          echo "Ollama is running. Pulling gemma2:2b..."
+          ollama pull gemma2:2b
+          
+          # Start the local API server in the background
+          python local_api_server.py &
+          echo "Waiting for local API server to start..."
+          until curl -s http://127.0.0.1:8000 > /dev/null; do sleep 1; done
+          echo "Local API server is ready!"
 
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v4
