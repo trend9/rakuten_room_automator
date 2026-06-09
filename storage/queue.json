@@ -1363,25 +1363,28 @@
       "url": "https://item.rakuten.co.jp/sommelier/ymj-01099/",
       "title": "[ 目隠し歯ブラシ＆チューブスタンド タワー ] 山崎実業 公式 tower 3505 3506 白 黒 / 歯ブラシスタンド 歯磨き粉 収納 洗面所 歯ブラシ",
       "addedAt": "2026-06-09T00:11:48.873Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T14:56:08.734Z"
     },
     {
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00676/",
       "title": "[ マグネットバスルームチューブ＆ボトルホルダー タワー L 3個セット ] 山崎実業 公式 tower マグネット お風呂 5508 5509 / 浴室 浮か",
       "addedAt": "2026-06-09T00:12:04.077Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T14:58:28.128Z"
     },
     {
       "url": "https://item.rakuten.co.jp/cucina-home/c3274-2746/",
       "title": "水切り 水筒 スタンド 【 ワイドジャグボトルスタンド タワー 】 山崎実業 タワー tower クッチーナホーム  水筒 水切り 水切りラック スリム 水筒 ",
       "addedAt": "2026-06-09T04:47:21.657Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T15:00:50.691Z"
     },
     {
       "url": "https://item.rakuten.co.jp/shop-erina/shop-erina2026060914282890132811/",
@@ -1419,6 +1422,22 @@
       "url": "https://item.rakuten.co.jp/bourgeonner/ck-sticker-ha/",
       "title": "ちいかわ ミニ デコ ステッカー ハチワレ 205467 なんか小さくてかわいいやつ 耐水 耐光 シール 日本製 雑貨 SNS 話題 大人気 ツイッター ナガノ",
       "addedAt": "2026-06-09T11:52:40.967Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00634/",
+      "title": "[ マグネットバスルームチューブ＆ボトルホルダー ダブル M タワー ] 山崎実業 公式 tower ホワイト/ブラック 5506 5507 / マグネットホル",
+      "addedAt": "2026-06-09T14:53:26.354Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/patie/ymj-00658/",
+      "title": "【365日出荷中】[ フィルムフック マグネットタンブラー / 1人用歯ブラシホルダー&マグネットタンブラー タワー ] タワー山崎実業 公式 tower ホワ",
+      "addedAt": "2026-06-09T14:53:41.078Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1576,6 +1595,9 @@
     "https://item.rakuten.co.jp/importshopaqua/twr-sbs4/",
     "https://item.rakuten.co.jp/bellevie-harima/ymj-00633/",
     "https://item.rakuten.co.jp/bellevie-harima/ymj-00727/",
-    "https://item.rakuten.co.jp/bellevie-harima/ymj-01695/"
+    "https://item.rakuten.co.jp/bellevie-harima/ymj-01695/",
+    "https://item.rakuten.co.jp/sommelier/ymj-01099/",
+    "https://item.rakuten.co.jp/bellevie-harima/ymj-00676/",
+    "https://item.rakuten.co.jp/cucina-home/c3274-2746/"
   ]
 }
