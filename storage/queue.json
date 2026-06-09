@@ -1309,25 +1309,28 @@
       "url": "https://item.rakuten.co.jp/hideout/shouting-chicken-32/",
       "title": "叫ぶ！ びっくりチキン イエロー SNS 話題 鳴る 鳴く ニワトリ おもしろ 雑貨 ■ シャウティングチキン 40cm Mサイズ",
       "addedAt": "2026-06-08T19:29:56.479Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T04:49:28.520Z"
     },
     {
       "url": "https://item.rakuten.co.jp/thevoyages/a520/",
       "title": "A5 バインダー リフィル20枚付き トレカカード160枚収納可能 【】波模様 半透明 ブック 透明 写真収納 一式 トレカ ケース SNS 話題 雑貨 システ",
       "addedAt": "2026-06-08T19:30:11.320Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T04:51:34.849Z"
     },
     {
       "url": "https://item.rakuten.co.jp/importshopaqua/twr-sbs4/",
       "title": "山崎実業 ボトルラック ボトルストッカー キッチンラック ボトルスタンド 缶ストッカー 缶ラック ラック スリム おしゃれ 奥行20 スチール 4段 ボトル キ",
       "addedAt": "2026-06-08T22:58:18.256Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-09T04:53:41.403Z"
     },
     {
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00633/",
@@ -1365,6 +1368,14 @@
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-00676/",
       "title": "[ マグネットバスルームチューブ＆ボトルホルダー タワー L 3個セット ] 山崎実業 公式 tower マグネット お風呂 5508 5509 / 浴室 浮か",
       "addedAt": "2026-06-09T00:12:04.077Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/cucina-home/c3274-2746/",
+      "title": "水切り 水筒 スタンド 【 ワイドジャグボトルスタンド タワー 】 山崎実業 タワー tower クッチーナホーム  水筒 水切り 水切りラック スリム 水筒 ",
+      "addedAt": "2026-06-09T04:47:21.657Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1516,6 +1527,9 @@
     "https://item.rakuten.co.jp/bourgeonner/ck-sticker-kuri/",
     "https://item.rakuten.co.jp/pocopoco/sq-04/",
     "https://item.rakuten.co.jp/alita/ph12-1722/",
-    "https://item.rakuten.co.jp/ichigoichi39/pop6701/"
+    "https://item.rakuten.co.jp/ichigoichi39/pop6701/",
+    "https://item.rakuten.co.jp/hideout/shouting-chicken-32/",
+    "https://item.rakuten.co.jp/thevoyages/a520/",
+    "https://item.rakuten.co.jp/importshopaqua/twr-sbs4/"
   ]
 }
