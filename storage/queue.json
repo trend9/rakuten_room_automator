@@ -1660,17 +1660,28 @@
       "url": "https://item.rakuten.co.jp/roomy/ymz17feb24h71/",
       "title": "［ アイロン収納マット タワー ］山崎実業 tower アイロン 収納 バッグ 折り畳み アイロン収納 アイロンマット アイロン台 収納バッグ アイロン アイロ",
       "addedAt": "2026-06-10T20:37:35.419Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T22:34:38.541Z"
     },
     {
       "url": "https://item.rakuten.co.jp/livingut/4903208028479/",
       "title": "山崎実業 tower グラススタンド タワー スリム （ 4903208028479 タワーシリーズ 水切りラック ドライスタンド 水切りスタンド グラス ペッ",
       "addedAt": "2026-06-10T20:37:50.367Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T22:36:54.220Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/interior-palette/267987/",
+      "title": "山崎実業 tower 密閉 袋ごと米びつ タワー 5kg 計量カップ付 （ 4903208033756 米びつ ライスボックス 米櫃 おしゃれ おすすめ ライス",
+      "addedAt": "2026-06-10T22:32:38.929Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T22:39:19.563Z"
     }
   ],
   "history": [
@@ -1858,6 +1869,9 @@
     "https://item.rakuten.co.jp/shop-erina/shop-erina2026061000063697964539/",
     "https://item.rakuten.co.jp/dio-store/key-ring021/",
     "https://item.rakuten.co.jp/grabadream/kfkf1803826/",
-    "https://item.rakuten.co.jp/roomy/ymz20jan28h05/"
+    "https://item.rakuten.co.jp/roomy/ymz20jan28h05/",
+    "https://item.rakuten.co.jp/roomy/ymz17feb24h71/",
+    "https://item.rakuten.co.jp/livingut/4903208028479/",
+    "https://item.rakuten.co.jp/interior-palette/267987/"
   ]
 }
