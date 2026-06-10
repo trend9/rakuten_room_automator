@@ -1525,25 +1525,28 @@
       "url": "https://item.rakuten.co.jp/cocopla/102-bqg0119e0004/",
       "title": "＜まとめ買い最大10％OFF＞【HARIO】粉も量れる 耐熱メジャーカップ ワイド 日本製 200ml 500ml ハリオ 食洗機対応 レンジ対応 キッチンツー",
       "addedAt": "2026-06-09T21:51:29.475Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T06:30:54.447Z"
     },
     {
       "url": "https://item.rakuten.co.jp/nonoji/w3np-01pg/",
       "title": "【ヌードルピーラー】・ ゆうパケット対象・ あさイチ紹介商品／テレビ朝日「家事ヤロウ!!!」 紹介商品 ・ ののじ ピーラー 皮むき スライサー 調理器具 料理",
       "addedAt": "2026-06-09T21:51:44.720Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T06:33:21.942Z"
     },
     {
       "url": "https://item.rakuten.co.jp/interior-palette/292913/",
       "title": "レンジ調理器 レンジで手作りカリーポット 小 レッド （ 電子レンジ対応 レンジ用品 電子レンジ調理器 カリーポット カレーポット カレー皿 カレー調理 カレー",
       "addedAt": "2026-06-09T21:52:00.003Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T06:35:47.254Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy/ymz24oct15h02/",
@@ -1557,6 +1560,14 @@
       "url": "https://item.rakuten.co.jp/sommelier/ymj-01359/",
       "title": "[ マグネット水切りネットホルダー タワー ] 山崎実業 公式 tower 1715 1716 ホワイト ブラック / 水切りネット 収納 水切りネットホルダー",
       "addedAt": "2026-06-10T01:41:46.422Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/sommelier/ymj-00343/",
+      "title": "[ 折り畳み水切りラック タワー L ] 山崎実業 tower 水切りラック ホワイト/ブラック 7835 7836 水切りカゴ 水切りラック 水切りトレー 水",
+      "addedAt": "2026-06-10T06:28:57.612Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1732,6 +1743,9 @@
     "https://item.rakuten.co.jp/sun-road1/h107j/",
     "https://item.rakuten.co.jp/bellevie-harima/ymj-01550/",
     "https://item.rakuten.co.jp/colorfulbox/486502/",
-    "https://item.rakuten.co.jp/sun-road1/f-6586-t/"
+    "https://item.rakuten.co.jp/sun-road1/f-6586-t/",
+    "https://item.rakuten.co.jp/cocopla/102-bqg0119e0004/",
+    "https://item.rakuten.co.jp/nonoji/w3np-01pg/",
+    "https://item.rakuten.co.jp/interior-palette/292913/"
   ]
 }
