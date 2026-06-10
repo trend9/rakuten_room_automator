@@ -1498,25 +1498,28 @@
       "url": "https://item.rakuten.co.jp/bellevie-harima/ymj-01550/",
       "title": "[ ソープディスペンサーラック タワー ] 山崎実業 公式 tower 10203 10204 ホワイト ブラック / 収納トレー スタンド キッチン 洗面所 ",
       "addedAt": "2026-06-09T19:42:11.154Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T01:43:47.990Z"
     },
     {
       "url": "https://item.rakuten.co.jp/colorfulbox/486502/",
       "title": "電子レンジ炊飯器 一膳 二重蓋 日本製 （ レンジ 簡単 手軽 時短 調理 電子レンジ 炊飯 ご飯 ごはん 1膳 1杯分 火を使わない 2重構造 料理 便利グッ",
       "addedAt": "2026-06-09T21:50:58.057Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T01:46:16.828Z"
     },
     {
       "url": "https://item.rakuten.co.jp/sun-road1/f-6586-t/",
       "title": "子供 水筒 洗いやすい 水筒洗いブラシ 隙間 ゴム パッキン 洗える カビ対策【すき間キレイ マイボトル 3way おそうじブラシ お掃除クロス おまけ付】水筒",
       "addedAt": "2026-06-09T21:51:13.993Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T01:48:38.673Z"
     },
     {
       "url": "https://item.rakuten.co.jp/cocopla/102-bqg0119e0004/",
@@ -1546,6 +1549,14 @@
       "url": "https://item.rakuten.co.jp/roomy/ymz24oct15h02/",
       "title": "［ 目隠しお酒スタンド タワー ］山崎実業 tower 目隠し 収納 目隠しスタンド ワイン 一升瓶 ケース 酒瓶 ワイン キッチン収納 ボトル収納 おむつ収納",
       "addedAt": "2026-06-09T23:21:17.916Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/sommelier/ymj-01359/",
+      "title": "[ マグネット水切りネットホルダー タワー ] 山崎実業 公式 tower 1715 1716 ホワイト ブラック / 水切りネット 収納 水切りネットホルダー",
+      "addedAt": "2026-06-10T01:41:46.422Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1718,6 +1729,9 @@
     "https://item.rakuten.co.jp/sun-road1/s1130-j-0-t/",
     "https://item.rakuten.co.jp/amelion/tainetsu8/",
     "https://item.rakuten.co.jp/nihoninterior/ket140141/",
-    "https://item.rakuten.co.jp/sun-road1/h107j/"
+    "https://item.rakuten.co.jp/sun-road1/h107j/",
+    "https://item.rakuten.co.jp/bellevie-harima/ymj-01550/",
+    "https://item.rakuten.co.jp/colorfulbox/486502/",
+    "https://item.rakuten.co.jp/sun-road1/f-6586-t/"
   ]
 }
