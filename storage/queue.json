@@ -1606,30 +1606,41 @@
       "url": "https://item.rakuten.co.jp/e-goods/ry1102525/",
       "title": "【スーパーSALE期間中 最大100％ポイントバック】 家事問屋 システムトレー 1/1 トレー ステンレス 角型 下ごしらえ 日本製 キッチンツール トレイ ",
       "addedAt": "2026-06-10T10:46:04.638Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T17:52:32.431Z"
     },
     {
       "url": "https://item.rakuten.co.jp/livingut/418613/",
       "title": "ハリオ 電子レンジ調理鍋 ガラスのレンジおかず鍋 （ HARIO 電子レンジ調理器 レンジ調理器 鍋 なべ ガラス製 食洗機対応 メモリ付き レシピブック付き ",
       "addedAt": "2026-06-10T10:46:19.211Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T17:54:57.526Z"
     },
     {
       "url": "https://item.rakuten.co.jp/shop-erina/shop-erina2026061000063697964539/",
       "title": "猫スクイーズ もちとろ ふわふわ 水感 ぷにぷに 癒し かわいい ストレス解消 収納袋付き SNS話題 握る 動物玩具 ねこ雑貨 プレゼント 触感重視 リラック",
       "addedAt": "2026-06-10T14:26:56.967Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T17:57:14.819Z"
     },
     {
       "url": "https://item.rakuten.co.jp/dio-store/key-ring021/",
       "title": "【写真印刷・名入れ無料】キーホルダー インスタ風 オリジナル マグカップ 印刷 アクキー 写真 アクリルキーホルダー 名入れ 写真入りマグカップ オリジナル 推",
       "addedAt": "2026-06-10T14:30:44.929Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/grabadream/kfkf1803826/",
+      "title": "2個セット 丸ボタン ぽこぽこ かわいい電卓 SNS話題 卓上電卓 カラフル電卓 透明 軽量 携帯便利 計算機 使いやすい 事務用品 電池 かわいい 卓上 オフ",
+      "addedAt": "2026-06-10T17:50:02.473Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1814,6 +1825,9 @@
     "https://item.rakuten.co.jp/sommelier/ymj-00343/",
     "https://item.rakuten.co.jp/halekipa/71978/",
     "https://item.rakuten.co.jp/e-goods/ry1105488/",
-    "https://item.rakuten.co.jp/sun-road1/f-5367/"
+    "https://item.rakuten.co.jp/sun-road1/f-5367/",
+    "https://item.rakuten.co.jp/e-goods/ry1102525/",
+    "https://item.rakuten.co.jp/livingut/418613/",
+    "https://item.rakuten.co.jp/shop-erina/shop-erina2026061000063697964539/"
   ]
 }
