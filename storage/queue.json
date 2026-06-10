@@ -1579,25 +1579,28 @@
       "url": "https://item.rakuten.co.jp/halekipa/71978/",
       "title": "即納★ 泡立つ洗濯せっけんケース [Z3003-Z3233]ブラシ付き 石鹸ケース 予洗い こすり洗い 洗濯用品 ランドリーグッズ 時短 便利 襟 袖 汚れ 子",
       "addedAt": "2026-06-10T10:45:20.019Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T14:33:15.664Z"
     },
     {
       "url": "https://item.rakuten.co.jp/e-goods/ry1105488/",
       "title": "【スーパーSALE期間中 最大100％ポイントバック】 フライパン 仕切り 卵焼き【特典付き】 仕切りフライパン 3つ たまご焼き 玉子焼き PFOAフリー お",
       "addedAt": "2026-06-10T10:45:34.406Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T14:35:31.073Z"
     },
     {
       "url": "https://item.rakuten.co.jp/sun-road1/f-5367/",
       "title": "おにぎり型 おにぎりメーカー 6個 食洗器対応 おにぎり達人 日本製 お掃除クロス付 おむすび型 型抜き 型枠 おにぎり 型 小さめ 作りおき 幼児食 幼稚園 ",
       "addedAt": "2026-06-10T10:45:50.136Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-10T14:37:54.688Z"
     },
     {
       "url": "https://item.rakuten.co.jp/e-goods/ry1102525/",
@@ -1611,6 +1614,22 @@
       "url": "https://item.rakuten.co.jp/livingut/418613/",
       "title": "ハリオ 電子レンジ調理鍋 ガラスのレンジおかず鍋 （ HARIO 電子レンジ調理器 レンジ調理器 鍋 なべ ガラス製 食洗機対応 メモリ付き レシピブック付き ",
       "addedAt": "2026-06-10T10:46:19.211Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/shop-erina/shop-erina2026061000063697964539/",
+      "title": "猫スクイーズ もちとろ ふわふわ 水感 ぷにぷに 癒し かわいい ストレス解消 収納袋付き SNS話題 握る 動物玩具 ねこ雑貨 プレゼント 触感重視 リラック",
+      "addedAt": "2026-06-10T14:26:56.967Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/dio-store/key-ring021/",
+      "title": "【写真印刷・名入れ無料】キーホルダー インスタ風 オリジナル マグカップ 印刷 アクキー 写真 アクリルキーホルダー 名入れ 写真入りマグカップ オリジナル 推",
+      "addedAt": "2026-06-10T14:30:44.929Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1792,6 +1811,9 @@
     "https://item.rakuten.co.jp/interior-palette/292913/",
     "https://item.rakuten.co.jp/roomy/ymz24oct15h02/",
     "https://item.rakuten.co.jp/sommelier/ymj-01359/",
-    "https://item.rakuten.co.jp/sommelier/ymj-00343/"
+    "https://item.rakuten.co.jp/sommelier/ymj-00343/",
+    "https://item.rakuten.co.jp/halekipa/71978/",
+    "https://item.rakuten.co.jp/e-goods/ry1105488/",
+    "https://item.rakuten.co.jp/sun-road1/f-5367/"
   ]
 }
