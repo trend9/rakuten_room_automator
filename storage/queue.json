@@ -1714,14 +1714,41 @@
       "url": "https://item.rakuten.co.jp/livingut/311997/",
       "title": "フライパン IH対応 仕切り付き ツインパン ひるもぐ フッ素樹脂加工 （ ガス火対応 玉子焼き器 卵焼き器 たまご焼き器 卵1個 玉子1個 エッグパン 玉子焼",
       "addedAt": "2026-06-11T00:03:15.753Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T04:32:47.234Z"
     },
     {
       "url": "https://item.rakuten.co.jp/zakkashop/31647/",
       "title": "【6月10日はポイント最大10倍祭】＼楽天1位／ ツールズ グリラー TOOLS GRILLER 耐熱 陶器 電子レンジ 魚焼きグリル ガスレンジ グリルパン ",
       "addedAt": "2026-06-11T00:03:30.985Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T04:35:05.296Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/yamayuu/yj-1572/",
+      "title": "【 山崎実業 テーブル横バスケット タワー 】 tower バスケット かご 収納ボックス テーブル デスク 調味料 カトラリー 文房具 ゲーム機 タブレット ",
+      "addedAt": "2026-06-11T04:29:12.525Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T04:37:29.838Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/alamode/27-4770/",
+      "title": "【365日出荷】山崎実業 フィルムフック ディスペンサーホルダー タワー tower 公式 浮かせる収納 浴室 洗面台 洗面所 ボトルホルダー ボディソープ シ",
+      "addedAt": "2026-06-11T04:30:12.344Z",
+      "status": "pending",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/yamayuu/yj-5397/",
+      "title": "【 山崎実業 フィルムフック サニタリーラック タワー 】 tower フィルムフック 浮かせる収納 サニタリー 洗面用品 洗面台 ラック トレー 洗面収納 収",
+      "addedAt": "2026-06-11T04:30:27.493Z",
       "status": "pending",
       "genre": "主婦向けインテリア・便利雑貨",
       "targetPrice": "3,000-5,000円"
@@ -1918,6 +1945,9 @@
     "https://item.rakuten.co.jp/interior-palette/267987/",
     "https://item.rakuten.co.jp/daiya/4901948902233/",
     "https://item.rakuten.co.jp/zuttonezutto/znz-0154/",
-    "https://item.rakuten.co.jp/orlando/carcleaner-dryer/"
+    "https://item.rakuten.co.jp/orlando/carcleaner-dryer/",
+    "https://item.rakuten.co.jp/livingut/311997/",
+    "https://item.rakuten.co.jp/zakkashop/31647/",
+    "https://item.rakuten.co.jp/yamayuu/yj-1572/"
   ]
 }
