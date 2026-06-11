@@ -1813,17 +1813,28 @@
       "url": "https://item.rakuten.co.jp/colorfulbox/418613/",
       "title": "ハリオ 電子レンジ調理鍋 ガラスのレンジおかず鍋 （ HARIO 電子レンジ調理器 レンジ調理器 鍋 なべ ガラス製 食洗機対応 メモリ付き レシピブック付き ",
       "addedAt": "2026-06-11T17:04:56.288Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T19:42:59.476Z"
     },
     {
       "url": "https://item.rakuten.co.jp/nonoji/fsp-01/",
       "title": "【根菜フリルサラダ削り～ナ】・ 宅配便対象・ イエロー TV「家事ヤロウ!!!」 紹介商品 ・ ののじ ピーラー 皮むき スライサー 調理器具 主婦 料理 スラ",
       "addedAt": "2026-06-11T17:05:11.326Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T19:45:20.319Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/kaguzaku/yj-5409/",
+      "title": "『 山崎実業 ワイドジャグボトルスタンド タワー 』 『 ワイドジャグボトルスタンド タワー ドライングプレートセット 』 tower 公式 ホワイト ブラック",
+      "addedAt": "2026-06-11T19:40:50.538Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T19:47:37.597Z"
     }
   ],
   "history": [
@@ -2028,6 +2039,9 @@
     "https://item.rakuten.co.jp/hanko-otobe/s8816026/",
     "https://item.rakuten.co.jp/whitebang/tans4589779368574/",
     "https://item.rakuten.co.jp/store-marufuku/amak-a70002/",
-    "https://item.rakuten.co.jp/kawataki1912/225133/"
+    "https://item.rakuten.co.jp/kawataki1912/225133/",
+    "https://item.rakuten.co.jp/colorfulbox/418613/",
+    "https://item.rakuten.co.jp/nonoji/fsp-01/",
+    "https://item.rakuten.co.jp/kaguzaku/yj-5409/"
   ]
 }
