@@ -1741,17 +1741,28 @@
       "url": "https://item.rakuten.co.jp/alamode/27-4770/",
       "title": "【365日出荷】山崎実業 フィルムフック ディスペンサーホルダー タワー tower 公式 浮かせる収納 浴室 洗面台 洗面所 ボトルホルダー ボディソープ シ",
       "addedAt": "2026-06-11T04:30:12.344Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T09:06:22.917Z"
     },
     {
       "url": "https://item.rakuten.co.jp/yamayuu/yj-5397/",
       "title": "【 山崎実業 フィルムフック サニタリーラック タワー 】 tower フィルムフック 浮かせる収納 サニタリー 洗面用品 洗面台 ラック トレー 洗面収納 収",
       "addedAt": "2026-06-11T04:30:27.493Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T09:08:38.128Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/roomy/ymz24feb09h01/",
+      "title": "［ ポリエチレンシートポケット付きおもちゃ収納バッグ タワー ］山崎実業 tower 収納バッグ ポケットつき 子供 外遊び おもちゃ 収納 大容量 うきわ 水",
+      "addedAt": "2026-06-11T09:04:07.925Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-11T09:10:58.256Z"
     }
   ],
   "history": [
@@ -1948,6 +1959,9 @@
     "https://item.rakuten.co.jp/orlando/carcleaner-dryer/",
     "https://item.rakuten.co.jp/livingut/311997/",
     "https://item.rakuten.co.jp/zakkashop/31647/",
-    "https://item.rakuten.co.jp/yamayuu/yj-1572/"
+    "https://item.rakuten.co.jp/yamayuu/yj-1572/",
+    "https://item.rakuten.co.jp/alamode/27-4770/",
+    "https://item.rakuten.co.jp/yamayuu/yj-5397/",
+    "https://item.rakuten.co.jp/roomy/ymz24feb09h01/"
   ]
 }
