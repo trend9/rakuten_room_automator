@@ -1957,9 +1957,19 @@
       "url": "https://item.rakuten.co.jp/bellevie-harima/t-fal-350/",
       "title": "【T-fal公認ショップ】ティファール T-fal 電気ケトル ジャスティン ロック 1.2L KO5901JP 5908JP 590AJP 5902JP 59",
       "addedAt": "2026-06-12T20:45:04.377Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-12T22:31:01.319Z"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/nonoji/lknbg-01/",
+      "title": "【クルクルヌードルビームバターおろし】・ ゆうパケット対象・ テレビ朝日 「 家事ヤロウ!!! 」 紹介商品 浜名ランチさん・ ののじ おろし器 おろし金 調理",
+      "addedAt": "2026-06-12T22:29:10.761Z",
+      "status": "posted",
+      "genre": "主婦向けインテリア・便利雑貨",
+      "targetPrice": "3,000-5,000円",
+      "postedAt": "2026-06-12T22:33:28.431Z"
     }
   ],
   "history": [
@@ -2180,6 +2190,8 @@
     "https://item.rakuten.co.jp/roomy/ymz25jan10h06/",
     "https://item.rakuten.co.jp/mecu/dh-030/",
     "https://item.rakuten.co.jp/soutowelshop/0359/",
-    "https://item.rakuten.co.jp/ordy/1741/"
+    "https://item.rakuten.co.jp/ordy/1741/",
+    "https://item.rakuten.co.jp/bellevie-harima/t-fal-350/",
+    "https://item.rakuten.co.jp/nonoji/lknbg-01/"
   ]
 }
