@@ -2119,25 +2119,28 @@
       "url": "https://item.rakuten.co.jp/nattyandco/item-0605/",
       "title": "置き時計 時計 卓上 静音 かわいい アナログ 北欧 シンプル モダン アート デザイン インテリア 玄関 リビング 寝室 ベッドサイド 書斎 デスク 指針 ア",
       "addedAt": "2026-06-13T11:01:16.975Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-13T14:45:21.152Z"
     },
     {
       "url": "https://item.rakuten.co.jp/air-rhizome/air-ar-ast01/",
       "title": "【6/14まで！最大3,500円OFFクーポン配布中】 スツール 収納 アニマルスツール アニマルチェア おしゃれ 北欧 かわいい オットマン いす キッズ 子",
       "addedAt": "2026-06-13T11:01:32.127Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-13T14:47:38.648Z"
     },
     {
       "url": "https://item.rakuten.co.jp/lucky13/copeau/",
       "title": "カエル 置物 Copeau コポー 定番 かわいい ガーデニング 玄関 蛙 かえる グッズ オーナメント 小物 雑貨 インテリア おしゃれ 置き物 読書するカエ",
       "addedAt": "2026-06-13T11:01:47.383Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-13T14:49:56.293Z"
     },
     {
       "url": "https://item.rakuten.co.jp/donguri/10011307/",
@@ -2432,6 +2435,9 @@
     "https://item.rakuten.co.jp/nattyandco/item-0029/",
     "https://item.rakuten.co.jp/four-piece/4589672882276/",
     "https://item.rakuten.co.jp/nattyandco/item-0226/",
-    "https://item.rakuten.co.jp/yaniwani/metabo-set01/"
+    "https://item.rakuten.co.jp/yaniwani/metabo-set01/",
+    "https://item.rakuten.co.jp/nattyandco/item-0605/",
+    "https://item.rakuten.co.jp/air-rhizome/air-ar-ast01/",
+    "https://item.rakuten.co.jp/lucky13/copeau/"
   ]
 }
