@@ -84,76 +84,208 @@ function generateFallbackMessage(title) {
   return `${intro}\n\n${cleanTitle.substring(0, 70)}...${cta}\n\n${tags}`.substring(0, 490);
 }
 
+/** GitHub Models API による生成 (GITHUB_TOKENを使用) */
+async function generateGitHubModelsMessage(prompt) {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (!token) return null;
+
+  try {
+    console.log('🤖 GITHUB_TOKEN検出。GitHub Models API (gpt-4o-mini) でコメントを生成中...');
+    const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。" },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7
+      }),
+      signal: AbortSignal.timeout(20000)
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const content = json?.choices?.[0]?.message?.content?.trim();
+      if (content && content.length >= 30) {
+        return content;
+      }
+    } else {
+      console.warn(`⚠️ GitHub Models APIエラー: ${response.status} ${response.statusText}`);
+    }
+  } catch (err) {
+    console.warn(`⚠️ GitHub Models API呼び出し中にエラーが発生しました: ${err.message}`);
+  }
+  return null;
+}
+
+/** Pollinations AI による生成 (キー不要) */
+async function generatePollinationsMessage(prompt) {
+  const models = ["openai", "mistral"];
+  for (const model of models) {
+    try {
+      console.log(`🤖 キー不要の Pollinations AI (model: ${model}) でコメントを生成中...`);
+      const response = await fetch("https://text.pollinations.ai/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。" },
+            { role: "user", content: prompt }
+          ],
+          model: model
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        const cleaned = text.trim();
+        if (cleaned && cleaned.length >= 30) {
+          return cleaned;
+        }
+      } else {
+        console.warn(`⚠️ Pollinations AI (${model}) エラー: ${response.status}`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ Pollinations AI (${model}) 呼び出し中にエラーが発生しました: ${err.message}`);
+    }
+  }
+  return null;
+}
+
 /**
- * Colab API 経由でLLMに高CTA日本語文章を生成させる。
- * 失敗またはCOLAB_API_URLが未設定の場合はフォールバックを返す。
+ * Colab API または各種LLM API 経由でLLMに高CTA日本語文章を生成させる。
+ * 失敗した場合は順次フォールバックチェーンを実行する。
  */
 async function generateLLMMessage(title) {
-  const colabUrl = COLAB_API_URL;
-  if (!colabUrl) {
-    console.log('⚠️ COLAB_API_URLが未設定。フォールバックで生成します。');
-    return generateFallbackMessage(title);
-  }
-
   const cleanTitle = title
     .replace(/【[^】]+】/g, '')
     .replace(/＼[^／]+／/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  const prompt = `以下の商品を主婦向けに「自然に購入欲をかきたてる」高CTA（クリック誘発）の日本語コメントを書いてください。
+  const prompt = `あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。
+以下の「大人可愛いインテリア・スクイーズ・おしゃれ小物雑貨」を主婦や可愛いもの好きに向けて、思わずクリックしたくなる高CTA（クリック誘発）の日本語紹介コメントを書いてください。
 
 【ルール】
-- 文字数は400文字以内（楽天ROOMの制限）
+- 文字数は400文字以内（絶対に厳守、楽天ROOMの文字数制限のため）
 - 語尾は話し言葉で親しみやすく（「〜だよ！」「〜なんです♪」など）
 - 宣伝と分からないよう自然に書く（「PR」「広告」禁止）
 - 絵文字を効果的に使う（5〜8個程度）
-- 最後にハッシュタグを3〜5個つける（#楽天市場 は必須）
-- 品切れ・レア感・限定感を匂わせてCTAを高める
+- 最後にハッシュタグを3〜5個つける（#楽天市場 は必須。その他 #インテリア #スクイーズ #かわいい雑貨 など）
+- 商品の可愛さ、お部屋に置いたときの雰囲気、癒やし効果、売り切れやすいレア感をアピールする
 - 「レビュー」「口コミ」「在庫確認はこちら」などで締める
 
 【商品名】
 ${cleanTitle.substring(0, 100)}
 
-【コメント本文のみ出力。前置きや説明文は不要】`;
+【コメント本文のみ出力。前置きや説明文、\`\`\` などのマークダウン装飾は一切不要】`;
 
-  try {
-    const response = await fetch(
-      `${colabUrl.replace(/\/$/, '')}/generate/text`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          system_prompt: 'あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。',
-          user_prompt: prompt,
-        }),
-        signal: AbortSignal.timeout(30000),
+  // 1. 最優先: Colab API (COLAB_API_URLを使用) を試行
+  const colabUrl = COLAB_API_URL;
+  if (colabUrl) {
+    try {
+      console.log('🤖 Colab APIでコメントを生成中...');
+      const response = await fetch(
+        `${colabUrl.replace(/\/$/, '')}/generate/text`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            system_prompt: 'あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。',
+            user_prompt: prompt,
+          }),
+          signal: AbortSignal.timeout(30000),
+        }
+      );
+
+      if (response.ok) {
+        const json = await response.json();
+        const generated = json?.result?.trim();
+        if (generated && generated.length >= 30) {
+          const finalText = generated.substring(0, 490);
+          console.log(`🤖 LLM (Colab) 生成成功！(${finalText.length}文字)`);
+          return finalText;
+        }
+      } else {
+        console.warn(`⚠️ Colab API エラー (${response.status})。フォールバックを試みます。`);
       }
-    );
-
-    if (!response.ok) {
-      console.warn(`⚠️ Colab API エラー (${response.status})。フォールバックを使用します。`);
-      return generateFallbackMessage(title);
+    } catch (err) {
+      console.warn(`⚠️ Colab APIでの生成中にエラーが発生しました: ${err.message}。フォールバックを試みます。`);
     }
-
-    const json = await response.json();
-    const generated = json?.result?.trim();
-
-    if (!generated || generated.length < 30) {
-      console.warn('⚠️ LLMの出力が短すぎます。フォールバックを使用します。');
-      return generateFallbackMessage(title);
-    }
-
-    const finalText = generated.substring(0, 490);
-    console.log(`🤖 LLM生成成功！(${finalText.length}文字)`);
-    return finalText;
-
-  } catch (err) {
-    console.warn(`⚠️ LLM生成エラー: ${err.message}。フォールバックを使用します。`);
-    return generateFallbackMessage(title);
+  } else {
+    console.log('💡 COLAB_API_URLが設定されていないため、次のフォールバックを試みます。');
   }
+
+  // 2. フォールバック1: HuggingFace Inference API (HF_API_TOKENを使用) を試行
+  const hfToken = process.env.HF_API_TOKEN;
+  if (hfToken) {
+    try {
+      console.log('🤖 HuggingFace Inference API でコメントを生成中...');
+      const response = await fetch(
+        'https://router.huggingface.co/novita/v3/openai/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${hfToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'qwen/qwen2.5-72b-instruct',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 400,
+            temperature: 0.85,
+          }),
+          signal: AbortSignal.timeout(20000),
+        }
+      );
+
+      if (response.ok) {
+        const json = await response.json();
+        const generated = json?.choices?.[0]?.message?.content?.trim();
+        if (generated && generated.length >= 30) {
+          const finalText = generated.substring(0, 490);
+          console.log(`🤖 LLM (HuggingFace) 生成成功！(${finalText.length}文字)`);
+          return finalText;
+        }
+      } else {
+        console.warn(`⚠️ HF API エラー (${response.status})。フォールバックを試みます。`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ HF APIでの生成中にエラーが発生しました: ${err.message}。フォールバックを試みます。`);
+    }
+  } else {
+    console.log('💡 HF_API_TOKENが設定されていないため、次のフォールバックを試みます。');
+  }
+
+  // 3. フォールバック2: GitHub Models API
+  const ghResult = await generateGitHubModelsMessage(prompt);
+  if (ghResult) {
+    const finalText = ghResult.substring(0, 490);
+    console.log(`🤖 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
+    return finalText;
+  }
+
+  // 4. フォールバック3: Pollinations AI (キー不要で安定稼働)
+  const polResult = await generatePollinationsMessage(prompt);
+  if (polResult) {
+    const finalText = polResult.substring(0, 490);
+    console.log(`🤖 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
+    return finalText;
+  }
+
+  // 5. 最終フォールバック: テンプレートベースのメッセージ
+  console.warn('⚠️ すべてのLLM生成試行が失敗しました。テンプレートフォールバックを使用します。');
+  return generateFallbackMessage(title);
 }
 
 // =============================================================
