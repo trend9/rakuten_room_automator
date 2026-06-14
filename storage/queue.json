@@ -2389,25 +2389,28 @@
       "url": "https://item.rakuten.co.jp/futaba-corp/sq-mlbr/",
       "title": "【ふわとろスクイーズ ミルキーベア キーホルダー】最新 スクイーズ 動物 アニマル ふわふわ くま くまさん 熊 ベア— クマ クリーム かわいい 袋 パウチ ",
       "addedAt": "2026-06-14T04:01:11.369Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-14T13:18:38.342Z"
     },
     {
       "url": "https://item.rakuten.co.jp/stellashop11/y812786/",
       "title": "【限定！8%OFFクーポン】スクイーズ ストレス解消グッズ かわいい 猫 動物 握る柔らかい感覚のおもちゃ 低反発 柔らかい 猫のおもちゃ クリエイティブなピン",
       "addedAt": "2026-06-14T04:01:26.560Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-14T13:20:56.104Z"
     },
     {
       "url": "https://item.rakuten.co.jp/futaba-corp/sq-waffle/",
       "title": "【もちとろスクイーズ 生クリームワッフル】最新 スクイーズ お菓子 ケーキ ワッフル カンノーリ スイーツ リアル クリーム 袋 ケース パウチ 袋のまま 柔ら",
       "addedAt": "2026-06-14T04:01:41.576Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-14T13:23:12.465Z"
     },
     {
       "url": "https://item.rakuten.co.jp/futaba-corp/sq-donuts/",
@@ -2732,6 +2735,9 @@
     "https://item.rakuten.co.jp/asia-kobo/11014/",
     "https://item.rakuten.co.jp/icasecreative/tbx2/",
     "https://item.rakuten.co.jp/dondon/jbl02/",
-    "https://item.rakuten.co.jp/value-deco/vr01453/"
+    "https://item.rakuten.co.jp/value-deco/vr01453/",
+    "https://item.rakuten.co.jp/futaba-corp/sq-mlbr/",
+    "https://item.rakuten.co.jp/stellashop11/y812786/",
+    "https://item.rakuten.co.jp/futaba-corp/sq-waffle/"
   ]
 }
