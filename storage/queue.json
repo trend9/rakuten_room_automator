@@ -2686,7 +2686,7 @@
       "url": "https://item.rakuten.co.jp/happy-talk-shop/applemk/",
       "title": "【公式】 癒しグッズ トルマリンゴ Pastel 選べる5色 | 消臭 脱臭 リフレッシュ リラックス 癒し トルマリン 空気清浄器 マイナスイオン 置物 風水",
       "addedAt": "2026-06-15T02:04:52.282Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
       "targetPrice": "〜10,000円"
     },
@@ -2694,17 +2694,19 @@
       "url": "https://item.rakuten.co.jp/ajiro/am1041/",
       "title": "【10％OFFクーポン配布中】H030 キーケース クロシェット チャーム レザー ネックレス バッグ 小物 ブランド雑貨 多用途 人気 おしゃれ シンプル 大",
       "addedAt": "2026-06-15T02:05:07.120Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T08:24:36.082Z"
     },
     {
       "url": "https://item.rakuten.co.jp/cigar-shop/a96-1-9-lock/",
       "title": "【本物そっくり金庫】 【書斎の隠し金庫】 金庫 本型 シリンダー式 貯金箱 ブック キーロック 鍵穴式 カギ 収納ボックス デザイン 隠し金庫 紙幣 千円札 金",
       "addedAt": "2026-06-15T07:35:25.079Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T08:26:48.126Z"
     },
     {
       "url": "https://item.rakuten.co.jp/yakimono/10003069/",
@@ -2734,6 +2736,46 @@
       "url": "https://item.rakuten.co.jp/auc-rmjapan/hans_bolling_duckling/",
       "title": "ハンス・ブリング ダックリング 全3色 Hans Bolling Duckling 子アヒル 木製玩具 フィギュア 木のオブジェ インテリア 人形 置物 北欧雑",
       "addedAt": "2026-06-15T07:36:24.200Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/livingut/457242/",
+      "title": "ポーチ マスコットポーチ 動物 ダイカット カラビナ （ ミニポーチ どうぶつ アニマル マルチポーチ 小物入れ カラビナ付き 持ち歩き 携帯用 小物収納 マル",
+      "addedAt": "2026-06-15T08:19:44.358Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/w-itsuki/878-007/",
+      "title": "木彫りの置物 天然木 木彫り 置物 アニマル かわいい 象 ぞう ゾウ オーナメント 動物雑貨 おしゃれ 木製小物 オブジェ インテリア雑貨 アジアン雑貨 イン",
+      "addedAt": "2026-06-15T08:19:58.816Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/cigar-shop/zakka-000176/",
+      "title": "【安心の30日保証付き】巾着袋 小物入れ 小さめ 大きめ ギフトバッグ ラッピング ポーチ ミニサイズ コンパクト ギフト プレゼント ホワイト ブラック グレ",
+      "addedAt": "2026-06-15T08:20:13.697Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/charasma/20w-zan-mr/",
+      "title": "(10%OFFクーポン 15日限定) 全15種 アニマル 拡大鏡付き コンパクトミラー 2面ミラー 角型 グッズ アニマル雑貨 かわいい おしゃれ レッド ブル",
+      "addedAt": "2026-06-15T08:20:28.030Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/auc-kingmobile/jpkh004/",
+      "title": "本革 キーホルダー 日本製 かわいい 肉球 猫 犬 手 動物 8色 ギフト プレゼント おそろい ペア 小物 雑貨 革 レザー チャーム 鍵 キーリング Huk",
+      "addedAt": "2026-06-15T08:20:42.433Z",
       "status": "pending",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
       "targetPrice": "〜10,000円"
@@ -3038,6 +3080,8 @@
     "https://item.rakuten.co.jp/asia-kobo/10546/",
     "https://item.rakuten.co.jp/auc-kingmobile/jptri03/",
     "https://item.rakuten.co.jp/auc-kingmobile/jpkeycase03/",
-    "https://item.rakuten.co.jp/mecu/ql10148/"
+    "https://item.rakuten.co.jp/mecu/ql10148/",
+    "https://item.rakuten.co.jp/ajiro/am1041/",
+    "https://item.rakuten.co.jp/cigar-shop/a96-1-9-lock/"
   ]
 }
