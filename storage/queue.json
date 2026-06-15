@@ -2739,25 +2739,28 @@
       "url": "https://item.rakuten.co.jp/auc-rmjapan/hans_bolling_duckling/",
       "title": "ハンス・ブリング ダックリング 全3色 Hans Bolling Duckling 子アヒル 木製玩具 フィギュア 木のオブジェ インテリア 人形 置物 北欧雑",
       "addedAt": "2026-06-15T07:36:24.200Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T09:39:02.452Z"
     },
     {
       "url": "https://item.rakuten.co.jp/livingut/457242/",
       "title": "ポーチ マスコットポーチ 動物 ダイカット カラビナ （ ミニポーチ どうぶつ アニマル マルチポーチ 小物入れ カラビナ付き 持ち歩き 携帯用 小物収納 マル",
       "addedAt": "2026-06-15T08:19:44.358Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T09:41:20.412Z"
     },
     {
       "url": "https://item.rakuten.co.jp/w-itsuki/878-007/",
       "title": "木彫りの置物 天然木 木彫り 置物 アニマル かわいい 象 ぞう ゾウ オーナメント 動物雑貨 おしゃれ 木製小物 オブジェ インテリア雑貨 アジアン雑貨 イン",
       "addedAt": "2026-06-15T08:19:58.816Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T09:43:37.471Z"
     },
     {
       "url": "https://item.rakuten.co.jp/cigar-shop/zakka-000176/",
@@ -3128,6 +3131,9 @@
     "https://item.rakuten.co.jp/cigar-shop/a96-1-9-lock/",
     "https://item.rakuten.co.jp/yakimono/10003069/",
     "https://item.rakuten.co.jp/auc-smilesugar/a67834_67835_67836/",
-    "https://item.rakuten.co.jp/zakkashop/0050207/"
+    "https://item.rakuten.co.jp/zakkashop/0050207/",
+    "https://item.rakuten.co.jp/auc-rmjapan/hans_bolling_duckling/",
+    "https://item.rakuten.co.jp/livingut/457242/",
+    "https://item.rakuten.co.jp/w-itsuki/878-007/"
   ]
 }
