@@ -2793,25 +2793,28 @@
       "url": "https://item.rakuten.co.jp/linsl/minics002/",
       "title": "【5%OFFクーポン】10種 ミニキャンバス Nordic Art Poster イーゼル付き 高品質印刷 LINSL 買いまわり 【 クリスマス アートパネル",
       "addedAt": "2026-06-15T08:39:39.995Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T14:00:06.565Z"
     },
     {
       "url": "https://item.rakuten.co.jp/juden-king/mira-pu-299/",
       "title": "(10%OFFクーポン 15日限定) アニマル 全9種 折りたたみコンパクトミラー 拡大鏡付き レディース 小物 動物 可愛い ぶた 羊 牛 あらいぐま マニア",
       "addedAt": "2026-06-15T08:39:54.415Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T14:02:23.243Z"
     },
     {
       "url": "https://item.rakuten.co.jp/field-work/gy052/",
       "title": "腕時計 レディース ハープ 5気圧防水 日常生活強化防水 ハート  小さめ シンプル お手頃 学校 ビジネス 仕事 プレゼント クリスマス 母の日 高品質 可愛",
       "addedAt": "2026-06-15T08:40:08.746Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-15T14:04:39.890Z"
     },
     {
       "url": "https://item.rakuten.co.jp/cigar-shop/a154-karinba/",
@@ -3180,6 +3183,9 @@
     "https://item.rakuten.co.jp/w-itsuki/878-007/",
     "https://item.rakuten.co.jp/cigar-shop/zakka-000176/",
     "https://item.rakuten.co.jp/charasma/20w-zan-mr/",
-    "https://item.rakuten.co.jp/auc-kingmobile/jpkh004/"
+    "https://item.rakuten.co.jp/auc-kingmobile/jpkh004/",
+    "https://item.rakuten.co.jp/linsl/minics002/",
+    "https://item.rakuten.co.jp/juden-king/mira-pu-299/",
+    "https://item.rakuten.co.jp/field-work/gy052/"
   ]
 }
