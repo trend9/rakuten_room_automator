@@ -438,7 +438,7 @@ async function postOneProduct(pendingProduct, data) {
 
     let officialRecommendUrl = null;
     if (loaded) {
-      await page.waitForTimeout(4000);
+      await page.waitForTimeout(2000);
       await takeScreenshot(page, 'step1_rakuten_loaded');
 
       const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
@@ -446,25 +446,28 @@ async function postOneProduct(pendingProduct, data) {
         pendingProduct.imageUrl = ogImage;
         console.log(`📸 楽天市場の商品ページから og:image を検出しました: ${ogImage}`);
       }
-
-      const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
-      if (await roomLinkLocator.count() > 0) {
-        const href = await roomLinkLocator.first().getAttribute('href');
-        if (href && (href.includes('room.rakuten.co.jp/recommend') || href.includes('room.rakuten.co.jp/mix'))) {
-          officialRecommendUrl = href;
-          console.log('🎯 楽天市場から「ROOMに投稿」の公式正規URLを自動検出しました！');
-        }
-      }
-    }
-
-    if (!officialRecommendUrl) {
-      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
-      console.log('🌐 公式投稿ワープURLを生成しました。');
     }
 
     // ── ステップ2: ROOMの投稿編集画面へ遷移 ──
+    officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
+    console.log('🌐 確実な公式投稿ワープURLを使用します。');
     console.log(`🚀 公式投稿URLへ遷移します:\n👉 ${officialRecommendUrl}`);
-    await page.goto(officialRecommendUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    
+    let isEditorLoaded = false;
+    for (let r = 0; r < 3; r++) {
+      try {
+        await page.goto(officialRecommendUrl, { waitUntil: 'load', timeout: 50000 });
+        isEditorLoaded = true;
+        break;
+      } catch (err) {
+        console.warn(`⚠️ 編集画面への遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
+        await page.waitForTimeout(3000);
+      }
+    }
+
+    if (!isEditorLoaded) {
+      throw new Error('編集画面のロードに失敗しました。');
+    }
 
     const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"]';
     await page.waitForSelector(commentAreaSelector, { timeout: 35000 }).catch(async () => {

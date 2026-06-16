@@ -46,8 +46,8 @@ async function fetchFromRakutenAPI() {
     { query: "韓国 インテリア 小物", minPrice: 1000, maxPrice: 30000 },
     { query: "スクイーズ キーホルダー かわいい", minPrice: 1000, maxPrice: 30000 },
     { query: "かわいい シール ステッカー デコ", minPrice: 1000, maxPrice: 3000 },
-    { query: "期間限定 スイーツ デザート ギフト", minPrice: 1000, maxPrice: 6000 },
-    { query: "かわいい お菓子 プレゼント", minPrice: 1000, maxPrice: 10000 }
+    { query: "期間限定 スイーツ デザート ギフト", minPrice: 1000, maxPrice: 10000 },
+    { query: "かわいい お菓子 プレゼント", minPrice: 1000, maxPrice: 30000 }
   ];
 
   const target = keywords[Math.floor(Math.random() * keywords.length)];
