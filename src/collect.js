@@ -582,7 +582,7 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     if (await checkDuplicateModal()) {
-      return false;
+      return 'duplicate';
     }
 
     await takeScreenshot(page, 'step6_before_click');
@@ -591,7 +591,7 @@ async function postOneProduct(pendingProduct, data) {
 
     await page.waitForTimeout(3000);
     if (await checkDuplicateModal()) {
-      return false;
+      return 'duplicate';
     }
 
     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {
@@ -607,14 +607,14 @@ async function postOneProduct(pendingProduct, data) {
     data.history.push(targetUrl);
     saveQueue(data);
     console.log('💾 投稿キューと履歴を更新しました。正常終了！');
-    return true; // 投稿成功
+    return 'posted'; // 投稿成功
 
   } catch (error) {
     console.error('❌ 投稿実行中にエラーが発生しました:', error.message);
     await browser.contexts()[0]?.pages()[0]?.screenshot({ path: path.resolve('storage/steps/step_error_occurred.png') }).catch(() => {});
     pendingProduct.status = 'failed';
     saveQueue(data);
-    return false; // 投稿失敗
+    return 'failed'; // 投稿失敗
   } finally {
     await browser.close().catch(() => {});
     console.log('\n🚪 ブラウザを閉じ、自動投稿処理を終了しました。');
@@ -656,8 +656,8 @@ async function run() {
     }
 
     console.log(`\n━━━ ラウンド ${round + 1}/${MAX_POSTS_PER_RUN} ━━━`);
-    const success = await postOneProduct(pendingProduct, data);
-    if (success) {
+    const result = await postOneProduct(pendingProduct, data);
+    if (result === 'posted') {
       postedCount++;
       postedProducts.push({
         url: pendingProduct.url,
