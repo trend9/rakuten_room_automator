@@ -449,33 +449,60 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ── ステップ2: ROOMの投稿編集画面へ遷移 ──
-    officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
-    console.log('🌐 確実な公式投稿ワープURLを使用します。');
-    console.log(`🚀 公式投稿URLへ遷移します:\n👉 ${officialRecommendUrl}`);
+    // 第一選択: 遷移成功率が最も高い「items/create（URL直接投稿）」経由で確実に編集画面を呼び出す
+    const creationUrl = 'https://room.rakuten.co.jp/items/create';
+    console.log(`🚀 ROOMのURL投稿作成ページへ遷移します:\n👉 ${creationUrl}`);
     
-    let isEditorLoaded = false;
+    let isCreationLoaded = false;
     for (let r = 0; r < 3; r++) {
       try {
-        await page.goto(officialRecommendUrl, { waitUntil: 'load', timeout: 50000 });
-        isEditorLoaded = true;
+        await page.goto(creationUrl, { waitUntil: 'load', timeout: 50000 });
+        isCreationLoaded = true;
         break;
       } catch (err) {
-        console.warn(`⚠️ 編集画面への遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
+        console.warn(`⚠️ 作成ページへの遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
         await page.waitForTimeout(3000);
       }
     }
 
-    if (!isEditorLoaded) {
-      throw new Error('編集画面のロードに失敗しました。');
+    if (!isCreationLoaded) {
+      throw new Error('作成ページのロードに失敗しました。');
     }
 
-    await takeScreenshot(page, 'step2_editor_loaded');
+    await page.waitForTimeout(3000);
+
+    // URL入力フィールドを検出して商品URLを流し込む
+    const urlInputSelector = 'input[placeholder*="URL"], input[type="text"], input[name*="url"]';
+    const urlInput = page.locator(urlInputSelector).first();
+    if (await urlInput.count() > 0 && await urlInput.isVisible()) {
+      console.log(`✍️ 商品URLを流し込んでいます: ${targetUrl}`);
+      await urlInput.focus();
+      await urlInput.fill(targetUrl);
+      await page.waitForTimeout(1000);
+      
+      // 「次へ」または「進む」ボタンをクリック
+      const nextBtn = page.locator('button:has-text("次へ"), button:has-text("登録"), button:has-text("コレ！"), button[type="submit"]').first();
+      if (await nextBtn.count() > 0) {
+        await nextBtn.click({ force: true });
+        console.log('➡️ 「次へ」ボタンをクリックしました。編集画面の生成を待機します。');
+        await page.waitForTimeout(5000);
+      }
+    } else {
+      // items/createで入力欄が見当たらない（すでに直接ワープURLで動く状態）場合は、予備として従来のワープ遷移を実行
+      console.log('💡 直接入力フォームが未検出のため、従来型のワープURLへ切り替えます。');
+      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
+      await page.goto(officialRecommendUrl, { waitUntil: 'load', timeout: 50000 }).catch(async (e) => {
+        console.warn(`⚠️ 予備ワープ遷移中にエラーが発生しました: ${e.message}`);
+      });
+    }
 
     // ログインチェック
     const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
     if (isLoginNeeded) {
       throw new Error('セッション切れ。再度 npm run auth を実行してください。');
     }
+
+    await takeScreenshot(page, 'step2_editor_loaded');
 
     // ブラウザ上の重複ダイアログチェック
     const checkDuplicateModal = async () => {
