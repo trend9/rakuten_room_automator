@@ -494,6 +494,10 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('投稿編集画面のロードに失敗しました。');
     }
 
+    // ダイアログやコンテンツの非同期表示を待つため少し待機
+    console.log('⏳ エディタ読み込み後の初期待機中 (3秒)...');
+    await page.waitForTimeout(3000);
+
     // ログインチェック
     const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
     if (isLoginNeeded) {
@@ -504,19 +508,45 @@ async function postOneProduct(pendingProduct, data) {
 
     // ブラウザ上の重複ダイアログチェック
     const checkDuplicateModal = async () => {
-      // 完全に合致する日本語文言も含めて、部分一致のあらゆるパターンをカバー
-      const duplicateLocator = page.locator('text=すでにコレ！している商品です, text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています, text=すでにコレ！');
-      const count = await duplicateLocator.count().catch(() => 0);
-      if (count > 0) {
+      const hasDuplicate = await page.evaluate(() => {
+        const allElements = Array.from(document.querySelectorAll('div, span, p, h1, h2, h3, h4'));
+        return allElements.some(el => {
+          const text = el.innerText || '';
+          return text.includes('すでにコレしている商品です') || 
+                 text.includes('すでにコレしている') ||
+                 text.includes('すでに登録されています') ||
+                 text.includes('すでにコレ') ||
+                 text.includes('すでにコレ！');
+        });
+      }).catch(() => false);
+
+      if (hasDuplicate) {
         console.log('⚠️ 【重複投稿防止】楽天ROOM側の重複ダイアログ（すでにコレ！）を検知。安全にスキップします。');
         
-        // ダイアログの「OK」ボタンを確実に押して閉じる
-        const okBtn = page.locator('button:has-text("OK"), a:has-text("OK"), span:has-text("OK"), [class*="ok"], [class*="OK"]').first();
-        if (await okBtn.count() > 0) {
-          await okBtn.click({ force: true }).catch(() => {});
+        // ダイアログの「OK」ボタンを確実にブラウザ側でクリックする
+        const clicked = await page.evaluate(() => {
+          const okBtn = Array.from(document.querySelectorAll('a, button, span')).find(el => {
+            const text = el.innerText || '';
+            return text.trim() === 'OK';
+          });
+          if (okBtn) {
+            okBtn.click();
+            return true;
+          }
+          return false;
+        }).catch(() => false);
+
+        if (clicked) {
           console.log('🆗 重複ダイアログのOKボタンをクリックしました。');
-          await page.waitForTimeout(2000);
+        } else {
+          // Playwrightによる予備のクリック
+          const fallbackOk = page.locator('a.button:has-text("OK"), button:has-text("OK"), a:has-text("OK")').first();
+          if (await fallbackOk.count() > 0) {
+            await fallbackOk.click({ force: true }).catch(() => {});
+            console.log('🆗 (予備) 重複ダイアログのOKボタンをクリックしました。');
+          }
         }
+        await page.waitForTimeout(2000);
         
         pendingProduct.status = 'duplicate';
         saveQueue(data);
@@ -526,7 +556,7 @@ async function postOneProduct(pendingProduct, data) {
     };
 
     if (await checkDuplicateModal()) {
-      return false;
+      return 'duplicate';
     }
 
     // ── ステップ3: 商品名入力欄の自動穴埋め ──
