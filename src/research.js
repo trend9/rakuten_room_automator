@@ -30,7 +30,6 @@ function saveQueue(data) {
   }
   fs.writeFileSync(QUEUE_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
-
 // 楽天商品検索APIを使用した商品取得
 async function fetchFromRakutenAPI() {
   const appId = process.env.RAKUTEN_APP_ID || process.env.RAKUTEN_APPLICATION_ID;
@@ -41,11 +40,14 @@ async function fetchFromRakutenAPI() {
     return null;
   }
 
+  // 18-40歳の主婦・女性にターゲットを厳格化
   const keywords = [
-    { query: "かわいい インテリア", minPrice: 1000, maxPrice: 10000 },
-    { query: "韓国 インテリア 小物", minPrice: 500, maxPrice: 10000 },
-    { query: "スクイーズ キーホルダー かわいい", minPrice: 300, maxPrice: 5000 },
-    { query: "かわいい 雑貨 小物", minPrice: 500, maxPrice: 10000 }
+    { query: "かわいい インテリア 雑貨", minPrice: 1000, maxPrice: 30000 },
+    { query: "韓国 インテリア 小物", minPrice: 1000, maxPrice: 30000 },
+    { query: "スクイーズ キーホルダー かわいい", minPrice: 1000, maxPrice: 30000 },
+    { query: "かわいい シール ステッカー デコ", minPrice: 1000, maxPrice: 3000 },
+    { query: "期間限定 スイーツ デザート ギフト", minPrice: 1000, maxPrice: 6000 },
+    { query: "かわいい お菓子 プレゼント", minPrice: 1000, maxPrice: 10000 }
   ];
 
   const target = keywords[Math.floor(Math.random() * keywords.length)];
@@ -125,12 +127,29 @@ async function run() {
         
         if (title.length < 15) continue;
 
+        // 本・書籍・ゲーム・コミック等の除外フィルタ
+        const lowercaseTitle = title.toLowerCase();
+        const lowercaseUrl = url.toLowerCase();
+        const isExcluded = 
+          lowercaseTitle.includes('book') || lowercaseTitle.includes('magazine') || 
+          lowercaseTitle.includes('コミック') || lowercaseTitle.includes('漫画') || 
+          lowercaseTitle.includes('ムック') || lowercaseTitle.includes('雑誌') || 
+          lowercaseTitle.includes('ゲーム') || lowercaseTitle.includes('playstation') || 
+          lowercaseTitle.includes('ps5') || lowercaseTitle.includes('vr') || 
+          lowercaseTitle.includes('dvd') || lowercaseTitle.includes('bd') ||
+          lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/');
+
+        if (isExcluded) {
+          console.log(`❌ 【除外フィルタ】ターゲット外の商品を除外しました: ${title}`);
+          continue;
+        }
+
         newProducts.push({
           url: url,
           title: title.substring(0, 80),
           addedAt: new Date().toISOString(),
           status: 'pending',
-          genre: '可愛いインテリア・スクイーズ・小物雑貨',
+          genre: '可愛いインテリア・スクイーズ・小物雑貨・シール・スイーツ',
           targetPrice: `〜${item.itemPrice}円`
         });
       }
@@ -176,8 +195,12 @@ async function run() {
         url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%AF%E3%82%A4%E3%83%BC%E3%82%BA+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84/max=5000/?exch=1&f=1&grp=product&p2=5000&sf=0'
       },
       {
-        name: '乙女心をくすぐるかわいい小物雑貨（〜10,000円）',
-        url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+%E9%9B%91%E8%B2%A8+%E5%B0%8F%E7%89%A9/max=10000/?exch=1&f=1&grp=product&p2=10000&sf=0'
+        name: 'かわいいシール・ステッカー（〜3,000円）',
+        url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+%E3%82%B7%E3%83%BC%E3%83%AB+%E3%82%B9%E3%83%86%E3%83%83%E3%82%AB%E3%83%BC/max=3000/?exch=1&f=1&grp=product&p2=3000&sf=0'
+      },
+      {
+        name: '期間限定の可愛いスイーツ・お菓子（〜6,000円）',
+        url: 'https://search.rakuten.co.jp/search/mall/%E6%9C%9F%E9%96%93%E9%99%90%E5%AE%9A+%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%85+%E3%81%8A%E8%8F%85%E5%AD%90+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84/max=6000/?exch=1&f=1&grp=product&p2=6000&sf=0'
       }
     ];
 
@@ -306,6 +329,23 @@ async function run() {
                     continue;
                   }
 
+                  // 本・書籍・ゲーム・コミック等の除外フィルタ
+                  const lowercaseTitle = title.toLowerCase();
+                  const lowercaseUrl = url.toLowerCase();
+                  const isExcluded = 
+                    lowercaseTitle.includes('book') || lowercaseTitle.includes('magazine') || 
+                    lowercaseTitle.includes('コミック') || lowercaseTitle.includes('漫画') || 
+                    lowercaseTitle.includes('ムック') || lowercaseTitle.includes('雑誌') || 
+                    lowercaseTitle.includes('ゲーム') || lowercaseTitle.includes('playstation') || 
+                    lowercaseTitle.includes('ps5') || lowercaseTitle.includes('vr') || 
+                    lowercaseTitle.includes('dvd') || lowercaseTitle.includes('bd') ||
+                    lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/');
+
+                  if (isExcluded) {
+                    console.log(`❌ 【除外フィルタ】ターゲット外の商品を除外しました: ${title}`);
+                    continue;
+                  }
+
                   console.log(`🔎 候補商品の有効性を事前検証中...: ${url}`);
                   let isValid = false;
                   try {
@@ -356,7 +396,7 @@ async function run() {
                     title: title.substring(0, 80),
                     addedAt: new Date().toISOString(),
                     status: 'pending',
-                    genre: '可愛いインテリア・スクイーズ・小物雑貨',
+                    genre: '可愛いインテリア・スクイーズ・小物雑貨・シール・スイーツ',
                     targetPrice: '〜10,000円'
                   });
                 }

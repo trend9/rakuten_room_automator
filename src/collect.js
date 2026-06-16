@@ -480,11 +480,26 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ブラウザ上の重複ダイアログチェック
-    const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています').count() > 0;
-    if (isAlreadyCollectedModal) {
-      console.log('⚠️ 【重複投稿防止】楽天ROOM側の警告を検知。安全にスキップします。');
-      pendingProduct.status = 'duplicate';
-      saveQueue(data);
+    const checkDuplicateModal = async () => {
+      const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています').count() > 0;
+      if (isAlreadyCollectedModal) {
+        console.log('⚠️ 【重複投稿防止】楽天ROOM側の警告を検知。安全にスキップします。');
+        
+        // ダイアログのOKボタンをクリックして閉じる試み
+        const okBtn = page.locator('button:has-text("OK"), a:has-text("OK"), [class*="ok"], [class*="OK"]').first();
+        if (await okBtn.count() > 0 && await okBtn.isVisible()) {
+          await okBtn.click().catch(() => {});
+          await page.waitForTimeout(1000);
+        }
+        
+        pendingProduct.status = 'duplicate';
+        saveQueue(data);
+        return true;
+      }
+      return false;
+    };
+
+    if (await checkDuplicateModal()) {
       return false;
     }
 
@@ -560,11 +575,19 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('投稿確定ボタンが見つかりませんでした。');
     }
 
+    if (await checkDuplicateModal()) {
+      return false;
+    }
+
     await takeScreenshot(page, 'step6_before_click');
     await submitBtn.click({ force: true });
     console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
 
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(3000);
+    if (await checkDuplicateModal()) {
+      return false;
+    }
+
     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {
       console.log('⚠️ 投稿完了後の画面切り替え待ちタイムアウト。');
     });
