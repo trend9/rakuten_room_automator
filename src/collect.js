@@ -289,6 +289,100 @@ ${cleanTitle.substring(0, 100)}
 }
 
 // =============================================================
+// 📸 商品画像URL解決エンジン (楽天API & Unsplash)
+// =============================================================
+
+function extractItemCodeFromUrl(url) {
+  try {
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    const match = cleanUrl.match(/item\.rakuten\.co\.jp\/([^\/]+)\/([^\/]+)/);
+    if (match) {
+      return `${match[1]}:${match[2]}`;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function getRakutenImage(url) {
+  const appId = process.env.RAKUTEN_APP_ID || process.env.RAKUTEN_APPLICATION_ID;
+  if (!appId) return null;
+  const itemCode = extractItemCodeFromUrl(url);
+  if (!itemCode) return null;
+  
+  try {
+    console.log(`📡 楽天APIから画像URLを取得中... (itemCode: ${itemCode})`);
+    const apiUrl = `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706`;
+    const params = new URLSearchParams({
+      applicationId: appId,
+      itemCode: itemCode,
+      format: 'json'
+    });
+    const res = await fetch(`${apiUrl}?${params.toString()}`);
+    if (res.ok) {
+      const result = await res.json();
+      const item = result.Items?.[0]?.Item;
+      if (item) {
+        const imgUrl = item.mediumImageUrls?.[0]?.imageUrl || item.smallImageUrls?.[0]?.imageUrl;
+        if (imgUrl) {
+          // 画像サイズ制限クエリ(?_ex=...)を除去して本来の高画質URLを取得
+          return imgUrl.split('?')[0];
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`⚠️ 楽天API画像取得エラー: ${err.message}`);
+  }
+  return null;
+}
+
+async function getUnsplashImage(keyword) {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (accessKey) {
+    try {
+      console.log(`📡 Unsplash APIから類似画像を検索中... (キーワード: ${keyword})`);
+      const url = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&client_id=${accessKey}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const imgUrl = data.urls?.regular || data.urls?.small;
+        if (imgUrl) return imgUrl;
+      }
+    } catch (err) {
+      console.warn(`⚠️ Unsplash APIエラー: ${err.message}`);
+    }
+  }
+  // 高品質なインテリア関連のフォールバック画像
+  const fallbacks = [
+    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1000",
+    "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000",
+    "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1000",
+    "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1000",
+    "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=1000"
+  ];
+  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+}
+
+async function resolveProductImage(product) {
+  if (product.imageUrl) {
+    console.log(`🎯 既に取得済みの画像URLを使用します: ${product.imageUrl}`);
+    return product.imageUrl;
+  }
+  
+  // 1. 楽天API経由
+  const apiImage = await getRakutenImage(product.url);
+  if (apiImage) {
+    console.log(`🎯 楽天APIから画像を取得しました: ${apiImage}`);
+    return apiImage;
+  }
+  
+  // 2. Unsplash経由
+  const keyword = product.genre || product.title || "interior";
+  const unsplashImage = await getUnsplashImage(keyword);
+  console.log(`🎯 Unsplashから画像を取得しました: ${unsplashImage}`);
+  return unsplashImage;
+}
+
+// =============================================================
 // メイン投稿処理（1商品）
 // =============================================================
 async function postOneProduct(pendingProduct, data) {
@@ -313,6 +407,7 @@ async function postOneProduct(pendingProduct, data) {
   
   // ブラウザ起動・遷移の前にLLM文章生成を終わらせておく（遷移後のアイドル時間によるセッション切れ・エラー防止）
   const customComment = await generateLLMMessage(targetTitle);
+  pendingProduct.customComment = customComment;
 
   const isCI = process.env.GITHUB_ACTIONS === 'true';
   const browser = await chromium.launch({
@@ -345,6 +440,12 @@ async function postOneProduct(pendingProduct, data) {
     if (loaded) {
       await page.waitForTimeout(4000);
       await takeScreenshot(page, 'step1_rakuten_loaded');
+
+      const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
+      if (ogImage) {
+        pendingProduct.imageUrl = ogImage;
+        console.log(`📸 楽天市場の商品ページから og:image を検出しました: ${ogImage}`);
+      }
 
       const roomLinkLocator = page.locator('a[href*="room.rakuten.co.jp/recommend"], a[href*="room.rakuten.co.jp/mix"]');
       if (await roomLinkLocator.count() > 0) {
@@ -503,6 +604,7 @@ async function run() {
   }
 
   let postedCount = 0;
+  const postedProducts = [];
 
   for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
     const data = loadQueue();
@@ -528,6 +630,12 @@ async function run() {
     const success = await postOneProduct(pendingProduct, data);
     if (success) {
       postedCount++;
+      postedProducts.push({
+        url: pendingProduct.url,
+        title: pendingProduct.title,
+        comment: pendingProduct.customComment,
+        imageUrl: pendingProduct.imageUrl
+      });
     }
 
     // 次ラウンドまで30秒間隔
@@ -538,6 +646,39 @@ async function run() {
   }
 
   console.log(`\n🏁 今回の実行で合計 ${postedCount} 件のコレ！を自動投稿しました！`);
+
+  if (postedProducts.length > 0) {
+    const targetProduct = postedProducts[0];
+    console.log(`\n📤 Webhook経由でSNSへの自動投稿を実行します (対象: ${targetProduct.title})`);
+    
+    try {
+      const resolvedImage = await resolveProductImage(targetProduct);
+      const postText = `${targetProduct.comment || ''}\n\nhttps://room.rakuten.co.jp/jack555/items/`;
+      
+      console.log(`📡 Make.com Webhookへリクエストを送信中...`);
+      console.log(`🖼️ 画像URL: ${resolvedImage}`);
+      console.log(`📝 送信テキスト:\n${postText}`);
+      
+      const response = await fetch("https://hook.us1.make.com/vrank20zgvnokm5ad539yimyktnhmtqb", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          image_url: resolvedImage,
+          text: postText
+        })
+      });
+      
+      if (response.ok) {
+        console.log(`🎉 Webhook自動投稿の送信が完了しました！ (ステータス: ${response.status})`);
+      } else {
+        console.warn(`⚠️ Webhook自動投稿の送信に失敗しました (ステータス: ${response.status})`);
+      }
+    } catch (webhookError) {
+      console.error(`❌ Webhook送信中にエラーが発生しました:`, webhookError.message);
+    }
+  }
 }
 
 run();
