@@ -2955,25 +2955,28 @@
       "url": "https://item.rakuten.co.jp/cigar-shop/a31-1-hakari/",
       "title": "【安心の30日保証付き】 デジタル スケール キッチンスケール 小型 電子 計量器 測り はかり 精密 100g 100グラム 重量計 0.01g 0.1g 1",
       "addedAt": "2026-06-15T18:30:41.505Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-16T09:37:52.318Z"
     },
     {
       "url": "https://item.rakuten.co.jp/auc-superfrog/10014326/",
       "title": "ラグドール ミヌエット コーイケルホンディエ コイケル ミニチュアシュナウザー 猫 ねこ ネコ 犬 いぬ イヌ アニマル刺繍 ポーチ レディース スクエアポーチ",
       "addedAt": "2026-06-15T18:30:56.406Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-16T09:40:06.815Z"
     },
     {
       "url": "https://item.rakuten.co.jp/waabbit/c-et-wallpo/",
       "title": "壁面収納 Wall Pocket ポケットホルダー キッチン 壁 小物収納 かわいい 雑貨 組み合わせ お知らせボード 子供部屋 ウォール ポケット",
       "addedAt": "2026-06-15T23:49:03.186Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
-      "targetPrice": "〜10,000円"
+      "targetPrice": "〜10,000円",
+      "postedAt": "2026-06-16T09:42:26.108Z"
     },
     {
       "url": "https://item.rakuten.co.jp/opabinia/10059-pupufelt-boom/",
@@ -3003,6 +3006,38 @@
       "url": "https://item.rakuten.co.jp/heart-box/zakka35set/",
       "title": "ポプラの木 ツリー オブジェ Lサイズ×Sサイズセット",
       "addedAt": "2026-06-15T23:50:03.260Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/sanyodo/20000028/",
+      "title": "【5400円以上で】 台湾 土産 台湾 ミニポーチ 4柄セット【257132】",
+      "addedAt": "2026-06-16T09:35:07.592Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/happy-talk-shop/applenagomi-5set/",
+      "title": "【公式】 癒しグッズ トルマリンゴ 和 選べる5個セット | 消臭 脱臭 リフレッシュ リラックス 癒し トルマリン 空気清浄器 マイナスイオン 置物 風水 和",
+      "addedAt": "2026-06-16T09:35:23.359Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/interior-palette/356408/",
+      "title": "マスコット ヒツジ 置物 インテリア （ オブジェ アニマル ひつじ ミニ 羊 ガーデニング ディスプレイ 動物 かわいい 雑貨 小物 オーナメント 玄関 デス",
+      "addedAt": "2026-06-16T09:35:38.443Z",
+      "status": "pending",
+      "genre": "可愛いインテリア・スクイーズ・小物雑貨",
+      "targetPrice": "〜10,000円"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/plusnao/zak-22359/",
+      "title": " スニーカー型 ペンケース ペン立て 小物入れ ペンスタンド 厚底 パステルカラー アースカラー 収納 整理 かわいい おしゃれ 雑貨 プレゼント ギフト 小学",
+      "addedAt": "2026-06-16T09:35:53.594Z",
       "status": "pending",
       "genre": "可愛いインテリア・スクイーズ・小物雑貨",
       "targetPrice": "〜10,000円"
@@ -3336,6 +3371,9 @@
     "https://item.rakuten.co.jp/nishi-ryutu/pansqkey/",
     "https://item.rakuten.co.jp/colorfulbox/356408/",
     "https://item.rakuten.co.jp/yayapapus/am876-a/",
-    "https://item.rakuten.co.jp/colorfulbox/356405/"
+    "https://item.rakuten.co.jp/colorfulbox/356405/",
+    "https://item.rakuten.co.jp/cigar-shop/a31-1-hakari/",
+    "https://item.rakuten.co.jp/auc-superfrog/10014326/",
+    "https://item.rakuten.co.jp/waabbit/c-et-wallpo/"
   ]
 }
