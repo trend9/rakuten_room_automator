@@ -421,10 +421,16 @@ async function postOneProduct(pendingProduct, data) {
       viewport: { width: 1280, height: 800 },
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     });
+    // navigator.webdriver 等のボット防止用偽装を注入
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(navigator, 'languages', { get: () => ['ja', 'en-US', 'en'] });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
+    });
     const page = await context.newPage();
 
-    // ── ステップ1: 楽天市場へ事前アクセス（クッキー活性化） ──
-    console.log('🌐 楽天市場の商品ページにアクセスしています（クッキー活性化・セッション橋渡しのため）...');
+    // ── ステップ1: 楽天市場へ事前アクセス（クッキー活性化 ＆ 動的URL抽出のため） ──
+    console.log('🌐 楽天市場の商品ページにアクセスしています（クッキー活性化＆動的URL抽出のため）...');
     let loaded = false;
     for (let retries = 0; retries < 3 && !loaded; retries++) {
       try {
@@ -436,7 +442,6 @@ async function postOneProduct(pendingProduct, data) {
       }
     }
 
-    let officialRecommendUrl = null;
     if (loaded) {
       await page.waitForTimeout(2000);
       await takeScreenshot(page, 'step1_rakuten_loaded');
@@ -449,51 +454,44 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ── ステップ2: ROOMの投稿編集画面へ遷移 ──
-    // 第一選択: 遷移成功率が最も高い「items/create（URL直接投稿）」経由で確実に編集画面を呼び出す
-    const creationUrl = 'https://room.rakuten.co.jp/items/create';
-    console.log(`🚀 ROOMのURL投稿作成ページへ遷移します:\n👉 ${creationUrl}`);
-    
-    let isCreationLoaded = false;
+    // 第一選択: 楽天市場の商品ページから「ROOMに投稿」リンク（/mix?itemcode=...）を抽出する
+    let warpUrl = null;
+    if (loaded) {
+      const roomLinkEl = page.locator('a[href*="room.rakuten.co.jp"]').first();
+      if (await roomLinkEl.count() > 0) {
+        warpUrl = await roomLinkEl.getAttribute('href');
+        console.log(`🎯 楽天市場の商品ページから公式ROOM投稿URLを抽出しました: ${warpUrl}`);
+      }
+    }
+
+    // 第二選択: 抽出できなかった場合の自動組み立てフォールバック（新形式URL）
+    if (!warpUrl) {
+      const itemCode = extractItemCodeFromUrl(targetUrl);
+      if (itemCode) {
+        warpUrl = `https://room.rakuten.co.jp/mix?itemcode=${encodeURIComponent(itemCode)}&scid=we_room_upc60`;
+        console.log(`💡 商品URLから公式ROOM投稿URL（新形式）を組み立てました: ${warpUrl}`);
+      } else {
+        // 第三選択: 従来のrecommend.html遷移
+        warpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
+        console.log(`⚠️ itemcodeの抽出に失敗したため、旧ワープURLを使用します: ${warpUrl}`);
+      }
+    }
+
+    console.log(`🚀 ROOMの投稿編集画面（ワープURL）へ遷移します:\n👉 ${warpUrl}`);
+    let isWarpLoaded = false;
     for (let r = 0; r < 3; r++) {
       try {
-        await page.goto(creationUrl, { waitUntil: 'load', timeout: 50000 });
-        isCreationLoaded = true;
+        await page.goto(warpUrl, { waitUntil: 'load', timeout: 50000 });
+        isWarpLoaded = true;
         break;
       } catch (err) {
-        console.warn(`⚠️ 作成ページへの遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
+        console.warn(`⚠️ 投稿編集画面への遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
         await page.waitForTimeout(3000);
       }
     }
 
-    if (!isCreationLoaded) {
-      throw new Error('作成ページのロードに失敗しました。');
-    }
-
-    await page.waitForTimeout(3000);
-
-    // URL入力フィールドを検出して商品URLを流し込む
-    const urlInputSelector = 'input[placeholder*="URL"], input[type="text"], input[name*="url"]';
-    const urlInput = page.locator(urlInputSelector).first();
-    if (await urlInput.count() > 0 && await urlInput.isVisible()) {
-      console.log(`✍️ 商品URLを流し込んでいます: ${targetUrl}`);
-      await urlInput.focus();
-      await urlInput.fill(targetUrl);
-      await page.waitForTimeout(1000);
-      
-      // 「次へ」または「進む」ボタンをクリック
-      const nextBtn = page.locator('button:has-text("次へ"), button:has-text("登録"), button:has-text("コレ！"), button[type="submit"]').first();
-      if (await nextBtn.count() > 0) {
-        await nextBtn.click({ force: true });
-        console.log('➡️ 「次へ」ボタンをクリックしました。編集画面の生成を待機します。');
-        await page.waitForTimeout(5000);
-      }
-    } else {
-      // items/createで入力欄が見当たらない（すでに直接ワープURLで動く状態）場合は、予備として従来のワープ遷移を実行
-      console.log('💡 直接入力フォームが未検出のため、従来型のワープURLへ切り替えます。');
-      officialRecommendUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
-      await page.goto(officialRecommendUrl, { waitUntil: 'load', timeout: 50000 }).catch(async (e) => {
-        console.warn(`⚠️ 予備ワープ遷移中にエラーが発生しました: ${e.message}`);
-      });
+    if (!isWarpLoaded) {
+      throw new Error('投稿編集画面のロードに失敗しました。');
     }
 
     // ログインチェック
