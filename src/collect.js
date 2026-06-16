@@ -654,18 +654,68 @@ async function postOneProduct(pendingProduct, data) {
     await page.waitForTimeout(2000);
     await takeScreenshot(page, 'step5_scrolled_to_bottom');
 
-    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"]').first();
-    if (!(await submitBtn.isVisible()) || !(await submitBtn.isEnabled())) {
-      throw new Error('投稿確定ボタンが見つかりませんでした。');
-    }
-
     if (await checkDuplicateModal()) {
       return 'duplicate';
     }
 
-    await takeScreenshot(page, 'step6_before_click');
-    await submitBtn.click({ force: true });
-    console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
+    // 通常の投稿ボタンクリックを試みる
+    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"], a:has-text("完了")').first();
+    let posted = false;
+
+    if (await submitBtn.count() > 0 && await submitBtn.isVisible() && await submitBtn.isEnabled()) {
+      await takeScreenshot(page, 'step6_before_click');
+      await submitBtn.click({ force: true });
+      console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
+      posted = true;
+    } else {
+      // ── 🚨 核オプション: キーボード操作で「完了」を強制送信 ──
+      // Playwrightのビジュアル操作の代わりに、Tabキーでフォーカスを移動してEnterキーで送信する
+      console.log('⚠️ 投稿ボタンが検出できませんでした。キーボード操作（核オプション）で強制送信を試みます...');
+      await commentArea.blur().catch(() => {});
+      await page.waitForTimeout(500);
+
+      // クライアント側で完了ボタンを見つけてクリック
+      const nukeClicked = await page.evaluate(() => {
+        const buttons = Array.from(document.querySelectorAll('button, a, input[type="submit"]'));
+        const btn = buttons.find(el => {
+          const t = (el.innerText || el.value || '').trim();
+          return t === '完了' || t === 'コレ！' || t === '投稿';
+        });
+        if (btn) {
+          btn.click();
+          return true;
+        }
+        return false;
+      }).catch(() => false);
+
+      if (nukeClicked) {
+        console.log('🚨 核オプション: クライアント側で「完了」ボタンをクリックしました！');
+        posted = true;
+      } else {
+        // 最終手段: Tab連打でボタンにフォーカスを当てて Enter
+        console.log('🚨 核オプション: Tabキー + Enterによる強制送信を試みます...');
+        for (let tab = 0; tab < 10; tab++) {
+          await page.keyboard.press('Tab');
+          await page.waitForTimeout(200);
+          const focused = await page.evaluate(() => {
+            const el = document.activeElement;
+            if (!el) return '';
+            const t = (el.innerText || el.value || '').trim();
+            return t;
+          });
+          if (focused === '完了' || focused === 'コレ！' || focused === '投稿') {
+            await page.keyboard.press('Enter');
+            console.log('🚨 核オプション: Tabで「完了」ボタンにフォーカスしてEnterを押しました！');
+            posted = true;
+            break;
+          }
+        }
+      }
+
+      if (!posted) {
+        throw new Error('投稿確定ボタンが見つからず、核オプションでも失敗しました。');
+      }
+    }
 
     await page.waitForTimeout(3000);
     if (await checkDuplicateModal()) {
@@ -712,21 +762,29 @@ async function run() {
 
   let postedCount = 0;
   const postedProducts = [];
+  // 重複スキップした商品URLのセット（同ラン内での無限ループ防止）
+  const skippedUrls = new Set();
+
+  // 実行開始時に全failedを pending に復活させる（スキップ後も新しい候補が見つかるように）
+  {
+    const data = loadQueue();
+    let revived = 0;
+    data.queue.forEach(p => {
+      if (p.status === 'failed') {
+        p.status = 'pending';
+        revived++;
+      }
+    });
+    if (revived > 0) {
+      saveQueue(data);
+      console.log(`💡 ${revived} 件の failed 商品を pending に復活させました。`);
+    }
+  }
 
   for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
     const data = loadQueue();
-    let pendingProduct = data.queue.find(p => p.status === 'pending');
-
-    // pending がなければ、1回目のみ failed を復活させる
-    if (!pendingProduct && round === 0) {
-      console.log('💡 pending商品なし。failed商品を pending に復活させます...');
-      const failed = data.queue.find(p => p.status === 'failed');
-      if (failed) {
-        failed.status = 'pending';
-        saveQueue(data);
-        pendingProduct = failed;
-      }
-    }
+    // スキップ済みを除いた次の pending 商品を選択
+    let pendingProduct = data.queue.find(p => p.status === 'pending' && !skippedUrls.has(p.url));
 
     if (!pendingProduct) {
       console.log(`💡 投稿待ちの商品がありません。今回は ${postedCount} 件投稿して終了します。`);
@@ -735,6 +793,7 @@ async function run() {
 
     console.log(`\n━━━ ラウンド ${round + 1}/${MAX_POSTS_PER_RUN} ━━━`);
     const result = await postOneProduct(pendingProduct, data);
+
     if (result === 'posted') {
       postedCount++;
       postedProducts.push({
@@ -743,9 +802,15 @@ async function run() {
         comment: pendingProduct.customComment,
         imageUrl: pendingProduct.imageUrl
       });
+    } else if (result === 'duplicate') {
+      // 重複はスキップリストに追加して次の商品へ（ラウンドを消費せずループ継続）
+      console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。次の商品を探します。`);
+      skippedUrls.add(pendingProduct.url);
+      round--; // ラウンドを消費しない
+      continue;
     }
 
-    // 次ラウンドまで30秒間隔
+    // 次ラウンドまで待機（投稿成功・失敗時のみ）
     if (round < MAX_POSTS_PER_RUN - 1) {
       console.log('⏱️ 次の投稿まで30秒待機します...');
       await sleep(30000);
