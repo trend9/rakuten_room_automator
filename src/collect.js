@@ -484,15 +484,18 @@ async function postOneProduct(pendingProduct, data) {
 
     // ブラウザ上の重複ダイアログチェック
     const checkDuplicateModal = async () => {
-      const isAlreadyCollectedModal = await page.locator('text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています').count() > 0;
-      if (isAlreadyCollectedModal) {
-        console.log('⚠️ 【重複投稿防止】楽天ROOM側の警告を検知。安全にスキップします。');
+      // 完全に合致する日本語文言も含めて、部分一致のあらゆるパターンをカバー
+      const duplicateLocator = page.locator('text=すでにコレ！している商品です, text=すでにコレ！しています, text=もう一度コレ！, text=すでに登録されています, text=すでにコレ！');
+      const count = await duplicateLocator.count().catch(() => 0);
+      if (count > 0) {
+        console.log('⚠️ 【重複投稿防止】楽天ROOM側の重複ダイアログ（すでにコレ！）を検知。安全にスキップします。');
         
-        // ダイアログのOKボタンをクリックして閉じる試み
-        const okBtn = page.locator('button:has-text("OK"), a:has-text("OK"), [class*="ok"], [class*="OK"]').first();
-        if (await okBtn.count() > 0 && await okBtn.isVisible()) {
-          await okBtn.click().catch(() => {});
-          await page.waitForTimeout(1000);
+        // ダイアログの「OK」ボタンを確実に押して閉じる
+        const okBtn = page.locator('button:has-text("OK"), a:has-text("OK"), span:has-text("OK"), [class*="ok"], [class*="OK"]').first();
+        if (await okBtn.count() > 0) {
+          await okBtn.click({ force: true }).catch(() => {});
+          console.log('🆗 重複ダイアログのOKボタンをクリックしました。');
+          await page.waitForTimeout(2000);
         }
         
         pendingProduct.status = 'duplicate';
