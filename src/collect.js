@@ -469,11 +469,6 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('編集画面のロードに失敗しました。');
     }
 
-    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"]';
-    await page.waitForSelector(commentAreaSelector, { timeout: 35000 }).catch(async () => {
-      console.warn('⚠️ 編集画面の表示に時間がかかっています。追加で待機します。');
-      await page.waitForTimeout(5000);
-    });
     await takeScreenshot(page, 'step2_editor_loaded');
 
     // ログインチェック
@@ -530,10 +525,38 @@ async function postOneProduct(pendingProduct, data) {
     }
     await takeScreenshot(page, 'step3_name_checked');
 
-    // ── ステップ4: LLM高CTA紹介コメントの入力 ──
-    const commentArea = page.locator(commentAreaSelector).first();
-    if (!(await commentArea.isVisible())) {
-      throw new Error('コメント入力欄が表示されませんでした。');
+    // ── ステップ4: コメント入力欄が表示されるまでリトライ付きで待機 ──
+    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea[placeholder*="オススメポイント"], textarea';
+    let commentArea = null;
+    console.log('⏳ コメント入力欄が表示されるのを待機しています...');
+    
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      await page.waitForSelector(commentAreaSelector, { timeout: 10000 }).catch(() => {});
+      const area = page.locator(commentAreaSelector).first();
+      if (await area.count() > 0 && await area.isVisible()) {
+        commentArea = area;
+        break;
+      }
+      console.log(`⏳ コメント欄が見つかりません。リトライ中... (${attempt}/5)`);
+      await page.waitForTimeout(2000);
+      
+      // もし重複モーダルが割り込んで出現していれば、ここで再度閉じる処理を走らせる
+      if (await checkDuplicateModal()) {
+        return 'duplicate';
+      }
+    }
+
+    if (!commentArea) {
+      // 最終手段: 画面上の全 textarea 要素から取得
+      const fallbackTextareas = page.locator('textarea');
+      if (await fallbackTextareas.count() > 0) {
+        commentArea = fallbackTextareas.first();
+        console.log('💡 汎用 textarea セレクターでコメント欄を検出しました。');
+      }
+    }
+
+    if (!commentArea || !(await commentArea.isVisible())) {
+      throw new Error('コメント入力欄 (textarea) が表示されませんでした。タイムアウトまたはページ構成の変更エラー。');
     }
 
     if (!customComment || customComment.trim() === '') {
