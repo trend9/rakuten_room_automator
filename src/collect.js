@@ -671,8 +671,9 @@ async function run() {
     }
   }
 
-  console.log(`\n🏁 今回の実行で合計 ${postedCount} 件のコレ！を自動投稿しました！`);
+  console.log(`\n🏁 今回の実行で合計 ${postedCount} 件のコレ！を新規自動投稿しました！`);
 
+  // 実際に新規投稿に成功した商品のみを対象にする (postedProductsは success=true すなわち新規投稿成功時のみ格納される)
   if (postedProducts.length > 0) {
     const targetProduct = postedProducts[0];
     console.log(`\n📤 Webhook経由でSNSへの自動投稿を実行します (対象: ${targetProduct.title})`);
