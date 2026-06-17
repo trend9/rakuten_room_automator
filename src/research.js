@@ -57,16 +57,16 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'スクイーズ かわいい',             minPrice: 300,  maxPrice: 5000  },
-  { query: 'かわいい インテリア 雑貨',         minPrice: 1000, maxPrice: 10000 },
-  { query: '韓国 インテリア 小物 おしゃれ',    minPrice: 1000, maxPrice: 10000 },
-  { query: 'ぬいぐるみ かわいい SNS話題',      minPrice: 1000, maxPrice: 8000  },
-  { query: 'キーホルダー マスコット かわいい',  minPrice: 500,  maxPrice: 5000  },
-  { query: 'かわいい シール ステッカー デコ',  minPrice: 300,  maxPrice: 3000  },
-  { query: 'かわいい お菓子 スイーツ ギフト',  minPrice: 800,  maxPrice: 8000  },
-  { query: '山崎実業 tower キッチン',          minPrice: 1000, maxPrice: 8000  },
-  { query: 'おしゃれ 収納 雑貨 北欧',         minPrice: 1000, maxPrice: 10000 },
-  { query: 'かわいい マグカップ コップ 北欧',  minPrice: 500,  maxPrice: 5000  },
+  { query: 'スクイーズ かわいい 低反発',       minPrice: 300,  maxPrice: 4000  },
+  { query: 'スクイーズ おもちゃ ぷにぷに 癒し', minPrice: 300,  maxPrice: 4000  },
+  { query: 'かわいい 雑貨 小物 スクイーズ',     minPrice: 500,  maxPrice: 5000  },
+  { query: '韓国雑貨 かわいい インテリア',      minPrice: 800,  maxPrice: 8000  },
+  { query: 'かわいい ぬいぐるみ キーホルダー',   minPrice: 500,  maxPrice: 5000  },
+  { query: 'マスコット キャラクター かわいい',   minPrice: 500,  maxPrice: 5000  },
+  { query: 'かわいい 文房具 デコ ステーショナリー', minPrice: 300,  maxPrice: 3000  },
+  { query: 'かわいい ルームライト 間接照明',    minPrice: 1000, maxPrice: 8000  },
+  { query: 'かわいい スマホケース デコパーツ',   minPrice: 500,  maxPrice: 4000  },
+  { query: 'かわいい マグカップ コップ 北欧',   minPrice: 500,  maxPrice: 5000  },
 ];
 
 async function fetchFromRakutenAPI(data) {

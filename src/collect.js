@@ -132,23 +132,21 @@ function generateFallbackMessage(title) {
     .trim();
 
   const intros = [
-    '普通のデパートやニトリではまず見かけない、隠れた名作を見つけちゃった✨',
-    'お家時間が一気に垢抜ける！ちょっとマニアックな超便利グッズを発見🏠',
-    'SNSで話題になってたやつをやっとゲット！普通の雑貨屋には置いてないんだよね🌟',
-    '生活感が消えて驚くほどスッキリ片付く！インテリア好き主婦の間で密かに大バズり中の名品😆',
-    'これ、本当に家事がラクになるやつ！知る人ぞ知る高見えアイテムです✨',
+    'SNSで見かけてひと目惚れしちゃった、本当にかわいくてお気に入りなアイテム✨',
+    'お家にあるだけで気分が上がる！デザインがとってもキュートで癒される名品です🎀',
+    '大人気でずっと気になってたアイテムをついに発見！実物もやっぱりめちゃくちゃかわいい🌟',
+    '置いておくだけで空間がパッと華やかになる！可愛くて大満足なお買い物でした😆',
+    '持っているだけで幸せな気持ちになれる！自分へのご褒美やギフトにもぴったりな素敵グッズ✨',
   ];
   const ctaList = [
-    '\n\n⚠️ 大人気のため品切れ多発中。リアルタイムな在庫状況や限定クーポンは今すぐ楽天市場公式ページで確認してね👇',
-    '\n\n🎁 今だけの限定割引クーポンやポイントアップ最新情報は楽天市場公式ページで公開中！損する前にチェックして👇✨',
-    '\n\n💬 愛用者のリアル口コミや現在の割引価格は楽天市場公式ページで今すぐ確認できます！👇🔗',
+    '\n\n⚠️ 大人気のため売り切れ続出中。リアルタイムな在庫状況や限定クーポンは今すぐ楽天市場公式ページで確認してね👇',
+    '\n\n🎁 最新の割引クーポンやお得なポイントアップ情報は楽天市場公式ページで公開中！損する前にチェックして👇✨',
+    '\n\n💬 愛用者のリアルなクチコミや現在の価格は楽天市場公式ページで今すぐ確認できます！👇🔗',
   ];
   const tagSets = [
-    '#楽天市場 #北欧インテリア #便利グッズ #暮らしを整える #お家時間',
-    '#楽天市場 #買ってよかった #家事楽 #すっきり暮らす #インテリア雑貨',
-    '#楽天市場 #おしゃれインテリア #暮らしの知恵 #主婦の味方 #お買い物',
-    '#楽天市場 #北欧ナチュラル #買ってよかった #垢抜け部屋 #リピ買い',
-    '#楽天市場 #便利グッズ #買ってよかった #お買い物マラソン #買い回り',
+    '#楽天市場 #かわいい雑貨 #お気に入り #お買い物マラソン #買ってよかった',
+    '#楽天市場 #おすすめギフト #暮らしを楽しむ #癒しグッズ #プチプラ雑貨',
+    '#楽天市場 #おしゃれ雑貨 #かわいい #自分へのご褒美 #リピ買い',
   ];
 
   const intro = intros[Math.floor(Math.random() * intros.length)];
@@ -156,6 +154,48 @@ function generateFallbackMessage(title) {
   const tags  = tagSets[Math.floor(Math.random() * tagSets.length)];
 
   return `${intro}\n\n${cleanTitle.substring(0, 70)}...${cta}\n\n${tags}`.substring(0, 490);
+}
+
+/** Gemini API による生成 (GEMINI_API_KEYを使用) */
+async function generateGeminiMessage(prompt) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    console.log('🤖 GEMINI_API_KEY検出。Gemini API (gemini-2.0-flash) でコメントを生成中...');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。\n\n" + prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500
+        }
+      }),
+      signal: AbortSignal.timeout(20000)
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const content = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      const cleaned = validateAndCleanLLMOutput(content);
+      if (cleaned) return cleaned;
+      console.warn('⚠️ Gemini API: 出力がバリデーションに失敗しました');
+    } else {
+      console.warn(`⚠️ Gemini APIエラー: ${response.status}`);
+    }
+  } catch (err) {
+    console.warn(`⚠️ Gemini API呼び出し中にエラーが発生しました: ${err.message}`);
+  }
+  return null;
 }
 
 /** GitHub Models API による生成 (GITHUB_TOKENを使用) */
@@ -234,7 +274,7 @@ async function generatePollinationsMessage(prompt) {
 }
 
 /**
- * Colab API または各種LLM API 経由でLLMに高CTA日本語文章を生成させる。
+ * 各種LLM API 経由でLLMに高CTA日本語文章を生成させる。
  * 失敗した場合は順次フォールバックチェーンを実行する。
  */
 async function generateLLMMessage(title) {
@@ -265,89 +305,15 @@ ${cleanTitle.substring(0, 100)}
 
 【コメント本文のみを出力。前置き・タイトル行・\`\`\`マークダウン装飾は絶対に不要】`;
 
-  // 1. 最優先: Colab API (COLAB_API_URLを使用) を試行
-  const colabUrl = COLAB_API_URL;
-  if (colabUrl) {
-    try {
-      console.log('🤖 Colab APIでコメントを生成中...');
-      const response = await fetch(
-        `${colabUrl.replace(/\/$/, '')}/generate/text`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            system_prompt: 'あなたは楽天ROOMでフォロワー急増中のインフルエンサーです。',
-            user_prompt: prompt,
-          }),
-          signal: AbortSignal.timeout(30000),
-        }
-      );
-
-      if (response.ok) {
-        const json = await response.json();
-        const generated = json?.result?.trim();
-        const cleaned = validateAndCleanLLMOutput(generated);
-        if (cleaned) {
-          const finalText = cleaned.substring(0, 400);
-          console.log(`🤖 LLM (Colab) 生成成功！(${finalText.length}文字)`);
-          return finalText;
-        }
-        console.warn('⚠️ Colab API: 出力がバリデーションに失敗しました');
-      } else {
-        console.warn(`⚠️ Colab API エラー (${response.status})。フォールバックを試みます。`);
-      }
-    } catch (err) {
-      console.warn(`⚠️ Colab APIでの生成中にエラーが発生しました: ${err.message}。フォールバックを試みます。`);
-    }
-  } else {
-    console.log('💡 COLAB_API_URLが設定されていないため、次のフォールバックを試みます。');
+  // 1. 最優先: Gemini API (GEMINI_API_KEY) を試行
+  const geminiResult = await generateGeminiMessage(prompt);
+  if (geminiResult) {
+    const finalText = geminiResult.substring(0, 400);
+    console.log(`🤖 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
+    return finalText;
   }
 
-  // 2. フォールバック1: HuggingFace Inference API (HF_API_TOKENを使用) を試行
-  const hfToken = process.env.HF_API_TOKEN;
-  if (hfToken) {
-    try {
-      console.log('🤖 HuggingFace Inference API でコメントを生成中...');
-      const response = await fetch(
-        'https://router.huggingface.co/novita/v3/openai/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${hfToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'qwen/qwen2.5-72b-instruct',
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 400,
-            temperature: 0.85,
-          }),
-          signal: AbortSignal.timeout(20000),
-        }
-      );
-
-      if (response.ok) {
-        const json = await response.json();
-        const rawGenerated = json?.choices?.[0]?.message?.content?.trim();
-        const generated = validateAndCleanLLMOutput(rawGenerated);
-        if (generated) {
-          const finalText = generated.substring(0, 400);
-          console.log(`🤖 LLM (HuggingFace) 生成成功！(${finalText.length}文字)`);
-          return finalText;
-        }
-      } else {
-        console.warn(`⚠️ HF API エラー (${response.status})。フォールバックを試みます。`);
-      }
-    } catch (err) {
-      console.warn(`⚠️ HF APIでの生成中にエラーが発生しました: ${err.message}。フォールバックを試みます。`);
-    }
-  } else {
-    console.log('💡 HF_API_TOKENが設定されていないため、次のフォールバックを試みます。');
-  }
-
-  // 3. フォールバック2: GitHub Models API
+  // 2. フォールバック1: GitHub Models API (GITHUB_TOKEN) を試行
   const ghResult = await generateGitHubModelsMessage(prompt);
   if (ghResult) {
     const finalText = ghResult.substring(0, 400);
@@ -355,7 +321,7 @@ ${cleanTitle.substring(0, 100)}
     return finalText;
   }
 
-  // 4. フォールバック3: Pollinations AI (キー不要で安定稼働)
+  // 3. フォールバック2: Pollinations AI (キー不要で安定稼働) を試行
   const polResult = await generatePollinationsMessage(prompt);
   if (polResult) {
     const finalText = polResult.substring(0, 400);
@@ -363,7 +329,7 @@ ${cleanTitle.substring(0, 100)}
     return finalText;
   }
 
-  // 5. 最終フォールバック: テンプレートベースのメッセージ
+  // 4. 最終フォールバック: テンプレートベースのメッセージ
   console.warn('⚠️ すべてのLLM生成試行が失敗しました。テンプレートフォールバックを使用します。');
   return generateFallbackMessage(title);
 }
