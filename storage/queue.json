@@ -31,7 +31,10 @@
       "url": "https://item.rakuten.co.jp/decori/y-342/",
       "title": "＼27日〜29日限定！今だけ予約特価65％OFF／＼楽天総合ランキング1位を4度獲得！／NISHIZARC 保冷剤 ステンレス保冷剤…",
       "addedAt": "2026-05-28T15:54:37.875Z",
-      "status": "pending"
+      "status": "posted",
+      "customComment": "{\"role\":\"assistant\",\"reasoning\":\"We need to write 400 characters or less Japanese, targeted to 18-40 year old housewives and women who love cute things. It's a product: NISHIZARC 保冷剤 ステンレス保冷剤… It has features: stainless steel, reusable, holds coldness, cute design? Seller likely Japanese. We must talk intimately, friendly, include 5-8 emojis, 3-5 hashtags at end, including #楽天市場 required. \\\"レビュー多数\\\" or \\\"在庫わずか\\\" no at start? Should not mention \\\"在庫わずか\\\" but it's allowed. Actually it's ",
+      "imageUrl": "https://shop.r10s.jp/decori/cabinet/12282578/zt6.jpg",
+      "postedAt": "2026-06-17T02:03:19.290Z"
     },
     {
       "url": "https://item.rakuten.co.jp/chakasho-dina/383yimiaorisan/",
@@ -58,15 +61,21 @@
       "url": "https://item.rakuten.co.jp/sanrio/n-2605-882160/",
       "title": "シュガーバニーズ(しろうさ) マスコットホルダー（ビスケット）",
       "addedAt": "2026-05-28T17:10:58.969Z",
-      "status": "pending"
+      "status": "posted",
+      "customComment": "可愛すぎる♪シュガーバニーズのビスケットホルダーは、まるで可愛いうさぎがチョコレートを抱えているみたい！置くだけでキッチンやリビングがほんわか♡小物持ちで便利で、子どものお茶会にもぴったり。タンタムとしたふわっふわの触感が癒し効果抜群。忙しい主婦の必須アイテムだよ！質問はコメントでどうぞ☺️レビュー多数で大人気。🧸🍪✨ #楽天市場 #インテリア #可愛い雑貨 #オシャレ",
+      "imageUrl": "https://shop.r10s.jp/sanrio/cabinet/item2605_2/n-2605-882160_1.jpg",
+      "postedAt": "2026-06-17T02:05:34.199Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy/ymz21apr26h06/",
       "title": "水切りラック［ ワイドジャグボトルスタンド タワー ］山崎実業 tower 水筒 水切り 置き 立て 収納 乾燥 乾かす コップ立て 水切りかご 水切りカゴ 水",
       "addedAt": "2026-05-29T05:05:24.376Z",
-      "status": "pending",
+      "status": "posted",
       "genre": "主婦向けインテリア・便利雑貨",
-      "targetPrice": "3,000-5,000円"
+      "targetPrice": "3,000-5,000円",
+      "customComment": "{\"role\":\"assistant\",\"reasoning\":\"We need to write a 400 characters or less Japanese comment for the product, targeting 18-40 year old housewives who like cute things. Must be in natural tone, use 5-8 emojis, use 3-5 hashtags with #楽天市場 mandatory. No prohibited phrases. Must not include URLs, no brackets. Must end with statement like \\\"レビュー多数\\\" or \\\"在庫わずか\\\". No \\\"売切れ\\\". So we end with something like \\\"レビュー多数\\\" or \\\"在庫許容量\\\". Should be within 400 characters (include emojis and hashtags). ",
+      "imageUrl": "https://shop.r10s.jp/roomy/cabinet/500cart_all/500cart_11g/p5-5/ymz5505-or017-0_gt01.jpg",
+      "postedAt": "2026-06-17T02:08:00.962Z"
     },
     {
       "url": "https://item.rakuten.co.jp/roomy-garden/ymz24jul19h08/",
@@ -2253,6 +2262,9 @@
     "https://item.rakuten.co.jp/ponsshoponline/k-413/",
     "https://item.rakuten.co.jp/masam1963/pd-302/",
     "https://item.rakuten.co.jp/i-need-more-shoes/20000019/",
-    "https://item.rakuten.co.jp/sanrio/n-2605-020389/"
+    "https://item.rakuten.co.jp/sanrio/n-2605-020389/",
+    "https://item.rakuten.co.jp/decori/y-342/",
+    "https://item.rakuten.co.jp/sanrio/n-2605-882160/",
+    "https://item.rakuten.co.jp/roomy/ymz21apr26h06/"
   ]
 }
