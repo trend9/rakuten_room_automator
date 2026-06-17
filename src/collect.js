@@ -44,10 +44,84 @@ async function takeScreenshot(page, stepName) {
 }
 
 // =============================================================
-// 💡 LLM高CTA文章生成エンジン（HuggingFace Inference API経由）
-//   HF_API_TOKEN 環境変数を設定するだけで即起動。
-//   失敗時はテンプレートベースのフォールバックへ自動切替。
+// 💡 LLM高CTA文章生成エンジン
 // =============================================================
+
+/**
+ * LLM出力のバリデーション＆クリーニング
+ * 英語テキスト、reasoning、プレースホルダー、マークダウンなどを検出して除去・reject
+ */
+function validateAndCleanLLMOutput(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  let text = raw.trim();
+
+  // マークダウンのコードブロックを除去
+  text = text.replace(/```[\s\S]*?```/g, '').trim();
+  // 先頭の「コメント本文：」のようなラベル行を除去
+  text = text.replace(/^(コメント本文[：:]?\s*)/i, '').trim();
+  // 先頭・末尾の引用符やバッククォートを除去
+  text = text.replace(/^["`']+|["`']+$/g, '').trim();
+
+  // []付きプレースホルダーを除去
+  text = text.replace(/\[[^\]]*(?:リンク|こちら|レビュー|口コミ|確認|クリック)[^\]]*\]/g, '').trim();
+  // URL文字列を除去
+  text = text.replace(/https?:\/\/\S+/g, '').trim();
+  // 「さらに表示」「続きを読む」を除去
+  text = text.replace(/さらに表示|続きを読む/g, '').trim();
+  // 連続改行を整理
+  text = text.replace(/\n{3,}/g, '\n\n').trim();
+
+  // ── reject条件 ──
+  // 英語が50%以上 → LLMのreasoning漏れ
+  const ascii = text.replace(/[\s\d#@!？！♪♡✨🌟💕🥰😍🎉💖🌸🛁🍃⚠️\p{Emoji}]/gu, '');
+  const englishChars = (ascii.match(/[a-zA-Z]/g) || []).length;
+  const totalChars = ascii.length;
+  if (totalChars > 20 && englishChars / totalChars > 0.4) {
+    console.warn('⚠️ LLM出力reject: 英語テキストが多すぎます（reasoning漏れの可能性）');
+    return null;
+  }
+
+  // 明らかなreasoning/内部思考の検出
+  const reasoningPatterns = [
+    /^(We need to|Let me|I need to|I'll|I will|First,|Here's|Here is|The product|This is a)/i,
+    /^(Okay|Sure|Alright|Now|So,|Well)/i,
+    /\b(reasoning|thinking|analysis|approach|strategy|consider)\b/i,
+    /role.*assistant/i,
+    /\{"role"/,
+  ];
+  for (const pat of reasoningPatterns) {
+    if (pat.test(text)) {
+      console.warn(`⚠️ LLM出力reject: reasoning漏れを検出 (pattern: ${pat})`);
+      return null;
+    }
+  }
+
+  // 「売切れ」「在庫なし」を除去
+  text = text.replace(/売切れ|在庫なし|品切れ中/g, '').trim();
+
+  // 400文字制限
+  if (text.length > 400) {
+    // ハッシュタグの前で切る
+    const hashIdx = text.lastIndexOf('#', 400);
+    if (hashIdx > 200) {
+      text = text.substring(0, hashIdx).trim() + '\n\n' + text.substring(hashIdx).split('\n')[0];
+    }
+    text = text.substring(0, 400);
+  }
+
+  // 最低30文字なければreject
+  if (text.length < 30) {
+    console.warn('⚠️ LLM出力reject: 文字数が短すぎます');
+    return null;
+  }
+
+  // #楽天市場 が含まれていなければ追加
+  if (!text.includes('#楽天市場')) {
+    text = text.trimEnd() + '\n\n#楽天市場';
+  }
+
+  return text.substring(0, 400);
+}
 
 /** フォールバック用テンプレートベースの文章生成 */
 function generateFallbackMessage(title) {
@@ -111,9 +185,9 @@ async function generateGitHubModelsMessage(prompt) {
     if (response.ok) {
       const json = await response.json();
       const content = json?.choices?.[0]?.message?.content?.trim();
-      if (content && content.length >= 30) {
-        return content;
-      }
+      const cleaned = validateAndCleanLLMOutput(content);
+      if (cleaned) return cleaned;
+      console.warn('⚠️ GitHub Models: 出力がバリデーションに失敗しました');
     } else {
       console.warn(`⚠️ GitHub Models APIエラー: ${response.status} ${response.statusText}`);
     }
@@ -146,10 +220,9 @@ async function generatePollinationsMessage(prompt) {
 
       if (response.ok) {
         const text = await response.text();
-        const cleaned = text.trim();
-        if (cleaned && cleaned.length >= 30) {
-          return cleaned;
-        }
+        const cleaned = validateAndCleanLLMOutput(text);
+        if (cleaned) return cleaned;
+        console.warn(`⚠️ Pollinations AI (${model}): 出力がバリデーションに失敗しました`);
       } else {
         console.warn(`⚠️ Pollinations AI (${model}) エラー: ${response.status}`);
       }
@@ -255,9 +328,10 @@ ${cleanTitle.substring(0, 100)}
 
       if (response.ok) {
         const json = await response.json();
-        const generated = json?.choices?.[0]?.message?.content?.trim();
-        if (generated && generated.length >= 30) {
-          const finalText = generated.substring(0, 490);
+        const rawGenerated = json?.choices?.[0]?.message?.content?.trim();
+        const generated = validateAndCleanLLMOutput(rawGenerated);
+        if (generated) {
+          const finalText = generated.substring(0, 400);
           console.log(`🤖 LLM (HuggingFace) 生成成功！(${finalText.length}文字)`);
           return finalText;
         }
@@ -274,7 +348,7 @@ ${cleanTitle.substring(0, 100)}
   // 3. フォールバック2: GitHub Models API
   const ghResult = await generateGitHubModelsMessage(prompt);
   if (ghResult) {
-    const finalText = ghResult.substring(0, 490);
+    const finalText = ghResult.substring(0, 400);
     console.log(`🤖 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
     return finalText;
   }
@@ -282,7 +356,7 @@ ${cleanTitle.substring(0, 100)}
   // 4. フォールバック3: Pollinations AI (キー不要で安定稼働)
   const polResult = await generatePollinationsMessage(prompt);
   if (polResult) {
-    const finalText = polResult.substring(0, 490);
+    const finalText = polResult.substring(0, 400);
     console.log(`🤖 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
     return finalText;
   }
@@ -786,9 +860,31 @@ async function postOneProduct(pendingProduct, data) {
       console.log('⚠️ 投稿完了の確認が取れませんでしたが、ボタンクリックは完了しているため成功とみなします。');
     }
 
+    // ── 楽天ROOMの自分の商品ページURL（アフィリエイトリンク）を取得 ──
+    // コレ！完了後に遷移する /room/jack555/items/XXXXXX がアフィリエイトリンク
+    let roomUrl = null;
+    const postUrl = page.url();
+    if (postUrl.includes('room.rakuten.co.jp') && postUrl.includes('/items/') && !postUrl.endsWith('/items/') && !postUrl.endsWith('/items')) {
+      roomUrl = postUrl.split('?')[0];
+      console.log(`🔗 楽天ROOM商品URL（自分のアフィリエイトリンク）を取得しました: ${roomUrl}`);
+    } else {
+      // ページ内のリンクからROOM URLを探す
+      roomUrl = await page.evaluate(() => {
+        const url = window.location.href;
+        if (url.includes('room.rakuten.co.jp') && url.includes('/items/')) return url.split('?')[0];
+        return null;
+      }).catch(() => null);
+      if (roomUrl) {
+        console.log(`🔗 ページ内から楽天ROOM URLを取得しました: ${roomUrl}`);
+      } else {
+        console.warn('⚠️ 楽天ROOM URLの取得に失敗しました。SNS投稿にはROOM URLなしで送信します。');
+      }
+    }
+
     // キューと履歴を更新
     pendingProduct.status   = 'posted';
     pendingProduct.postedAt = new Date().toISOString();
+    pendingProduct.roomUrl  = roomUrl;  // ← 自分のROOM URLを保存
     // 画像がまだ保存されていない場合、ここで取得する
     if (!pendingProduct.imageUrl || pendingProduct.imageUrl.includes('unsplash')) {
       const resolvedImg = await getRakutenImage(targetUrl).catch(() => null)
@@ -867,7 +963,8 @@ async function run() {
         url: pendingProduct.url,
         title: pendingProduct.title,
         comment: pendingProduct.customComment,
-        imageUrl: pendingProduct.imageUrl
+        imageUrl: pendingProduct.imageUrl,
+        roomUrl: pendingProduct.roomUrl  // ← 自分のROOM URL
       });
     } else if (result === 'duplicate') {
       // 重複はスキップリストに追加して次の商品へ（ラウンドを消費せずループ継続）
@@ -893,11 +990,22 @@ async function run() {
     
     try {
       const resolvedImage = await resolveProductImage(targetProduct);
-      // LLMが生成したコメントから[]付きプレースホルダーやURL文字列を除去
-      const rawComment = (targetProduct.comment || '').replace(/\[.*?\]/g, '').replace(/https?:\/\/\S+/g, '').trim();
-      // 楽天ROOMの商品URLを末尾に追加（roomのURLが判明している場合のみ）
-      const roomItemUrl = targetProduct.url ? targetProduct.url : '';
-      const postText = `${rawComment}\n\n${roomItemUrl}`.trim();
+      // LLMが生成したコメントをバリデーション＆クリーニング
+      let cleanComment = validateAndCleanLLMOutput(targetProduct.comment);
+      if (!cleanComment) {
+        // バリデーション失敗時はテンプレートフォールバック
+        console.warn('⚠️ SNS用コメントのバリデーション失敗。テンプレートを使用します。');
+        cleanComment = generateFallbackMessage(targetProduct.title);
+      }
+      // ★ 重要: SNSに投稿するリンクは自分の楽天ROOM URL（アフィリエイトリンク）
+      // item.rakuten.co.jp（他人の店のURL）を絶対に使ってはいけない
+      const snsUrl = targetProduct.roomUrl || '';
+      if (!snsUrl) {
+        console.warn('⚠️ 楽天ROOM URLが取得できませんでした。リンクなしでSNS投稿します。');
+      } else {
+        console.log(`🔗 SNS投稿に使用するROOM URL: ${snsUrl}`);
+      }
+      const postText = snsUrl ? `${cleanComment}\n\n${snsUrl}`.trim() : cleanComment;
       
       console.log(`📡 Make.com Webhookへリクエストを送信中...`);
       console.log(`🖼️ 画像URL: ${resolvedImage}`);
