@@ -172,21 +172,25 @@ async function generateLLMMessage(title) {
     .trim();
 
   const prompt = `あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。
-以下の「大人可愛いインテリア・スクイーズ・おしゃれ小物雑貨」を主婦や可愛いもの好きに向けて、思わずクリックしたくなる高CTA（クリック誘発）の日本語紹介コメントを書いてください。
+以下の商品を、18〜40代の主婦・可愛いもの好き女性に向けて、思わずクリックしたくなる日本語紹介コメントを書いてください。
 
-【ルール】
-- 文字数は400文字以内（絶対に厳守、楽天ROOMの文字数制限のため）
+【厳守ルール】
+- 文字数は400文字以内（楽天ROOMの文字数制限。超えると投稿エラーになる）
 - 語尾は話し言葉で親しみやすく（「〜だよ！」「〜なんです♪」など）
 - 宣伝と分からないよう自然に書く（「PR」「広告」禁止）
-- 絵文字を効果的に使う（5〜8個程度）
-- 最後にハッシュタグを3〜5個つける（#楽天市場 は必須。その他 #インテリア #スクイーズ #かわいい雑貨 など）
-- 商品の可愛さ、お部屋に置いたときの雰囲気、癒やし効果、売り切れやすいレア感をアピールする
-- 「レビュー」「口コミ」「在庫確認はこちら」などで締める
+- 絵文字を5〜8個使う
+- ハッシュタグを3〜5個、文末に付ける（#楽天市場 は必須。商品の種類に合ったもの）
+- 商品の魅力・可愛さ・使い勝手・癒し効果などを具体的に書く
+- 「レビュー多数」「在庫わずか」など購買意欲を上げる一文で締める
+- ⚠️ 絶対禁止：「[楽天ROOM商品ページへのリンク]」「[在庫確認はこちら]」「[レビュー・口コミ]」など、[]付きのプレースホルダーや疑似リンク文字列を書かない
+- ⚠️ 絶対禁止：URLやリンク文字列を本文中に書かない（ハッシュタグは除く）
+- ⚠️ 絶対禁止：「さらに表示」「続きを読む」など余分な文字を書かない
+- ⚠️ 絶対禁止：「売切れ」「在庫なし」の表現
 
 【商品名】
 ${cleanTitle.substring(0, 100)}
 
-【コメント本文のみ出力。前置きや説明文、\`\`\` などのマークダウン装飾は一切不要】`;
+【コメント本文のみを出力。前置き・タイトル行・\`\`\`マークダウン装飾は絶対に不要】`;
 
   // 1. 最優先: Colab API (COLAB_API_URLを使用) を試行
   const colabUrl = COLAB_API_URL;
@@ -335,51 +339,62 @@ async function getRakutenImage(url) {
   return null;
 }
 
-async function getUnsplashImage(keyword) {
-  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
-  if (accessKey) {
-    try {
-      console.log(`📡 Unsplash APIから類似画像を検索中... (キーワード: ${keyword})`);
-      const url = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&client_id=${accessKey}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const imgUrl = data.urls?.regular || data.urls?.small;
-        if (imgUrl) return imgUrl;
-      }
-    } catch (err) {
-      console.warn(`⚠️ Unsplash APIエラー: ${err.message}`);
+async function scrapeRakutenProductImage(productUrl) {
+  // 楽天商品ページから直接OGP/商品画像をスクレイピングする
+  try {
+    console.log(`🖼️ 楽天商品ページから画像を直接スクレイピング中... (${productUrl})`);
+    const res = await fetch(productUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept-Language': 'ja-JP,ja;q=0.9',
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // OGPイメージを最優先で取得
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    if (ogMatch?.[1]) {
+      const imgUrl = ogMatch[1].split('?')[0];
+      console.log(`🎯 OGP画像を取得しました: ${imgUrl}`);
+      return imgUrl;
     }
+
+    // tshop.r10s.jp の商品画像URL
+    const r10Match = html.match(/https:\/\/(?:tshop|shop)\.r10s\.jp\/[^"'\s,>]+\.(?:jpg|jpeg|png|webp)/i);
+    if (r10Match?.[0]) {
+      const imgUrl = r10Match[0].split('?')[0];
+      console.log(`🎯 楽天商品画像を取得しました: ${imgUrl}`);
+      return imgUrl;
+    }
+  } catch (err) {
+    console.warn(`⚠️ 楽天ページ画像スクレイピングエラー: ${err.message}`);
   }
-  // 高品質なインテリア関連のフォールバック画像
-  const fallbacks = [
-    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1000",
-    "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000",
-    "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1000",
-    "https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1000",
-    "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=1000"
-  ];
-  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  return null;
 }
 
 async function resolveProductImage(product) {
-  if (product.imageUrl) {
+  if (product.imageUrl && !product.imageUrl.includes('unsplash')) {
     console.log(`🎯 既に取得済みの画像URLを使用します: ${product.imageUrl}`);
     return product.imageUrl;
   }
   
-  // 1. 楽天API経由
+  // 1. 楽天API経由（appIdがある場合のみ）
   const apiImage = await getRakutenImage(product.url);
   if (apiImage) {
     console.log(`🎯 楽天APIから画像を取得しました: ${apiImage}`);
     return apiImage;
   }
-  
-  // 2. Unsplash経由
-  const keyword = product.genre || product.title || "interior";
-  const unsplashImage = await getUnsplashImage(keyword);
-  console.log(`🎯 Unsplashから画像を取得しました: ${unsplashImage}`);
-  return unsplashImage;
+
+  // 2. 楽天商品ページから直接スクレイピング（APIキー不要）
+  const scraped = await scrapeRakutenProductImage(product.url);
+  if (scraped) return scraped;
+
+  // 3. 画像が一切取得できない場合はnullを返す（Unsplashは使わない）
+  console.warn(`⚠️ 商品画像の取得に失敗しました。SNSの画像はスキップします。`);
+  return null;
 }
 
 // =============================================================
@@ -826,7 +841,11 @@ async function run() {
     
     try {
       const resolvedImage = await resolveProductImage(targetProduct);
-      const postText = `${targetProduct.comment || ''}\n\nhttps://room.rakuten.co.jp/jack555/items/`;
+      // LLMが生成したコメントから[]付きプレースホルダーやURL文字列を除去
+      const rawComment = (targetProduct.comment || '').replace(/\[.*?\]/g, '').replace(/https?:\/\/\S+/g, '').trim();
+      // 楽天ROOMの商品URLを末尾に追加（roomのURLが判明している場合のみ）
+      const roomItemUrl = targetProduct.url ? targetProduct.url : '';
+      const postText = `${rawComment}\n\n${roomItemUrl}`.trim();
       
       console.log(`📡 Make.com Webhookへリクエストを送信中...`);
       console.log(`🖼️ 画像URL: ${resolvedImage}`);

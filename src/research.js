@@ -127,20 +127,50 @@ async function run() {
         
         if (title.length < 15) continue;
 
-        // 本・書籍・ゲーム・コミック等の除外フィルタ
+        // 雑貨・インテリア以外の除外フィルター（強化版）
         const lowercaseTitle = title.toLowerCase();
         const lowercaseUrl = url.toLowerCase();
         const isExcluded = 
+          // URLベースでの除外
+          lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/') ||
+          // ゲーム・婊乐・DVD・BD
+          lowercaseTitle.includes('playstation') || lowercaseTitle.includes('ps5') ||
+          lowercaseTitle.includes('ps4') || lowercaseTitle.includes('vr') ||
+          lowercaseTitle.includes('dvd') || lowercaseTitle.includes('blu-ray') ||
+          lowercaseTitle.includes('bluray') || lowercaseTitle.includes('bd！') ||
+          lowercaseTitle.includes('game') || lowercaseTitle.includes('ゲーム') ||
+          lowercaseTitle.includes('初回生産限定') || lowercaseTitle.includes('live at') ||
+          lowercaseTitle.includes('revolution’') ||
+          // 書籍・雑誌・コミック
           lowercaseTitle.includes('book') || lowercaseTitle.includes('magazine') || 
           lowercaseTitle.includes('コミック') || lowercaseTitle.includes('漫画') || 
-          lowercaseTitle.includes('ムック') || lowercaseTitle.includes('雑誌') || 
-          lowercaseTitle.includes('ゲーム') || lowercaseTitle.includes('playstation') || 
-          lowercaseTitle.includes('ps5') || lowercaseTitle.includes('vr') || 
-          lowercaseTitle.includes('dvd') || lowercaseTitle.includes('bd') ||
-          lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/');
+          lowercaseTitle.includes('ムック') || lowercaseTitle.includes('雑誌') ||
+          // 食品・飲料
+          lowercaseTitle.includes('炭酸水') || lowercaseTitle.includes('500ml') ||
+          lowercaseTitle.includes('骨取り') || lowercaseTitle.includes('魚') ||
+          lowercaseTitle.includes('鮫') || lowercaseTitle.includes('お米') ||
+          lowercaseTitle.includes('白米') || lowercaseTitle.includes('無洗米') ||
+          lowercaseTitle.includes('天然水') || lowercaseTitle.includes('ブレンド米') ||
+          // コンタクトレンズ
+          lowercaseTitle.includes('コンタクトレンズ') ||
+          lowercaseTitle.includes('ワンデーアキュビュー') ||
+          lowercaseTitle.includes('カラコン') || lowercaseTitle.includes('エバーカラー') ||
+          lowercaseTitle.includes('teamo') || lowercaseTitle.includes('1day') ||
+          // プロテイン・サプリ
+          lowercaseTitle.includes('プロテイン') || lowercaseTitle.includes('wpc ') ||
+          // おむつ・消耗品
+          lowercaseTitle.includes('おむつ') || lowercaseTitle.includes('オムツ') ||
+          lowercaseTitle.includes('パンパース') || lowercaseTitle.includes('メリーズ') ||
+          lowercaseTitle.includes('マミーポコ') ||
+          // 医薬品・シャンプー
+          lowercaseTitle.includes('医薬部外品') || lowercaseTitle.includes('シャンプー') ||
+          lowercaseTitle.includes('トリートメント') || lowercaseTitle.includes('skin smoother') ||
+          // ブラトップ・インナー
+          lowercaseTitle.includes('ブラトップ') || lowercaseTitle.includes('キャミソール') ||
+          lowercaseTitle.includes('タンクトップ');
 
         if (isExcluded) {
-          console.log(`❌ 【除外フィルタ】ターゲット外の商品を除外しました: ${title}`);
+          console.log(`❌ 【除外フィルター】ターゲット外の商品を除外しました: ${title}`);
           continue;
         }
 
@@ -232,9 +262,9 @@ async function run() {
           // 楽天市場の商品リンクを抽出
           const items = await page.evaluate(() => {
             const cards = Array.from(document.querySelectorAll([
-              'div.search-grid-item', 
-              'div.ri-search-card', 
-              'div[class*="item"]', 
+              'div.search-grid-item',
+              'div.ri-search-card',
+              'div[class*="item"]',
               'div[class*="Card"]',
               'tr.shop-item'
             ].join(',')));
@@ -243,32 +273,16 @@ async function run() {
               return cards.map(card => {
                 const links = Array.from(card.querySelectorAll('a[href*="item.rakuten.co.jp"]'));
                 if (links.length === 0) return null;
-
                 let bestLink = links[0];
                 let maxLen = 0;
                 for (const l of links) {
                   const txt = (l.innerText || '').trim();
-                  if (txt.length > maxLen) {
-                    maxLen = txt.length;
-                    bestLink = l;
-                  }
+                  if (txt.length > maxLen) { maxLen = txt.length; bestLink = l; }
                 }
-
-                const titleEl = card.querySelector([
-                  '[class*="title"]',
-                  '[class*="name"]',
-                  'h2',
-                  'h3'
-                ].join(','));
-
+                const titleEl = card.querySelector('[class*="title"],[class*="name"],h2,h3');
                 const titleText = titleEl ? (titleEl.innerText || '').trim() : '';
                 const finalTitle = titleText.length > maxLen ? titleText : (bestLink.innerText || '').trim();
-
-                return {
-                  href: bestLink.href,
-                  text: finalTitle,
-                  price: '0'
-                };
+                return { href: bestLink.href, text: finalTitle, price: '0' };
               }).filter(Boolean);
             }
 
@@ -278,24 +292,26 @@ async function run() {
               const url = a.href.split('?')[0].split('#')[0];
               const txt = (a.innerText || '').trim();
               if (txt.length >= 15) {
-                if (!urlMap.has(url) || urlMap.get(url).length < txt.length) {
-                  urlMap.set(url, txt);
-                }
+                if (!urlMap.has(url) || urlMap.get(url).length < txt.length) urlMap.set(url, txt);
               }
             }
-
-            return Array.from(urlMap.entries()).map(([href, text]) => ({
-              href,
-              text,
-              price: '0'
-            }));
+            return Array.from(urlMap.entries()).map(([href, text]) => ({ href, text, price: '0' }));
           });
 
+          // 楽天市場の商品のみ・ゴミ除外フィルター
+          const SCRAPE_EXCLUDE = ['playstation','ps5','ps4','dvd','blu-ray','ゲーム','初回生産限定',
+            'book','magazine','コミック','漫画','ムック','雑誌','炭酸水','500ml',
+            '骨取り','お米','白米','無洗米','天然水','ブレンド米','コンタクトレンズ',
+            'ワンデーアキュビュー','カラコン','エバーカラー','teamo','1day',
+            'プロテイン','おむつ','オムツ','パンパース','メリーズ','マミーポコ',
+            '医薬部外品','シャンプー','トリートメント','ブラトップ','キャミソール'];
+
           const filteredItems = items.filter(item => {
-            const href = item.href;
-            return href.includes('item.rakuten.co.jp') && 
-                   !href.includes('ranking.rakuten.co.jp') && 
-                   !href.includes('coupon.rakuten.co.jp');
+            const href = (item.href || '').toLowerCase();
+            const txt  = (item.text || '').toLowerCase();
+            if (!item.href.includes('item.rakuten.co.jp')) return false;
+            if (href.includes('/book/') || href.includes('/game/')) return false;
+            return !SCRAPE_EXCLUDE.some(kw => txt.includes(kw) || href.includes(kw));
           });
 
           if (filteredItems.length > 0) {
@@ -329,22 +345,23 @@ async function run() {
                     continue;
                   }
 
-                  // 本・書籍・ゲーム・コミック等の除外フィルタ
+                  // 強化除外フィルター（二重チェック）
                   const lowercaseTitle = title.toLowerCase();
                   const lowercaseUrl = url.toLowerCase();
-                  const isExcluded = 
-                    lowercaseTitle.includes('book') || lowercaseTitle.includes('magazine') || 
-                    lowercaseTitle.includes('コミック') || lowercaseTitle.includes('漫画') || 
-                    lowercaseTitle.includes('ムック') || lowercaseTitle.includes('雑誌') || 
-                    lowercaseTitle.includes('ゲーム') || lowercaseTitle.includes('playstation') || 
-                    lowercaseTitle.includes('ps5') || lowercaseTitle.includes('vr') || 
-                    lowercaseTitle.includes('dvd') || lowercaseTitle.includes('bd') ||
-                    lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/');
+                  const EXCLUDE2 = ['playstation','ps5','ps4','dvd','blu-ray','ゲーム','初回生産限定',
+                    'book','magazine','コミック','漫画','ムック','雑誌','炭酸水','500ml',
+                    '骨取り','お米','白米','無洗米','天然水','ブレンド米','コンタクトレンズ',
+                    'ワンデーアキュビュー','カラコン','エバーカラー','teamo','1day',
+                    'プロテイン','おむつ','オムツ','パンパース','メリーズ','マミーポコ',
+                    '医薬部外品','シャンプー','トリートメント','ブラトップ','キャミソール'];
+                  const isExcluded = lowercaseUrl.includes('/book/') || lowercaseUrl.includes('/game/') ||
+                    EXCLUDE2.some(kw => lowercaseTitle.includes(kw) || lowercaseUrl.includes(kw));
 
                   if (isExcluded) {
-                    console.log(`❌ 【除外フィルタ】ターゲット外の商品を除外しました: ${title}`);
+                    console.log(`❌ 【除外フィルター】ターゲット外の商品を除外しました: ${title}`);
                     continue;
                   }
+
 
                   console.log(`🔎 候補商品の有効性を事前検証中...: ${url}`);
                   let isValid = false;
