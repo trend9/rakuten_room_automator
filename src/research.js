@@ -29,7 +29,7 @@ const EXCLUDE_KEYWORDS = [
 
 function isExcludedProduct(title, url) {
   const t = (title || '').toLowerCase();
-  const u = (url   || '').toLowerCase();
+  const u = (url || '').toLowerCase();
   if (u.includes('/book/') || u.includes('/game/')) return true;
   return EXCLUDE_KEYWORDS.some(kw => t.includes(kw.toLowerCase()));
 }
@@ -57,14 +57,14 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'スクイーズ かわいい 低反発',       minPrice: 300,  maxPrice: 4000  },
-  { query: 'スクイーズ おもちゃ ぷにぷに 癒し', minPrice: 300,  maxPrice: 4000  },
-  { query: 'かわいい 雑貨 小物 スクイーズ',     minPrice: 500,  maxPrice: 5000  },
-  { query: 'かわいい ぬいぐるみ キーホルダー',   minPrice: 500,  maxPrice: 5000  },
-  { query: 'マスコット キャラクター かわいい',   minPrice: 500,  maxPrice: 5000  },
-  { query: '高級スイーツ インスタ映え かわいい', minPrice: 1000, maxPrice: 6000  },
-  { query: 'かわいい お菓子 ギフト スイーツ',   minPrice: 800,  maxPrice: 5000  },
-  { query: '韓国雑貨 かわいい ぷにぷに',        minPrice: 500,  maxPrice: 5000  },
+  { query: 'スクイーズ かわいい 低反発', minPrice: 1000, maxPrice: 30000 },
+  { query: 'スクイーズ おもちゃ ぷにぷに 癒し', minPrice: 1000, maxPrice: 30000 },
+  { query: 'かわいい 雑貨 小物 スクイーズ', minPrice: 1000, maxPrice: 30000 },
+  { query: 'かわいい ぬいぐるみ キーホルダー', minPrice: 1000, maxPrice: 30000 },
+  { query: 'マスコット キャラクター かわいい', minPrice: 1000, maxPrice: 30000 },
+  { query: '高級スイーツ インスタ映え かわいい', minPrice: 1000, maxPrice: 30000 },
+  { query: 'かわいい お菓子 ギフト スイーツ', minPrice: 1000, maxPrice: 30000 },
+  { query: '韓国雑貨 かわいい ぷにぷに', minPrice: 1000, maxPrice: 30000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -89,12 +89,12 @@ async function fetchFromRakutenAPI(data) {
 
     const params = new URLSearchParams({
       applicationId: appId,
-      keyword:       target.query,
-      minPrice:      target.minPrice.toString(),
-      maxPrice:      target.maxPrice.toString(),
-      hits:          '30',
-      sort:          'standard',
-      format:        'json',
+      keyword: target.query,
+      minPrice: target.minPrice.toString(),
+      maxPrice: target.maxPrice.toString(),
+      hits: '30',
+      sort: 'standard',
+      format: 'json',
     });
     if (affiliateId) params.append('affiliateId', affiliateId);
 
@@ -143,7 +143,7 @@ async function fetchFromRakutenAPI(data) {
 
         // 重複チェック
         const targetKey = extractProductKey(url);
-        const inQueue   = data.queue.some(p => {
+        const inQueue = data.queue.some(p => {
           const k = extractProductKey(p.url);
           return k && k === targetKey;
         });
@@ -159,20 +159,20 @@ async function fetchFromRakutenAPI(data) {
         // 商品画像URL取得（楽天APIから直接取得）
         const rawImageUrl =
           item.mediumImageUrls?.[0]?.imageUrl ||
-          item.smallImageUrls?.[0]?.imageUrl  ||
+          item.smallImageUrls?.[0]?.imageUrl ||
           null;
         // クエリパラメータを除去して高画質URLを取得
         const imageUrl = rawImageUrl ? rawImageUrl.split('?')[0] : null;
 
         newProducts.push({
           url,
-          title:        title.substring(0, 80),
-          addedAt:      new Date().toISOString(),
-          status:       'pending',
-          genre:        'かわいいインテリア・スクイーズ・小物雑貨',
-          targetPrice:  `〜${item.itemPrice}円`,
+          title: title.substring(0, 80),
+          addedAt: new Date().toISOString(),
+          status: 'pending',
+          genre: 'かわいいインテリア・スクイーズ・小物雑貨',
+          targetPrice: `〜${item.itemPrice}円`,
           imageUrl,           // ← 楽天APIから取得した実商品画像
-          itemCode:     item.itemCode || null,
+          itemCode: item.itemCode || null,
         });
         console.log(`  ✅ 追加: ${title.substring(0, 50)} | 画像: ${imageUrl ? '✓' : '×'}`);
       }
@@ -194,27 +194,27 @@ async function fetchByScrapingWithImages(data) {
   const targetUrls = [
     {
       name: 'かわいいスクイーズ（〜5,000円）',
-      url:  'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%AF%E3%82%A4%E3%83%BC%E3%82%BA+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84/?max=5000&f=1',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%AF%E3%82%A4%E3%83%BC%E3%82%BA+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84/?max=5000&f=1',
     },
     {
       name: 'かわいいインテリア雑貨（〜10,000円）',
-      url:  'https://search.rakuten.co.jp/search/mall/%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2/?max=10000&f=1',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2/?max=10000&f=1',
     },
     {
       name: '韓国風インテリア小物（〜10,000円）',
-      url:  'https://search.rakuten.co.jp/search/mall/%E9%9F%93%E5%9B%BD+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2+%E5%B0%8F%E7%89%A9/?max=10000&f=1',
+      url: 'https://search.rakuten.co.jp/search/mall/%E9%9F%93%E5%9B%BD+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2+%E5%B0%8F%E7%89%A9/?max=10000&f=1',
     },
     {
       name: 'かわいいマスコット・ぬいぐるみ（〜8,000円）',
-      url:  'https://search.rakuten.co.jp/search/mall/%E3%81%AC%E3%81%84%E3%81%90%E3%82%8B%E3%81%BF+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+sns/?max=8000&f=1',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%AC%E3%81%84%E3%81%90%E3%82%8B%E3%81%BF+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+sns/?max=8000&f=1',
     },
   ];
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    viewport:  { width: 1280, height: 1000 },
+    viewport: { width: 1280, height: 1000 },
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    locale:    'ja-JP',
+    locale: 'ja-JP',
   });
   await context.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
@@ -244,10 +244,10 @@ async function fetchByScrapingWithImages(data) {
         // 商品カード抽出（URL + タイトル + 画像）
         const items = await page.evaluate(() => {
           const allLinks = Array.from(document.querySelectorAll('a[href*="item.rakuten.co.jp"]'));
-          const urlMap   = new Map();
+          const urlMap = new Map();
           for (const a of allLinks) {
             const href = a.href.split('?')[0].split('#')[0];
-            const txt  = (a.innerText || '').trim();
+            const txt = (a.innerText || '').trim();
             // 最も長いテキストを採用
             if (txt.length >= 15) {
               if (!urlMap.has(href) || urlMap.get(href).text.length < txt.length) {
@@ -277,7 +277,7 @@ async function fetchByScrapingWithImages(data) {
             if (!url.endsWith('/')) url += '/';
 
             const targetKey = extractProductKey(url);
-            const inQueue   = data.queue.some(p => {
+            const inQueue = data.queue.some(p => {
               const k = extractProductKey(p.url);
               return k && k === targetKey;
             });
@@ -313,9 +313,9 @@ async function fetchByScrapingWithImages(data) {
 
                 // 在庫チェック
                 const bodyText = await valPage.innerText('body').catch(() => '');
-                const hasCart  = bodyText.includes('買い物かごに入れる') ||
-                                 bodyText.includes('カートに入れる') ||
-                                 bodyText.includes('ご購入手続き');
+                const hasCart = bodyText.includes('買い物かごに入れる') ||
+                  bodyText.includes('カートに入れる') ||
+                  bodyText.includes('ご購入手続き');
                 if (!hasCart) {
                   console.log(`  ❌ 売切れ・店舗TOPへ転送を検出: ${title.substring(0, 40)}`);
                   continue;
@@ -328,16 +328,16 @@ async function fetchByScrapingWithImages(data) {
 
             newProducts.push({
               url,
-              title:    title.substring(0, 80),
-              addedAt:  new Date().toISOString(),
-              status:   'pending',
-              genre:    'かわいいインテリア・スクイーズ・小物雑貨',
+              title: title.substring(0, 80),
+              addedAt: new Date().toISOString(),
+              status: 'pending',
+              genre: 'かわいいインテリア・スクイーズ・小物雑貨',
               imageUrl: imageUrl || null,
             });
             console.log(`  ✅ 追加: ${title.substring(0, 50)} | 画像: ${imageUrl ? '✓' : '×'}`);
           }
         } finally {
-          await valPage.close().catch(() => {});
+          await valPage.close().catch(() => { });
         }
 
         if (newProducts.length >= 5) break;
@@ -360,7 +360,7 @@ async function fetchByScrapingWithImages(data) {
 async function run() {
   console.log('🔍 トレンド商品の自動リサーチを開始します...');
 
-  const data         = loadQueue();
+  const data = loadQueue();
   const pendingCount = data.queue.filter(p => p.status === 'pending').length;
 
   if (pendingCount >= 10) {
