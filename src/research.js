@@ -57,14 +57,12 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'スクイーズ かわいい 低反発', minPrice: 1000, maxPrice: 30000 },
-  { query: 'スクイーズ おもちゃ ぷにぷに 癒し', minPrice: 1000, maxPrice: 30000 },
-  { query: 'かわいい 雑貨 小物 スクイーズ', minPrice: 1000, maxPrice: 30000 },
-  { query: 'かわいい ぬいぐるみ キーホルダー', minPrice: 1000, maxPrice: 30000 },
-  { query: 'マスコット キャラクター かわいい', minPrice: 1000, maxPrice: 30000 },
-  { query: '高級スイーツ インスタ映え かわいい', minPrice: 1000, maxPrice: 30000 },
-  { query: 'かわいい お菓子 ギフト スイーツ', minPrice: 1000, maxPrice: 30000 },
-  { query: '韓国雑貨 かわいい ぷにぷに', minPrice: 1000, maxPrice: 30000 },
+  { query: 'スクイーズ 高級', minPrice: 3000, maxPrice: 30000 },
+  { query: 'かわいい ぬいぐるみ キーホルダー', minPrice: 3000, maxPrice: 30000 },
+  { query: 'マスコット キャラクター かわいい', minPrice: 3000, maxPrice: 30000 },
+  { query: '高級スイーツ インスタ映え かわいい', minPrice: 3000, maxPrice: 30000 },
+  { query: 'かわいい お菓子 ギフト スイーツ', minPrice: 3000, maxPrice: 30000 },
+  { query: '韓国雑貨', minPrice: 3000, maxPrice: 30000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
