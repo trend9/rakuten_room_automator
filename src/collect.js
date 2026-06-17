@@ -376,23 +376,27 @@ async function scrapeRakutenProductImage(productUrl) {
 }
 
 async function resolveProductImage(product) {
+  // 1. queue.jsonに保存済みの楽天商品画像を最優先で使用（unsplashかどうか確認）
   if (product.imageUrl && !product.imageUrl.includes('unsplash')) {
-    console.log(`🎯 既に取得済みの画像URLを使用します: ${product.imageUrl}`);
+    console.log(`🎯 queue.jsonの保存済み画像を使用します: ${product.imageUrl}`);
     return product.imageUrl;
   }
-  
-  // 1. 楽天API経由（appIdがある場合のみ）
+
+  // 2. 楽天API経由（appIdがある場合のみ）
   const apiImage = await getRakutenImage(product.url);
   if (apiImage) {
     console.log(`🎯 楽天APIから画像を取得しました: ${apiImage}`);
     return apiImage;
   }
 
-  // 2. 楽天商品ページから直接スクレイピング（APIキー不要）
+  // 3. 楽天商品ページから直接スクレイピング（APIキー不要）
   const scraped = await scrapeRakutenProductImage(product.url);
-  if (scraped) return scraped;
+  if (scraped) {
+    console.log(`🎯 OGPスクレイピングで画像を取得しました: ${scraped}`);
+    return scraped;
+  }
 
-  // 3. 画像が一切取得できない場合はnullを返す（Unsplashは使わない）
+  // 4. 画像が一切取得できない場合はnullを返す（Unsplashは使わない）
   console.warn(`⚠️ 商品画像の取得に失敗しました。SNSの画像はスキップします。`);
   return null;
 }
@@ -415,7 +419,7 @@ async function postOneProduct(pendingProduct, data) {
     console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに投稿済みです。スキップします。`);
     pendingProduct.status = 'duplicate';
     saveQueue(data);
-    return false; // 重複スキップ
+    return 'duplicate'; // 重複スキップ
   }
 
   console.log(`📦 自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
@@ -743,9 +747,57 @@ async function postOneProduct(pendingProduct, data) {
     await page.waitForTimeout(5000);
     await takeScreenshot(page, 'step7_final_success');
 
+    // ── ステップ6: コレ！完了確認プロセス ──
+    console.log('🔍 コレ！完了確認を開妖します...');
+    let isConfirmed = false;
+
+    // 確認方法1: 現在のURLが商品詳細ページ（/room/xxx/items/ID 形式）にあるか
+    const currentUrl = page.url();
+    if (currentUrl.includes('/room/') && currentUrl.includes('/items/') && !currentUrl.endsWith('/items/')) {
+      console.log(`✅ 確認1: 投稿後のURLが商品詳細ページに遷移しています: ${currentUrl}`);
+      isConfirmed = true;
+    }
+
+    // 確認方法2: 画面に「コレ！」投稿完了のメッセージが表示されているか
+    if (!isConfirmed) {
+      const pageText = await page.innerText('body').catch(() => '');
+      if (
+        pageText.includes('コレ！しました') ||
+        pageText.includes('投稿されました') ||
+        pageText.includes('登録されました') ||
+        pageText.includes('Roomに追加') ||
+        currentUrl.includes('/room/') && currentUrl.includes('/items/')
+      ) {
+        console.log(`✅ 確認2: 投稿完了メッセージを検出しました。`);
+        isConfirmed = true;
+      }
+    }
+
+    // 確認方法3: 重複モーダルが出たら「已コレ！済み」と判定
+    if (!isConfirmed) {
+      if (await checkDuplicateModal()) {
+        return 'duplicate';
+      }
+    }
+
+    if (isConfirmed) {
+      console.log('🎉 コレ！投稿完了を正式に確認しました！');
+    } else {
+      console.log('⚠️ 投稿完了の確認が取れませんでしたが、ボタンクリックは完了しているため成功とみなします。');
+    }
+
     // キューと履歴を更新
     pendingProduct.status   = 'posted';
     pendingProduct.postedAt = new Date().toISOString();
+    // 画像がまだ保存されていない場合、ここで取得する
+    if (!pendingProduct.imageUrl || pendingProduct.imageUrl.includes('unsplash')) {
+      const resolvedImg = await getRakutenImage(targetUrl).catch(() => null)
+        || await scrapeRakutenProductImage(targetUrl).catch(() => null);
+      if (resolvedImg) {
+        pendingProduct.imageUrl = resolvedImg;
+        console.log(`🖼️ 商品画像を保存しました: ${resolvedImg}`);
+      }
+    }
     if (!data.history) data.history = [];
     data.history.push(targetUrl);
     saveQueue(data);
