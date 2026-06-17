@@ -288,11 +288,13 @@ ${cleanTitle.substring(0, 100)}
       if (response.ok) {
         const json = await response.json();
         const generated = json?.result?.trim();
-        if (generated && generated.length >= 30) {
-          const finalText = generated.substring(0, 490);
+        const cleaned = validateAndCleanLLMOutput(generated);
+        if (cleaned) {
+          const finalText = cleaned.substring(0, 400);
           console.log(`🤖 LLM (Colab) 生成成功！(${finalText.length}文字)`);
           return finalText;
         }
+        console.warn('⚠️ Colab API: 出力がバリデーションに失敗しました');
       } else {
         console.warn(`⚠️ Colab API エラー (${response.status})。フォールバックを試みます。`);
       }
@@ -999,13 +1001,14 @@ async function run() {
       }
       // ★ 重要: SNSに投稿するリンクは自分の楽天ROOM URL（アフィリエイトリンク）
       // item.rakuten.co.jp（他人の店のURL）を絶対に使ってはいけない
-      const snsUrl = targetProduct.roomUrl || '';
+      let snsUrl = targetProduct.roomUrl || '';
       if (!snsUrl) {
-        console.warn('⚠️ 楽天ROOM URLが取得できませんでした。リンクなしでSNS投稿します。');
+        console.warn('⚠️ 楽天ROOM URLが取得できませんでした。固定マイページURLを使用します。');
+        snsUrl = 'https://room.rakuten.co.jp/jack555/items';
       } else {
         console.log(`🔗 SNS投稿に使用するROOM URL: ${snsUrl}`);
       }
-      const postText = snsUrl ? `${cleanComment}\n\n${snsUrl}`.trim() : cleanComment;
+      const postText = `${cleanComment}\n\n${snsUrl}`.trim();
       
       console.log(`📡 Make.com Webhookへリクエストを送信中...`);
       console.log(`🖼️ 画像URL: ${resolvedImage}`);
