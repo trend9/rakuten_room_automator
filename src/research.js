@@ -98,12 +98,19 @@ async function fetchFromRakutenAPI(data) {
       format: 'json',
     });
     if (affiliateId) params.append('affiliateId', affiliateId);
-    if (accessKey) params.append('accessKey', accessKey);
+
+    const fetchHeaders = {};
+    if (accessKey) {
+      fetchHeaders['accessKey'] = accessKey;
+    }
 
     try {
       const res = await fetch(
-        `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?${params}`,
-        { signal: AbortSignal.timeout(20000) }
+        `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401?${params}`,
+        {
+          headers: fetchHeaders,
+          signal: AbortSignal.timeout(20000)
+        }
       );
 
       if (!res.ok) {
