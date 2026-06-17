@@ -60,13 +60,11 @@ const TARGET_KEYWORDS = [
   { query: 'スクイーズ かわいい 低反発',       minPrice: 300,  maxPrice: 4000  },
   { query: 'スクイーズ おもちゃ ぷにぷに 癒し', minPrice: 300,  maxPrice: 4000  },
   { query: 'かわいい 雑貨 小物 スクイーズ',     minPrice: 500,  maxPrice: 5000  },
-  { query: '韓国雑貨 かわいい インテリア',      minPrice: 800,  maxPrice: 8000  },
   { query: 'かわいい ぬいぐるみ キーホルダー',   minPrice: 500,  maxPrice: 5000  },
   { query: 'マスコット キャラクター かわいい',   minPrice: 500,  maxPrice: 5000  },
-  { query: 'かわいい 文房具 デコ ステーショナリー', minPrice: 300,  maxPrice: 3000  },
-  { query: 'かわいい ルームライト 間接照明',    minPrice: 1000, maxPrice: 8000  },
-  { query: 'かわいい スマホケース デコパーツ',   minPrice: 500,  maxPrice: 4000  },
-  { query: 'かわいい マグカップ コップ 北欧',   minPrice: 500,  maxPrice: 5000  },
+  { query: '高級スイーツ インスタ映え かわいい', minPrice: 1000, maxPrice: 6000  },
+  { query: 'かわいい お菓子 ギフト スイーツ',   minPrice: 800,  maxPrice: 5000  },
+  { query: '韓国雑貨 かわいい ぷにぷに',        minPrice: 500,  maxPrice: 5000  },
 ];
 
 async function fetchFromRakutenAPI(data) {

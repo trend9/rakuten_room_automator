@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 25
     permissions:
       contents: write
+      models: read
 
     steps:
       - name: リポジトリのチェックアウト
@@ -67,6 +68,8 @@ jobs:
         run: node src/collect.js
         env:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 💖 自動いいね・フォロー巡回
         run: node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
