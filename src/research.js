@@ -105,7 +105,12 @@ async function fetchFromRakutenAPI(data) {
       );
 
       if (!res.ok) {
-        console.warn(`  ⚠️ APIエラー: ${res.status} ${res.statusText}`);
+        try {
+          const errJson = await res.json();
+          console.warn(`  ⚠️ APIエラー: ${res.status} ${res.statusText} — ${errJson.error_description || errJson.error || JSON.stringify(errJson)}`);
+        } catch (e) {
+          console.warn(`  ⚠️ APIエラー: ${res.status} ${res.statusText}`);
+        }
         continue;
       }
 
