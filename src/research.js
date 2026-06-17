@@ -70,6 +70,7 @@ const TARGET_KEYWORDS = [
 async function fetchFromRakutenAPI(data) {
   const appId = process.env.RAKUTEN_APP_ID || process.env.RAKUTEN_APPLICATION_ID;
   const affiliateId = process.env.RAKUTEN_AFFILIATE_ID;
+  const accessKey = process.env.RAKUTEN_ACCESS_KEY;
 
   if (!appId) {
     console.warn('⚠️ RAKUTEN_APP_ID が設定されていません。楽天APIは使用できません。');
@@ -97,6 +98,7 @@ async function fetchFromRakutenAPI(data) {
       format: 'json',
     });
     if (affiliateId) params.append('affiliateId', affiliateId);
+    if (accessKey) params.append('accessKey', accessKey);
 
     try {
       const res = await fetch(

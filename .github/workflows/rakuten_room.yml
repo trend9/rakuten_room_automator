@@ -63,6 +63,7 @@ jobs:
         run: node src/research.js || echo "⚠️ リサーチでエラーが発生しましたが、続行します"
         env:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
 
       - name: 🚀 自動コレ！投稿（最大3件連続）
         run: node src/collect.js
