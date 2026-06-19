@@ -66,6 +66,12 @@ async function run() {
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
   });
 
+  // ボット防止対策
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    Object.defineProperty(navigator, 'languages', { get: () => ['ja', 'en-US', 'en'] });
+  });
+
   const page = await context.newPage();
 
   try {
@@ -96,26 +102,42 @@ async function run() {
     ]);
     
     console.log('🌐 ROOMトップページへの遷移に成功しました！');
+    await page.waitForTimeout(5000);
+
+    // デバッグ用のスクリーンショット保存先作成
+    const dir = path.resolve('storage/steps');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    // ログイン状態の確認
+    const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
+    const hasMyroomLink = await page.locator('a[href*="mypage"], a:has-text("マイルーム"), a:has-text("フィード")').count() > 0;
     
-    console.log('⏳ フィードコンテンツの読み込みを待っています...');
-    await page.waitForSelector('[class*="item"], [class*="Item"], [class*="post"], [class*="Post"], [class*="card"], [class*="Card"]', { timeout: 15000 }).catch(() => {
-      console.log('⚠️ 投稿カードの検出タイムアウト。スクロールを開始します。');
-    });
+    console.log(`👤 ログイン必要判定: ${isLoginNeeded}, マイルームリンク検知: ${hasMyroomLink}`);
+    
+    if (isLoginNeeded || !hasMyroomLink) {
+      console.warn('⚠️ 未ログイン状態、またはLPが表示されている可能性があります。マイページへの直接アクセスを試みます。');
+      await page.goto('https://room.rakuten.co.jp/room/mypage', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+      await page.waitForTimeout(3000);
+      
+      const stillLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
+      if (stillLoginNeeded) {
+        console.error('❌ セッションが無効です。手動で npm run auth を実行して再ログインしてください。');
+        await page.screenshot({ path: path.join(dir, 'error_comment_login_failed.png') }).catch(() => {});
+        process.exit(1);
+      }
+    }
 
     console.log('📜 リストを読み込むために画面をスクロール中...');
-    for (let s = 0; s < 4; s++) {
-      await page.evaluate(() => window.scrollBy(0, 1000));
+    for (let s = 0; s < 5; s++) {
+      await page.evaluate(() => window.scrollBy(0, 1500));
       await page.waitForTimeout(2500);
     }
 
-    // デバッグ用スクリーンショット
-    const dir = path.resolve('storage/steps');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     await page.screenshot({ path: path.join(dir, 'step_comment_loaded.png') }).catch(() => {});
 
-    // フィードから投稿詳細URL (/room/ユーザーID/items/アイテムID) を抽出
-    console.log('🔍 フィード内の投稿リンクを探索中...');
-    const allLinks = await page.locator('a[href*="/room/"]').evaluateAll(links => 
+    // ページ内のすべてのリンクを収集して抽出
+    console.log('🔍 ページ内のすべての商品リンクを探索中...');
+    const allLinks = await page.locator('a').evaluateAll(links => 
       links.map(a => a.getAttribute('href'))
     );
 
@@ -127,7 +149,8 @@ async function run() {
       const match = href.match(itemPattern);
       if (match) {
         const fullUrl = `https://room.rakuten.co.jp${href}`;
-        if (!itemUrls.includes(fullUrl)) {
+        // まだリストにない、かつ自分のマイページ関連以外のリンクを抽出
+        if (!itemUrls.some(item => item.url === fullUrl) && !href.includes('mypage')) {
           itemUrls.push({
             url: fullUrl,
             userId: match[1],
@@ -138,9 +161,41 @@ async function run() {
     }
 
     console.log(`📊 抽出されたアイテム候補: ${itemUrls.length} 件`);
+    
+    if (itemUrls.length === 0) {
+      console.warn('⚠️ アイテムが1件も取得できませんでした。念のため、マイページから他の人のおすすめフィード等に遷移して再試行します。');
+      await page.goto('https://room.rakuten.co.jp/v2/recommend', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+      await page.waitForTimeout(3000);
+      
+      // スクロールして再抽出
+      for (let s = 0; s < 3; s++) {
+        await page.evaluate(() => window.scrollBy(0, 1500));
+        await page.waitForTimeout(2000);
+      }
+      
+      const retryLinks = await page.locator('a').evaluateAll(links => 
+        links.map(a => a.getAttribute('href'))
+      );
+      
+      for (const href of retryLinks) {
+        if (!href) continue;
+        const match = href.match(itemPattern);
+        if (match) {
+          const fullUrl = `https://room.rakuten.co.jp${href}`;
+          if (!itemUrls.some(item => item.url === fullUrl) && !href.includes('mypage')) {
+            itemUrls.push({
+              url: fullUrl,
+              userId: match[1],
+              itemId: match[2]
+            });
+          }
+        }
+      }
+      console.log(`📊 再試行後のアイテム候補: ${itemUrls.length} 件`);
+    }
 
     let commentCount = 0;
-    const limit = config.commentLimit || 3; // 1回あたりのコメント送信上限（デフォルト3回）
+    const limit = config.commentLimit || 3; // 1回あたりのコメント送信上限
 
     for (const item of itemUrls) {
       if (commentCount >= limit) {
@@ -160,7 +215,7 @@ async function run() {
         await page.waitForTimeout(3000);
 
         // コメント入力欄の探索
-        const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea';
+        const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea, input[type="text"][placeholder*="コメント"]';
         const commentArea = page.locator(commentAreaSelector).first();
 
         if (await commentArea.count() > 0 && await commentArea.isVisible()) {
@@ -177,7 +232,7 @@ async function run() {
           await page.waitForTimeout(1500);
 
           // 送信ボタンの探索とクリック
-          const sendButton = page.locator('button:has-text("送信"), button:has-text("投稿"), [class*="submit" i], [class*="send" i]').first();
+          const sendButton = page.locator('button:has-text("送信"), button:has-text("投稿"), button:has-text("コメント"), [class*="submit" i], [class*="send" i]').first();
           if (await sendButton.count() > 0 && await sendButton.isVisible()) {
             await sendButton.click();
             console.log('🚀 送信ボタンをクリックしました。完了を待っています...');
