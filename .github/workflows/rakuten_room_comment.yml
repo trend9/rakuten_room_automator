@@ -1,9 +1,9 @@
-name: 楽天ROOM 完全自動アフィリエイトシステム
+name: 楽天ROOM コメント自動送信システム
 
 on:
   schedule:
-    # 毎30分に自動実行（1日48回・混雑回避のため15分/45分に調整）
-    - cron: '15,45 * * * *'
+    # 毎時5分に自動実行（1日24回・いいね用と時間が被らないように設定）
+    - cron: '5 * * * *'
 
   workflow_dispatch: # 手動実行用トリガー
 
@@ -72,16 +72,22 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 💖 自動いいね・フォロー巡回
-        run: node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
+      - name: 💬 自動コメント送信巡回
+        run: node src/comment.js || echo "⚠️ コメント巡回でエラーが発生しましたが、続行します"
 
-      - name: 💾 投稿履歴とキューリストの自動コミット・保存
+      - name: 💾 コメント履歴とキューリストの自動コミット・保存
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add storage/queue.json
+          
+          # comment_state.json が存在しない場合は初期ファイルを作成してコミット対象にする
+          if [ ! -f storage/comment_state.json ]; then
+            echo '{"lastCommentType": 0, "sentUsers": []}' > storage/comment_state.json
+          fi
+          
+          git add storage/queue.json storage/comment_state.json
           git diff --cached --quiet || {
-            git commit -m "💾 投稿履歴とキューを自動更新 [skip ci]"
+            git commit -m "💾 コメント履歴とキューを自動更新 [skip ci]"
             git push
           }
           echo "✅ 履歴保存処理完了"
