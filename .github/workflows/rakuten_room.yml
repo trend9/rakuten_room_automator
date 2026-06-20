@@ -72,20 +72,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 💖 自動いいね巡回 または 💬 自動コメント送信巡回（時間別出し分け）
+      - name: 💖 自動いいね巡回
+        run: node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
+
+      - name: 💬 自動コメント送信巡回
         run: |
-          CURRENT_MIN=$(date +%M)
-          echo "🕒 現在の実行時間（分）: $CURRENT_MIN"
-          if [ "$CURRENT_MIN" -lt 30 ]; then
-            echo "👉 毎時15分の実行タイミングのため、自動いいね巡回を実行します。"
-            node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
-          else
-            echo "👉 毎時45分の実行タイミングのため、自動コメント送信を実行します。"
-            if [ ! -f storage/comment_state.json ]; then
-              echo '{"lastCommentType": 0, "sentUsers": []}' > storage/comment_state.json
-            fi
-            node src/comment.js || echo "⚠️ コメント巡回でエラーが発生しましたが、続行します"
+          if [ ! -f storage/comment_state.json ]; then
+            echo '{"lastCommentType": 0, "sentUsers": []}' > storage/comment_state.json
           fi
+          node src/comment.js || echo "⚠️ コメント巡回でエラーが発生しましたが、続行します"
 
       - name: 💾 投稿履歴とキューリストの自動コミット・保存
         run: |

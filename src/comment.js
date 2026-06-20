@@ -86,23 +86,34 @@ async function run() {
     const searchUrl = 'https://room.rakuten.co.jp/';
     console.log(`🔗 楽天市場のページ内にROOMトップへの偽装リンクを動的生成してクリック遷移します:\n👉 ${searchUrl}`);
     
-    await page.evaluate((url) => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.id = 'dummy-room-comment-link';
-      a.style.display = 'block';
-      a.style.position = 'fixed';
-      a.style.top = '10px';
-      a.style.left = '10px';
-      a.style.zIndex = '99999';
-      a.innerText = 'Go to ROOM';
-      document.body.appendChild(a);
-    }, searchUrl);
+    let fallbackNeeded = false;
+    try {
+      await page.evaluate((url) => {
+        if (!document.body) throw new Error('No body element');
+        const a = document.createElement('a');
+        a.href = url;
+        a.id = 'dummy-room-comment-link';
+        a.style.display = 'block';
+        a.style.position = 'fixed';
+        a.style.top = '10px';
+        a.style.left = '10px';
+        a.style.zIndex = '99999';
+        a.innerText = 'Go to ROOM';
+        document.body.appendChild(a);
+      }, searchUrl);
 
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {}),
-      page.locator('#dummy-room-comment-link').click({ force: true })
-    ]);
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {}),
+        page.locator('#dummy-room-comment-link').click({ force: true })
+      ]);
+    } catch (e) {
+      console.warn('⚠️ 偽装リンクでの遷移に失敗したため、直接遷移します:', e.message);
+      fallbackNeeded = true;
+    }
+
+    if (fallbackNeeded) {
+      await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
+    }
     
     console.log('🌐 ROOMトップページへの遷移に成功しました！');
     await page.waitForTimeout(3000);
@@ -113,118 +124,243 @@ async function run() {
       console.warn('⚠️ 未ログイン状態、またはセッション切れの可能性があります。処理は続行します。');
     }
 
-    // ── おすすめフィードへ直接遷移してターゲット候補を抽出 ──
-    const feedUrl = 'https://room.rakuten.co.jp/v2/recommend';
-    console.log(`🌐 おすすめフィードにアクセスします: ${feedUrl}`);
-    await page.goto(feedUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-    await page.waitForTimeout(6000); // ページの表示安定を待つ
-
-    console.log('📜 おすすめフィードをスクロールして投稿を読み込み中...');
-    for (let s = 0; s < 5; s++) {
-      await page.evaluate(() => window.scrollBy(0, 1500));
-      await page.waitForTimeout(2500);
+    // ── 「見つける」タブ -> 「商品」サブフィルタへの遷移 ──
+    console.log('🌐 「見つける」タブをクリックしてDiscover画面へ遷移します...');
+    const discoverTab = page.locator('li.discover a, a:has-text("見つける")').first();
+    if (await discoverTab.count() > 0) {
+      await discoverTab.click();
+      await page.waitForTimeout(5000);
+    } else {
+      console.warn('⚠️ 「見つける」タブが見つかりません。直接 discover URL への遷移を試みます。');
+      await page.goto('https://room.rakuten.co.jp/discover/items', { waitUntil: 'domcontentloaded', timeout: 45000 });
+      await page.waitForTimeout(6000);
     }
 
-    await page.screenshot({ path: path.join(dir, 'step_comment_recommend_loaded.png') }).catch(() => {});
-
-    // ページ全体のAタグリンクから商品詳細リンク (/room/ユーザーID/items/アイテムID) を抽出
-    console.log('🔍 ページ内の商品詳細リンクを探索中...');
-    const allLinks = await page.locator('a').evaluateAll(links => 
-      links.map(a => a.getAttribute('href'))
-    );
-
-    const itemUrls = [];
-    const itemPattern = /\/room\/([^\/]+)\/items\/([^\/]+)/;
-    for (const href of allLinks) {
-      if (!href) continue;
-      const match = href.match(itemPattern);
-      if (match) {
-        const fullUrl = `https://room.rakuten.co.jp${href}`;
-        // 重複がなく、マイページ関連以外のリンクを抽出
-        if (!itemUrls.some(item => item.url === fullUrl) && !href.includes('mypage')) {
-          itemUrls.push({
-            url: fullUrl,
-            userId: match[1],
-            itemId: match[2]
-          });
-        }
-      }
+    // 「商品」フィルタをクリック（表示されている場合のみ）
+    const itemFilterLink = page.locator('.collectCoordinateItemFilter a, .collectItemFilter a').first();
+    if (await itemFilterLink.count() > 0 && await itemFilterLink.isVisible()) {
+      console.log('🌐 「商品」サブフィルタをクリックします...');
+      await itemFilterLink.click();
+      await page.waitForTimeout(5000);
     }
-
-    console.log(`📊 抽出されたアイテム候補: ${itemUrls.length} 件`);
 
     let commentCount = 0;
     const limit = config.commentLimit || 3; // 1回あたりのコメント送信上限
+    let processedIndex = 0;
+    let scrollAttempts = 0;
+    const maxScrollAttempts = 15;
 
-    for (const item of itemUrls) {
-      if (commentCount >= limit) {
-        console.log(`🎯 今回のコメント送信上限（${limit}回）に達したため、処理を終了します。`);
-        break;
+    // 詳細ページでのコメント送信ロジックを関数化
+    async function handleCommentSubmission(targetPage, onSuccess, activeComments, activeState, screenshotDir) {
+      const currentUrl = targetPage.url();
+      console.log(`🌐 詳細ページURL: ${currentUrl}`);
+      
+      const urlMatch = currentUrl.match(/https:\/\/room\.rakuten\.co\.jp\/([a-zA-Z0-9_-]+)\/([0-9]+)/);
+      const activeUser = urlMatch ? urlMatch[1] : '';
+
+      if (!activeUser) {
+        console.warn('⚠️ 詳細ページのURLからアカウント名を抽出できませんでした。');
+        return false;
       }
 
-      // 重複ユーザーチェック
-      if (commentState.sentUsers.includes(item.userId)) {
-        console.log(`⏭️ ユーザー ${item.userId} はすでに送信済みのためスキップします。`);
-        continue;
-      }
-
-      console.log(`\n💬 [${commentCount + 1}/${limit}] 詳細ページへ移動します: ${item.url}`);
       try {
-        await page.goto(item.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForTimeout(4000);
+        console.log('📜 詳細ページの初期表示を待ちます...');
+        await targetPage.waitForTimeout(3000);
 
-        // コメント入力欄の探索
-        const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea, input[type="text"][placeholder*="コメント"]';
-        const commentArea = page.locator(commentAreaSelector).first();
+        await targetPage.screenshot({ path: path.join(screenshotDir, 'step_detail_page.png') }).catch(() => {});
+
+        const commentBtn = targetPage.locator('text=コメント(').first();
+        if (await commentBtn.count() > 0) {
+          console.log('👉 「コメント」ボタンをクリックします。');
+          await commentBtn.scrollIntoViewIfNeeded();
+          await targetPage.waitForTimeout(1000);
+          await commentBtn.click({ force: true });
+          await targetPage.waitForTimeout(4000);
+          await targetPage.screenshot({ path: path.join(screenshotDir, 'step_comment_clicked.png') }).catch(() => {});
+        } else {
+          console.warn('⚠️ 「コメント(X件)」ボタンが見つかりませんでした。');
+          return false;
+        }
+
+        const commentAreaSelector = 'textarea[placeholder*="コメントを書いてください"], textarea[placeholder*="コメント"], textarea, input[type="text"][placeholder*="コメント"]';
+        console.log('⏳ コメント入力欄の出現を待機しています...');
+        await targetPage.waitForSelector(commentAreaSelector, { timeout: 15000 }).catch(() => {});
+        const commentArea = targetPage.locator(commentAreaSelector).first();
 
         if (await commentArea.count() > 0 && await commentArea.isVisible()) {
           await commentArea.scrollIntoViewIfNeeded();
-          await page.waitForTimeout(1500);
+          await targetPage.waitForTimeout(1500);
 
-          // コメントを交互に決定
-          const commentIndex = commentState.lastCommentType;
-          const targetComment = comments[commentIndex];
+          const commentIndex = activeState.lastCommentType;
+          const targetComment = activeComments[commentIndex];
 
           console.log(`✍️ コメントを入力中: 「${targetComment}」`);
           await commentArea.focus();
           await commentArea.fill(targetComment);
+          await targetPage.waitForTimeout(2000);
+
+          const sendButton = targetPage.locator('[class*="popup" i] button:has-text("送信"), [class*="modal" i] button:has-text("送信"), button:has-text("送信")').first();
+          
+          if (await sendButton.count() > 0) {
+            console.log('🚀 送信ボタンをクリックします...');
+            await sendButton.click({ force: true });
+          } else {
+            console.log('🚀 送信ボタンが見つからないため、Enterキーで送信します...');
+            await commentArea.press('Enter');
+          }
+          await targetPage.waitForTimeout(4000);
+
+          const afterValue = await commentArea.inputValue().catch(() => '');
+          if (afterValue.trim() === '') {
+            console.log(`✅ コメント送信成功を確認しました！ (ユーザー: ${activeUser})`);
+            onSuccess(activeUser);
+            return true;
+          } else {
+            console.warn('⚠️ 送信ボタンを押しましたが、コメント欄がクリアされていません。');
+          }
+        } else {
+          console.log('⏭️ コメント入力欄が見つかりません。');
+        }
+      } catch (err) {
+        console.error(`⚠️ コメント送信処理中にエラーが発生しました:`, err.message);
+      }
+      return false;
+    }
+
+    while (commentCount < limit && scrollAttempts < maxScrollAttempts) {
+      console.log(`\n📊 送信状況: ${commentCount}/${limit} (走査開始インデックス: ${processedIndex})`);
+      
+      const cards = page.locator('.discoverItems li');
+      const totalItems = await cards.count();
+      console.log(`📊 画面上に商品カードが ${totalItems} 件読み込まれています。`);
+
+      if (totalItems === 0) {
+        console.log('📜 商品カードがありません。スクロールして読み込みを待ちます。');
+        await page.evaluate(() => window.scrollBy(0, 1000));
+        await page.waitForTimeout(3000);
+        scrollAttempts++;
+        continue;
+      }
+
+      if (processedIndex >= totalItems) {
+        console.log('📜 全ての表示済みカードを走査しました。さらにスクロールして追加読み込みします。');
+        await page.evaluate(() => window.scrollBy(0, 1500));
+        await page.waitForTimeout(4000);
+        scrollAttempts++;
+        
+        const newTotal = await cards.count();
+        if (newTotal === totalItems) {
+          console.log('⏭️ スクロールしても新しい商品が読み込まれないため、終了します。');
+          break;
+        }
+        continue;
+      }
+
+      let foundAndProcessed = false;
+
+      for (let i = processedIndex; i < totalItems; i++) {
+        processedIndex = i + 1;
+        const card = cards.nth(i);
+
+        if (!(await card.isVisible())) continue;
+
+        console.log(`\n🔍 [検証中] ${i + 1}/${totalItems} 個目のカードをチェックします。`);
+        await card.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(1000);
+
+        let username = await page.evaluate((el) => {
+          try {
+            const ngEl = window.angular && window.angular.element(el);
+            if (ngEl) {
+              const scope = ngEl.scope();
+              if (scope && scope.item && scope.item.userName) {
+                return scope.item.userName;
+              }
+            }
+          } catch (e) {}
+          
+          const userLinkEl = el.querySelector('a[href*="/items"]');
+          if (userLinkEl) {
+            const href = userLinkEl.getAttribute('href') || '';
+            const match = href.match(/\/([a-zA-Z0-9_-]+)\/items/);
+            if (match) return match[1];
+          }
+          return '';
+        }, await card.elementHandle());
+
+        if (!username) {
+          const userLink = card.locator('a[href*="/items"]').first();
+          if (await userLink.count() > 0) {
+            const href = await userLink.getAttribute('href') || '';
+            const match = href.match(/\/([a-zA-Z0-9_-]+)\/items/);
+            if (match) username = match[1];
+          }
+        }
+
+        if (!username) {
+          console.warn('⚠️ アカウント名を取得できませんでした。スキップします。');
+          continue;
+        }
+
+        console.log(`👤 投稿者アカウント: ${username}`);
+
+        if (commentState.sentUsers.includes(username)) {
+          console.log(`⏭️ アカウント ${username} はすでに送信済みのためスキップします。`);
+          continue;
+        }
+
+        console.log(`🎯 未送信ターゲット確定。プレビューを開きます。`);
+        const imgLink = card.locator('img[ng-click*="gotoItem"], img, a').first();
+        if (await imgLink.count() > 0) {
+          await imgLink.click({ force: true });
+          
+          await page.waitForSelector('.item-preview', { timeout: 8000 }).catch(() => {});
           await page.waitForTimeout(2000);
-
-          // 送信ボタンの探索とクリック
-          const sendButton = page.locator('button:has-text("送信"), button:has-text("投稿"), button:has-text("コメント"), [class*="submit" i], [class*="send" i]').first();
-          if (await sendButton.count() > 0 && await sendButton.isVisible()) {
-            await sendButton.click();
-            console.log('🚀 送信ボタンをクリックしました。完了を待っています...');
+          
+          const seeMoreBtn = page.locator('.see-more, .status-box').first();
+          
+          if (await seeMoreBtn.count() > 0) {
+            console.log('👉 「さらに見る」をクリックして詳細ページへ遷移します。');
+            await Promise.all([
+              page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+              seeMoreBtn.click({ force: true })
+            ]);
             await page.waitForTimeout(4000);
-
-            // 送信完了チェック（テキストボックスが空になったか確認）
-            const afterValue = await commentArea.inputValue().catch(() => '');
-            if (afterValue.trim() === '') {
-              console.log('✅ コメント送信成功を確認しました！');
-              
-              // 状態の更新
-              commentCount++;
+            
+            const success = await handleCommentSubmission(page, (activeUser) => {
               commentState.lastCommentType = (commentState.lastCommentType === 0) ? 1 : 0;
-              commentState.sentUsers.push(item.userId);
-              
-              // 記録件数が多すぎる場合は古いものを削除 (直近150件をキープ)
+              commentState.sentUsers.push(activeUser);
               if (commentState.sentUsers.length > 150) {
                 commentState.sentUsers.shift();
               }
-              
               saveCommentState(commentState);
-              await randomSleep(5000, 10000); // 送信後は長めに安全待機
-            } else {
-              console.warn('⚠️ 送信ボタンを押しましたが、コメント入力欄が空になっていません。失敗した可能性があります。');
+            }, comments, commentState, dir);
+
+            if (success) {
+              commentCount++;
             }
+            
+            console.log('🌐 商品一覧画面へ戻ります。');
+            await page.goBack({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(async () => {
+              await page.goto('https://room.rakuten.co.jp/discover/items', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            });
+            await page.waitForTimeout(5000);
+            
+            foundAndProcessed = true;
+            break; 
           } else {
-            console.warn('⚠️ 送信ボタンが見つかりませんでした。');
+            console.warn('⚠️ モーダル内の「さらに見る」が見つかりませんでした。モーダルを閉じます。');
+            const closeBtn = page.locator('.close-button, [ng-click*="closePreview"]').first();
+            if (await closeBtn.count() > 0) await closeBtn.click();
+            await page.waitForTimeout(1500);
           }
         } else {
-          console.log('⏭️ コメント入力欄が見つからないか表示されていません。スキップします。');
+          console.warn('⚠️ 画像リンクが見つかりませんでした。');
         }
-      } catch (err) {
-        console.error(`⚠️ 処理中にエラーが発生したためスキップします:`, err.message);
+      }
+      
+      if (!foundAndProcessed) {
+        await page.waitForTimeout(2000);
       }
     }
 
