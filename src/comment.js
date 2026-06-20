@@ -209,6 +209,7 @@ async function run() {
             await commentArea.press('Enter');
           }
           await targetPage.waitForTimeout(4000);
+          await targetPage.screenshot({ path: path.join(screenshotDir, 'step_comment_sent_result.png') }).catch(() => {});
 
           const afterValue = await commentArea.inputValue().catch(() => '');
           if (afterValue.trim() === '') {
@@ -322,7 +323,7 @@ async function run() {
           if (await seeMoreBtn.count() > 0) {
             console.log('👉 「さらに見る」をクリックして詳細ページへ遷移します。');
             await Promise.all([
-              page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+              page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {}),
               seeMoreBtn.click({ force: true })
             ]);
             await page.waitForTimeout(4000);
