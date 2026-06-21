@@ -520,8 +520,11 @@ async function postOneProduct(pendingProduct, data) {
     if (loaded) {
       const roomLinkEl = page.locator('a[href*="room.rakuten.co.jp"]').first();
       if (await roomLinkEl.count() > 0) {
-        warpUrl = await roomLinkEl.getAttribute('href');
-        console.log(`🎯 楽天市場の商品ページから公式ROOM投稿URLを抽出しました: ${warpUrl}`);
+        const href = await roomLinkEl.getAttribute('href') || '';
+        if (href.includes('/mix') || href.includes('/recommend') || href.includes('itemcode=')) {
+          warpUrl = href;
+          console.log(`🎯 楽天市場の商品ページから公式ROOM投稿URLを抽出しました: ${warpUrl}`);
+        }
       }
     }
 
@@ -642,7 +645,7 @@ async function postOneProduct(pendingProduct, data) {
     await takeScreenshot(page, 'step3_name_checked');
 
     // ── ステップ4: コメント入力欄が表示されるまでリトライ付きで待機 ──
-    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea[placeholder*="オススメポイント"], textarea';
+    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea[placeholder*="オススメポイント"], textarea[placeholder*="魅力"], textarea[placeholder*="紹介"], textarea';
     let commentArea = null;
     console.log('⏳ コメント入力欄が表示されるのを待機しています...');
     
@@ -720,7 +723,7 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // 通常の投稿ボタンクリックを試みる
-    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"], a:has-text("完了")').first();
+    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"], button[type="submit"], a:has-text("完了"), a:has-text("投稿"), a:has-text("コレ！")').first();
     let posted = false;
 
     if (await submitBtn.count() > 0 && await submitBtn.isVisible() && await submitBtn.isEnabled()) {

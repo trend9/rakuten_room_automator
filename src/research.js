@@ -57,12 +57,12 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'スクイーズ 高級', minPrice: 3000, maxPrice: 30000 },
-  { query: 'かわいい ぬいぐるみ キーホルダー', minPrice: 3000, maxPrice: 30000 },
-  { query: 'マスコット キャラクター かわいい', minPrice: 3000, maxPrice: 30000 },
-  { query: '高級スイーツ インスタ映え かわいい', minPrice: 3000, maxPrice: 30000 },
-  { query: 'かわいい お菓子 ギフト スイーツ', minPrice: 3000, maxPrice: 30000 },
-  { query: '韓国雑貨', minPrice: 3000, maxPrice: 30000 },
+  { query: 'スクイーズ', minPrice: 5000, maxPrice: 50000 },
+  { query: '高級スイーツ', minPrice: 5000, maxPrice: 50000 },
+  { query: 'かわいい お菓子', minPrice: 5000, maxPrice: 50000 },
+  { query: '韓国雑貨', minPrice: 5000, maxPrice: 50000 },
+  { query: 'インテリア雑貨', minPrice: 5000, maxPrice: 50000 },
+  { query: 'SNSで話題のスイーツ', minPrice: 5000, maxPrice: 50000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -104,7 +104,7 @@ async function fetchFromRakutenAPI(data) {
 
     try {
       const res = await fetch(
-        `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260401?${params}`,
+        `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?${params}`,
         {
           headers: fetchHeaders,
           signal: AbortSignal.timeout(20000)
@@ -306,8 +306,8 @@ async function fetchByScrapingWithImages(data) {
             let imageUrl = item.imgUrl || null;
             if (!imageUrl) {
               try {
-                await valPage.goto(url, { waitUntil: 'commit', timeout: 12000 });
-                await valPage.waitForTimeout(3000);
+                await valPage.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await valPage.waitForTimeout(4000);
 
                 // OGP画像取得
                 imageUrl = await valPage.evaluate(() => {
@@ -318,11 +318,26 @@ async function fetchByScrapingWithImages(data) {
                   return null;
                 }).catch(() => null);
 
-                // 在庫チェック
+                // 在庫チェック (テキスト + 特定のボタン要素の有無)
                 const bodyText = await valPage.innerText('body').catch(() => '');
+                const cartButtonCount = await valPage.locator('button, input, a').evaluateAll(elements => {
+                  return elements.filter(el => {
+                    const text = (el.innerText || el.value || '').trim();
+                    return text.includes('買い物かごに入れる') ||
+                      text.includes('カートに入れる') ||
+                      text.includes('ご購入手続き') ||
+                      text.includes('寄付を申し込む') ||
+                      text.includes('かごに追加') ||
+                      text.includes('カートに追加');
+                  }).length;
+                }).catch(() => 0);
+
                 const hasCart = bodyText.includes('買い物かごに入れる') ||
                   bodyText.includes('カートに入れる') ||
-                  bodyText.includes('ご購入手続き');
+                  bodyText.includes('ご購入手続き') ||
+                  bodyText.includes('寄付を申し込む') ||
+                  cartButtonCount > 0;
+
                 if (!hasCart) {
                   console.log(`  ❌ 売切れ・店舗TOPへ転送を検出: ${title.substring(0, 40)}`);
                   continue;

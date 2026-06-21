@@ -182,7 +182,7 @@ async function run() {
           return false;
         }
 
-        const commentAreaSelector = 'textarea[placeholder*="コメントを書いてください"], textarea[placeholder*="コメント"], textarea, input[type="text"][placeholder*="コメント"]';
+        const commentAreaSelector = 'textarea[placeholder*="コメントを書いてください"], textarea[placeholder*="コメント"], textarea[placeholder*="メッセージ"], textarea[placeholder*="返信"], textarea, input[type="text"][placeholder*="コメント"]';
         console.log('⏳ コメント入力欄の出現を待機しています...');
         await targetPage.waitForSelector(commentAreaSelector, { timeout: 15000 }).catch(() => {});
         const commentArea = targetPage.locator(commentAreaSelector).first();
@@ -199,7 +199,7 @@ async function run() {
           await commentArea.fill(targetComment);
           await targetPage.waitForTimeout(2000);
 
-          const sendButton = targetPage.locator('[class*="popup" i] button:has-text("送信"), [class*="modal" i] button:has-text("送信"), button:has-text("送信")').first();
+          const sendButton = targetPage.locator('[class*="popup" i] button:has-text("送信"), [class*="modal" i] button:has-text("送信"), button:has-text("送信"), button[class*="send" i], button[class*="submit" i], button[type="submit"], [class*="send-icon" i], [class*="submit-icon" i]').first();
           
           if (await sendButton.count() > 0) {
             console.log('🚀 送信ボタンをクリックします...');
