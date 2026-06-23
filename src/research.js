@@ -25,6 +25,8 @@ const EXCLUDE_KEYWORDS = [
   'プロテイン', 'おむつ', 'オムツ', 'パンパース', 'メリーズ', 'マミーポコ',
   '医薬部外品', 'シャンプー', 'トリートメント', 'ブラトップ', 'キャミソール',
   'タンクトップ', '哺乳瓶', 'ミルク 粉', '離乳食',
+  'スクイーズ', 'ぬいぐるみ', 'マスコット', 'キャラクター', 'おもちゃ', '玩具', 'フィギュア',
+  'キーホルダー', 'ストラップ', '缶バッジ', 'アクリルスタンド', 'アクスタ'
 ];
 
 function isExcludedProduct(title, url) {
@@ -57,12 +59,11 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'スクイーズ', minPrice: 5000, maxPrice: 50000 },
-  { query: '高級スイーツ', minPrice: 5000, maxPrice: 50000 },
-  { query: 'かわいい お菓子', minPrice: 5000, maxPrice: 50000 },
-  { query: '韓国雑貨', minPrice: 5000, maxPrice: 50000 },
-  { query: 'インテリア雑貨', minPrice: 5000, maxPrice: 50000 },
-  { query: 'SNSで話題のスイーツ', minPrice: 5000, maxPrice: 50000 },
+  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 30000 },
+  { query: '実用的 キッチン用品', minPrice: 3000, maxPrice: 30000 },
+  { query: '便利 キッチンツール', minPrice: 3000, maxPrice: 30000 },
+  { query: 'インテリア雑貨', minPrice: 3000, maxPrice: 30000 },
+  { query: 'おしゃれ 食器', minPrice: 3000, maxPrice: 30000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -176,7 +177,7 @@ async function fetchFromRakutenAPI(data) {
           title: title.substring(0, 80),
           addedAt: new Date().toISOString(),
           status: 'pending',
-          genre: 'かわいいインテリア・スクイーズ・小物雑貨',
+          genre: '実用インテリア・キッチン・おしゃれスイーツ',
           targetPrice: `〜${item.itemPrice}円`,
           imageUrl,           // ← 楽天APIから取得した実商品画像
           itemCode: item.itemCode || null,
@@ -200,20 +201,16 @@ async function fetchByScrapingWithImages(data) {
 
   const targetUrls = [
     {
-      name: 'かわいいスクイーズ（〜5,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%AF%E3%82%A4%E3%83%BC%E3%82%BA+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84/?max=5000&f=1',
+      name: '実用的なキッチン用品（〜10,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%AD%E3%83%83%E3%83%81%E3%83%B3%E7%94%A8%E5%93%81+%E5%AE%9F%E7%94%A8%E7%9A%84/?max=10000&f=1',
     },
     {
-      name: 'かわいいインテリア雑貨（〜10,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2/?max=10000&f=1',
+      name: 'おしゃれなインテリア雑貨（〜15,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2%E9%9B%91%E8%B2%A8+%E3%81%8A%E3%81%97%E3%82%83%E3%82%8C/?max=15000&f=1',
     },
     {
-      name: '韓国風インテリア小物（〜10,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E9%9F%93%E5%9B%BD+%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2+%E5%B0%8F%E7%89%A9/?max=10000&f=1',
-    },
-    {
-      name: 'かわいいマスコット・ぬいぐるみ（〜8,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%AC%E3%81%84%E3%81%90%E3%82%8B%E3%81%BF+%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84+sns/?max=8000&f=1',
+      name: 'お取り寄せスイーツ（〜10,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E5%8F%96%E3%82%8A%E5%AF%84%E3%81%9B%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?max=10000&f=1',
     },
   ];
 
@@ -353,7 +350,7 @@ async function fetchByScrapingWithImages(data) {
               title: title.substring(0, 80),
               addedAt: new Date().toISOString(),
               status: 'pending',
-              genre: 'かわいいインテリア・スクイーズ・小物雑貨',
+              genre: '実用インテリア・キッチン・おしゃれスイーツ',
               imageUrl: imageUrl || null,
             });
             console.log(`  ✅ 追加: ${title.substring(0, 50)} | 画像: ${imageUrl ? '✓' : '×'}`);
