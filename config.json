@@ -7,6 +7,7 @@
     "食器"
   ],
   "engagementLimit": 15,
+  "commentLimit": 18,
   "minDelayMs": 3000,
   "maxDelayMs": 8000,
   "postsPerDay": 4
