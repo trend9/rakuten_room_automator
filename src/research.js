@@ -25,7 +25,7 @@ const EXCLUDE_KEYWORDS = [
   'プロテイン', 'おむつ', 'オムツ', 'パンパース', 'メリーズ', 'マミーポコ',
   '医薬部外品', 'シャンプー', 'トリートメント', 'ブラトップ', 'キャミソール',
   'タンクトップ', '哺乳瓶', 'ミルク 粉', '離乳食',
-  'スクイーズ', 'ぬいぐるみ', 'マスコット', 'キャラクター', 'おもちゃ', '玩具', 'フィギュア',
+  'ぬいぐるみ', 'マスコット', 'キャラクター', 'おもちゃ', '玩具', 'フィギュア',
   'キーホルダー', 'ストラップ', '缶バッジ', 'アクリルスタンド', 'アクスタ'
 ];
 
@@ -59,11 +59,13 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
-  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 30000 },
-  { query: '実用的 キッチン用品', minPrice: 3000, maxPrice: 30000 },
-  { query: '便利 キッチンツール', minPrice: 3000, maxPrice: 30000 },
+  { query: 'スイーツ', minPrice: 3000, maxPrice: 30000 },
+  { query: 'ピアス', minPrice: 3000, maxPrice: 30000 },
+  { query: '加湿器', minPrice: 3000, maxPrice: 30000 },
   { query: 'インテリア雑貨', minPrice: 3000, maxPrice: 30000 },
-  { query: 'おしゃれ 食器', minPrice: 3000, maxPrice: 30000 },
+  { query: 'ふるさと納税', minPrice: 3000, maxPrice: 30000 },
+  { query: '美容', minPrice: 3000, maxPrice: 30000 },
+  { query: '美容家電', minPrice: 3000, maxPrice: 30000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
