@@ -562,8 +562,10 @@ async function postOneProduct(pendingProduct, data) {
     console.log('⏳ エディタ読み込み後の初期待機中 (3秒)...');
     await page.waitForTimeout(3000);
 
-    // ログインチェック
-    const isLoginNeeded = await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
+    // ログインチェック（投稿エディタからトップ等の他URLへリダイレクトされていないかも含めて判定）
+    const checkUrl = page.url();
+    const isWarpRedirected = !checkUrl.includes('/mix') && !checkUrl.includes('/recommend') && !checkUrl.includes('/items/create');
+    const isLoginNeeded = isWarpRedirected || await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
     if (isLoginNeeded) {
       throw new Error('セッション切れ。再度 npm run auth を実行してください。');
     }
