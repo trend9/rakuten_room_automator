@@ -60,8 +60,8 @@ function saveQueue(data) {
 // ターゲットキーワード一覧
 const TARGET_KEYWORDS = [
   { query: 'スイーツ', minPrice: 3000, maxPrice: 30000 },
-  { query: 'ピアス', minPrice: 3000, maxPrice: 30000 },
-  { query: '加湿器', minPrice: 3000, maxPrice: 30000 },
+  { query: 'お菓子', minPrice: 3000, maxPrice: 30000 },
+  { query: 'キッチン用品', minPrice: 3000, maxPrice: 30000 },
   { query: 'インテリア雑貨', minPrice: 3000, maxPrice: 30000 },
   { query: 'ふるさと納税', minPrice: 3000, maxPrice: 30000 },
   { query: '美容', minPrice: 3000, maxPrice: 30000 },
