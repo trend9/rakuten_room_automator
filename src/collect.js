@@ -234,6 +234,52 @@ async function generateGeminiMessage(prompt) {
   return null;
 }
 
+/** OpenRouter Free API による生成 (OPENROUTER_API_KEY または完全無料公開キー対応) */
+async function generateOpenRouterMessage(prompt) {
+  const apiKey = process.env.OPENROUTER_API_KEY || "sk-or-v1-free-anonymous";
+  const models = [
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemma-2-9b-it:free",
+    "deepseek/deepseek-r1:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+    "mistralai/mistral-7b-instruct:free"
+  ];
+
+  for (const model of models) {
+    try {
+      console.log(`🤖 OpenRouter Free API (model: ${model}) でコメントを生成中...`);
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://github.com/rakuten-room-automator",
+          "X-Title": "Rakuten Room Automator"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず買いたくなる魅力を上品でワクワクする日本語のみで執筆してください。" },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        const content = json?.choices?.[0]?.message?.content?.trim();
+        const cleaned = validateAndCleanLLMOutput(content);
+        if (cleaned) return cleaned;
+      }
+    } catch (err) {
+      console.warn(`⚠️ OpenRouter API (${model}) エラー: ${err.message}`);
+    }
+  }
+  return null;
+}
+
 /** Groq API による生成 (GROQ_API_KEYを使用、超高速＆完全無料枠大) */
 async function generateGroqMessage(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
@@ -274,84 +320,34 @@ async function generateGroqMessage(prompt) {
   return null;
 }
 
-/** DuckDuckGo AI Chat による完全無料・キー不要LLM生成 (gpt-4o-mini / claude / llama) */
-async function generateDuckDuckGoMessage(prompt) {
-  const models = ["gpt-4o-mini", "claude-3-haiku", "llama-3.3-70b", "mixtral-8x7b"];
-  for (const model of models) {
-    try {
-      console.log(`🤖 キー不要の DuckDuckGo AI Chat (model: ${model}) でコメントを生成中...`);
-      
-      // 1. VFD Token取得
-      const initRes = await fetch("https://duckduckgo.com/duckchat/v1/status", {
-        headers: {
-          "x-vfd-request": "1",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/124.0.0.0 Safari/537.36"
-        },
-        signal: AbortSignal.timeout(10000)
-      });
-      const vfdToken = initRes.headers.get("x-vfd-response");
-
-      // 2. チャットリクエスト
-      const response = await fetch("https://duckduckgo.com/duckchat/v1/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-vfd-response": vfdToken || "",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/124.0.0.0 Safari/537.36"
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: "user", content: "あなたは楽天ROOMのインフルエンサーです。\n" + prompt }
-          ]
-        }),
-        signal: AbortSignal.timeout(20000)
-      });
-
-      if (response.ok) {
-        const text = await response.text();
-        // SSEストリーミングレスポンスからテキスト抽出
-        const lines = text.split('\n');
-        let fullText = '';
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.replace('data: ', '').trim();
-            if (dataStr === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(dataStr);
-              if (parsed.message) fullText += parsed.message;
-            } catch (e) {}
-          }
-        }
-        const cleaned = validateAndCleanLLMOutput(fullText);
-        if (cleaned) return cleaned;
-      }
-    } catch (err) {
-      console.warn(`⚠️ DuckDuckGo AI (${model}) エラー: ${err.message}`);
-    }
-  }
-  return null;
-}
-
-/** Pollinations AI による生成 (キー不要) */
+/** Pollinations AI によるPOST直接通信 */
 async function generatePollinationsMessage(prompt) {
   const models = ["openai", "mistral", "qwen", "llama"];
   for (const model of models) {
     try {
       console.log(`🤖 キー不要の Pollinations AI (model: ${model}) でコメントを生成中...`);
-      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&json=true`, {
-        method: "GET",
+      const response = await fetch("https://text.pollinations.ai/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "あなたは楽天ROOMのインフルエンサーです。商品の魅力を親しみやすい日本語のみで書いてください。" },
+            { role: "user", content: prompt }
+          ],
+          model: model
+        }),
         signal: AbortSignal.timeout(25000)
       }).catch(() => null);
 
       if (response && response.ok) {
-        const json = await response.json().catch(() => null);
-        const text = json?.content || (typeof json === 'string' ? json : null);
+        const text = await response.text().catch(() => null);
         const cleaned = validateAndCleanLLMOutput(text);
         if (cleaned) return cleaned;
       }
     } catch (err) {
-      console.warn(`⚠️ Pollinations AI (${model}) 呼び出し中にエラーが発生しました: ${err.message}`);
+      console.warn(`⚠️ Pollinations AI (${model}) エラー: ${err.message}`);
     }
   }
   return null;
@@ -440,7 +436,19 @@ ${cleanTitle.substring(0, 100)}
     console.warn(`⚠️ Gemini API 処理エラー: ${e.message}`);
   }
 
-  // 2. Groq API
+  // 2. OpenRouter Free API (Llama 3.3 70B / Gemma 2 9B / DeepSeek R1)
+  try {
+    const openRouterResult = await generateOpenRouterMessage(prompt);
+    if (openRouterResult) {
+      const finalText = openRouterResult.substring(0, 400);
+      console.log(`🎉 LLM (OpenRouter Free API) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ OpenRouter Free API 処理エラー: ${e.message}`);
+  }
+
+  // 3. Groq API
   try {
     const groqResult = await generateGroqMessage(prompt);
     if (groqResult) {
