@@ -234,9 +234,11 @@ async function generateGeminiMessage(prompt) {
   return null;
 }
 
-/** OpenRouter Free API による生成 (OPENROUTER_API_KEY または完全無料公開キー対応) */
+/** OpenRouter Free API による生成 (OPENROUTER_API_KEY が必要) */
 async function generateOpenRouterMessage(prompt) {
-  const apiKey = process.env.OPENROUTER_API_KEY || "sk-or-v1-free-anonymous";
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null; // キーなしでは動作しないためスキップ
+
   const models = [
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-2-9b-it:free",
@@ -247,7 +249,7 @@ async function generateOpenRouterMessage(prompt) {
 
   for (const model of models) {
     try {
-      console.log(`🤖 OpenRouter Free API (model: ${model}) でコメントを生成中...`);
+      console.log(`🤖 OPENROUTER_API_KEY検出。OpenRouter Free API (model: ${model}) でコメントを生成中...`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -271,10 +273,124 @@ async function generateOpenRouterMessage(prompt) {
         const json = await response.json();
         const content = json?.choices?.[0]?.message?.content?.trim();
         const cleaned = validateAndCleanLLMOutput(content);
-        if (cleaned) return cleaned;
+        if (cleaned) {
+          console.log(`✅ OpenRouter (${model}) 成功`);
+          return cleaned;
+        }
+      } else {
+        const errBody = await response.text().catch(() => '');
+        console.warn(`⚠️ OpenRouter API (${model}) エラー: ${response.status} ${errBody.substring(0, 100)}`);
       }
     } catch (err) {
       console.warn(`⚠️ OpenRouter API (${model}) エラー: ${err.message}`);
+    }
+  }
+  return null;
+}
+
+/** DuckDuckGo AI Chat による生成（キー不要・完全無料） */
+async function generateDuckDuckGoMessage(prompt) {
+  // DuckDuckGo AI Chat公式API（キー不要）
+  const models = ['gpt-4o-mini', 'claude-3-haiku-20240307', 'meta-llama/Llama-3-70b-chat-hf', 'mistralai/Mixtral-8x7B-Instruct-v0.1'];
+  for (const model of models) {
+    try {
+      console.log(`🤖 DuckDuckGo AI Chat (${model}) でコメントを生成中...`);
+      // まずvqdトークンを取得
+      const statusRes = await fetch('https://duckduckgo.com/duckchat/v1/status', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+          'x-vqd-accept': '1'
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      const vqd = statusRes.headers.get('x-vqd-4');
+      if (!vqd) { console.warn('⚠️ DuckDuckGo: vqdトークン取得失敗'); continue; }
+
+      const chatRes = await fetch('https://duckduckgo.com/duckchat/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+          'x-vqd-4': vqd,
+          'Accept': 'text/event-stream'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: 'user', content: prompt }]
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (!chatRes.ok) { console.warn(`⚠️ DuckDuckGo (${model}): ${chatRes.status}`); continue; }
+
+      const text = await chatRes.text();
+      // SSEストリームからメッセージを組み立て
+      let fullMsg = '';
+      for (const line of text.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') break;
+        try {
+          const obj = JSON.parse(data);
+          fullMsg += obj?.message || '';
+        } catch {}
+      }
+      const cleaned = validateAndCleanLLMOutput(fullMsg);
+      if (cleaned) {
+        console.log(`✅ DuckDuckGo AI (${model}) 成功`);
+        return cleaned;
+      }
+    } catch (err) {
+      console.warn(`⚠️ DuckDuckGo AI (${model}) エラー: ${err.message}`);
+    }
+  }
+  return null;
+}
+
+/** Hugging Face Inference API による生成（無料・HF_TOKENが有れば高速） */
+async function generateHuggingFaceMessage(prompt) {
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_TOKEN;
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  // キー無しでもレート制限付きで動作するモデルを使用
+  const models = [
+    'mistralai/Mistral-7B-Instruct-v0.3',
+    'HuggingFaceH4/zephyr-7b-beta',
+    'meta-llama/Llama-3.2-3B-Instruct',
+  ];
+  const label = token ? 'HF_TOKEN検出' : 'キー不要';
+  for (const model of models) {
+    try {
+      console.log(`🤖 ${label}。Hugging Face Inference (${model}) でコメントを生成中...`);
+      const res = await fetch(`https://api-inference.huggingface.co/models/${model}/v1/chat/completions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: 'あなたは楽天ROOMのインフルエンサーです。商品の魅力を上品でワクワクする日本語のみで書いてください。' },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const content = json?.choices?.[0]?.message?.content?.trim();
+        const cleaned = validateAndCleanLLMOutput(content);
+        if (cleaned) {
+          console.log(`✅ Hugging Face (${model}) 成功`);
+          return cleaned;
+        }
+      } else if (res.status === 503) {
+        console.warn(`⚠️ Hugging Face (${model}): モデルロード中 (503)、スキップ`);
+      } else {
+        console.warn(`⚠️ Hugging Face (${model}): ${res.status}`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ Hugging Face (${model}) エラー: ${err.message}`);
     }
   }
   return null;
@@ -320,31 +436,35 @@ async function generateGroqMessage(prompt) {
   return null;
 }
 
-/** Pollinations AI によるPOST直接通信 */
+/** Pollinations AI によるPOST直接通信（エラー出力を強化） */
 async function generatePollinationsMessage(prompt) {
-  const models = ["openai", "mistral", "qwen", "llama"];
+  const models = ["openai", "qwen-coder", "llama"];
   for (const model of models) {
     try {
       console.log(`🤖 キー不要の Pollinations AI (model: ${model}) でコメントを生成中...`);
       const response = await fetch("https://text.pollinations.ai/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
             { role: "system", content: "あなたは楽天ROOMのインフルエンサーです。商品の魅力を親しみやすい日本語のみで書いてください。" },
             { role: "user", content: prompt }
           ],
-          model: model
+          model: model,
+          private: true
         }),
-        signal: AbortSignal.timeout(25000)
+        signal: AbortSignal.timeout(30000)
       }).catch(() => null);
 
       if (response && response.ok) {
         const text = await response.text().catch(() => null);
         const cleaned = validateAndCleanLLMOutput(text);
-        if (cleaned) return cleaned;
+        if (cleaned) {
+          console.log(`✅ Pollinations AI (${model}) 成功`);
+          return cleaned;
+        }
+      } else if (response) {
+        console.warn(`⚠️ Pollinations AI (${model}) エラー: ${response.status}`);
       }
     } catch (err) {
       console.warn(`⚠️ Pollinations AI (${model}) エラー: ${err.message}`);
@@ -424,73 +544,92 @@ ${cleanTitle.substring(0, 100)}
 
 【コメント本文のみを出力。前置き・タイトル行・\`\`\`マークダウン装飾は絶対に不要】`;
 
-  // 1. Gemini API
-  try {
-    const geminiResult = await generateGeminiMessage(prompt);
-    if (geminiResult) {
-      const finalText = geminiResult.substring(0, 400);
-      console.log(`🎉 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
-      return finalText;
-    }
-  } catch (e) {
-    console.warn(`⚠️ Gemini API 処理エラー: ${e.message}`);
-  }
-
-  // 2. OpenRouter Free API (Llama 3.3 70B / Gemma 2 9B / DeepSeek R1)
-  try {
-    const openRouterResult = await generateOpenRouterMessage(prompt);
-    if (openRouterResult) {
-      const finalText = openRouterResult.substring(0, 400);
-      console.log(`🎉 LLM (OpenRouter Free API) 生成成功！(${finalText.length}文字)`);
-      return finalText;
-    }
-  } catch (e) {
-    console.warn(`⚠️ OpenRouter Free API 処理エラー: ${e.message}`);
-  }
-
-  // 3. Groq API
+  // ─────────────────────────────────────────────
+  // 1. Groq API（完全無料・超高速・30req/min制限）
+  // ─────────────────────────────────────────────
   try {
     const groqResult = await generateGroqMessage(prompt);
     if (groqResult) {
-      const finalText = groqResult.substring(0, 400);
-      console.log(`🎉 LLM (Groq API) 生成成功！(${finalText.length}文字)`);
-      return finalText;
+      console.log(`🎉 LLM (Groq API) 生成成功！(${groqResult.length}文字)`);
+      return groqResult.substring(0, 400);
     }
   } catch (e) {
     console.warn(`⚠️ Groq API 処理エラー: ${e.message}`);
   }
 
-  // 3. GitHub Models API
+  // ─────────────────────────────────────────────
+  // 2. OpenRouter Free API（OPENROUTER_API_KEY要）
+  // ─────────────────────────────────────────────
+  try {
+    const openRouterResult = await generateOpenRouterMessage(prompt);
+    if (openRouterResult) {
+      console.log(`🎉 LLM (OpenRouter Free API) 生成成功！(${openRouterResult.length}文字)`);
+      return openRouterResult.substring(0, 400);
+    }
+  } catch (e) {
+    console.warn(`⚠️ OpenRouter Free API 処理エラー: ${e.message}`);
+  }
+
+  // ─────────────────────────────────────────────
+  // 3. Gemini API（429頻発のため後回し）
+  // ─────────────────────────────────────────────
+  try {
+    const geminiResult = await generateGeminiMessage(prompt);
+    if (geminiResult) {
+      console.log(`🎉 LLM (Gemini API) 生成成功！(${geminiResult.length}文字)`);
+      return geminiResult.substring(0, 400);
+    }
+  } catch (e) {
+    console.warn(`⚠️ Gemini API 処理エラー: ${e.message}`);
+  }
+
+  // ─────────────────────────────────────────────
+  // 4. GitHub Models API（GITHUB_TOKEN要）
+  // ─────────────────────────────────────────────
   try {
     const ghResult = await generateGitHubModelsMessage(prompt);
     if (ghResult) {
-      const finalText = ghResult.substring(0, 400);
-      console.log(`🎉 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
-      return finalText;
+      console.log(`🎉 LLM (GitHub Models) 生成成功！(${ghResult.length}文字)`);
+      return ghResult.substring(0, 400);
     }
   } catch (e) {
     console.warn(`⚠️ GitHub Models 処理エラー: ${e.message}`);
   }
 
-  // 4. DuckDuckGo AI Chat
+  // ─────────────────────────────────────────────
+  // 5. DuckDuckGo AI Chat（キー不要・SSEストリーム）
+  // ─────────────────────────────────────────────
   try {
     const ddgResult = await generateDuckDuckGoMessage(prompt);
     if (ddgResult) {
-      const finalText = ddgResult.substring(0, 400);
-      console.log(`🎉 LLM (DuckDuckGo AI - GPT-4o-mini/Claude) 生成成功！(${finalText.length}文字)`);
-      return finalText;
+      console.log(`🎉 LLM (DuckDuckGo AI) 生成成功！(${ddgResult.length}文字)`);
+      return ddgResult.substring(0, 400);
     }
   } catch (e) {
     console.warn(`⚠️ DuckDuckGo AI 処理エラー: ${e.message}`);
   }
 
-  // 5. Pollinations AI
+  // ─────────────────────────────────────────────
+  // 6. Hugging Face Inference API（キー不要でも動作）
+  // ─────────────────────────────────────────────
+  try {
+    const hfResult = await generateHuggingFaceMessage(prompt);
+    if (hfResult) {
+      console.log(`🎉 LLM (Hugging Face) 生成成功！(${hfResult.length}文字)`);
+      return hfResult.substring(0, 400);
+    }
+  } catch (e) {
+    console.warn(`⚠️ Hugging Face 処理エラー: ${e.message}`);
+  }
+
+  // ─────────────────────────────────────────────
+  // 7. Pollinations AI（キー不要・最終手段）
+  // ─────────────────────────────────────────────
   try {
     const polResult = await generatePollinationsMessage(prompt);
     if (polResult) {
-      const finalText = polResult.substring(0, 400);
-      console.log(`🎉 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
-      return finalText;
+      console.log(`🎉 LLM (Pollinations AI) 生成成功！(${polResult.length}文字)`);
+      return polResult.substring(0, 400);
     }
   } catch (e) {
     console.warn(`⚠️ Pollinations AI 処理エラー: ${e.message}`);

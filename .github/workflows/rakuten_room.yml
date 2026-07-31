@@ -65,12 +65,15 @@ jobs:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
 
-      - name: 🚀 自動コレ！投稿（最大3件連続）
+      - name: 🚀 自動コレ！投稿（最大5件連続）
         run: node src/collect.js
         env:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: 💖 自動いいね巡回
         run: node src/engage.js || echo "⚠️ いいね巡回でエラーが発生しましたが、続行します"
