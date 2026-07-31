@@ -186,8 +186,8 @@ async function generateGeminiMessage(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  // 利用可能なモデル一覧
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
+  // 利用可能なモデル一覧（404エラーを防止し最新モデルを最優先）
+  const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-8b"];
 
   for (const model of models) {
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -357,9 +357,48 @@ async function generatePollinationsMessage(prompt) {
   return null;
 }
 
+/** GitHub Models API による生成 (GITHUB_TOKENを使用) */
+async function generateGitHubModelsMessage(prompt) {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (!token) return null;
+
+  try {
+    console.log('🤖 GITHUB_TOKEN検出。GitHub Models API (gpt-4o-mini) でコメントを生成中...');
+    const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず買いたくなる魅力を上品でワクワクする日本語のみで執筆してください。" },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7
+      }),
+      signal: AbortSignal.timeout(20000)
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const content = json?.choices?.[0]?.message?.content?.trim();
+      const cleaned = validateAndCleanLLMOutput(content);
+      if (cleaned) return cleaned;
+      console.warn('⚠️ GitHub Models: 出力がバリデーションに失敗しました');
+    } else {
+      console.warn(`⚠️ GitHub Models APIエラー: ${response.status} ${response.statusText}`);
+    }
+  } catch (err) {
+    console.warn(`⚠️ GitHub Models API呼び出し中にエラーが発生しました: ${err.message}`);
+  }
+  return null;
+}
+
 /**
  * 多層LLMプロバイダ自動フォールバックチェーン
- * (Gemini ➔ Groq ➔ GitHub Models ➔ DuckDuckGo ➔ Pollinations)
+ * 1つが失敗・未定義・例外を起こしても絶対に全体クラッシュさせず、確実に最後までバトンを繋ぐ
  */
 async function generateLLMMessage(title) {
   const cleanTitle = title
@@ -390,47 +429,67 @@ ${cleanTitle.substring(0, 100)}
 【コメント本文のみを出力。前置き・タイトル行・\`\`\`マークダウン装飾は絶対に不要】`;
 
   // 1. Gemini API
-  const geminiResult = await generateGeminiMessage(prompt);
-  if (geminiResult) {
-    const finalText = geminiResult.substring(0, 400);
-    console.log(`🎉 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
-    return finalText;
+  try {
+    const geminiResult = await generateGeminiMessage(prompt);
+    if (geminiResult) {
+      const finalText = geminiResult.substring(0, 400);
+      console.log(`🎉 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ Gemini API 処理エラー: ${e.message}`);
   }
 
-  // 2. Groq API (GROQ_API_KEYが設定されている場合)
-  const groqResult = await generateGroqMessage(prompt);
-  if (groqResult) {
-    const finalText = groqResult.substring(0, 400);
-    console.log(`🎉 LLM (Groq API) 生成成功！(${finalText.length}文字)`);
-    return finalText;
+  // 2. Groq API
+  try {
+    const groqResult = await generateGroqMessage(prompt);
+    if (groqResult) {
+      const finalText = groqResult.substring(0, 400);
+      console.log(`🎉 LLM (Groq API) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ Groq API 処理エラー: ${e.message}`);
   }
 
-  // 3. GitHub Models API (GITHUB_TOKENが設定されている場合)
-  const ghResult = await generateGitHubModelsMessage(prompt);
-  if (ghResult) {
-    const finalText = ghResult.substring(0, 400);
-    console.log(`🎉 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
-    return finalText;
+  // 3. GitHub Models API
+  try {
+    const ghResult = await generateGitHubModelsMessage(prompt);
+    if (ghResult) {
+      const finalText = ghResult.substring(0, 400);
+      console.log(`🎉 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ GitHub Models 処理エラー: ${e.message}`);
   }
 
-  // 4. DuckDuckGo AI Chat (キー不要・無料)
-  const ddgResult = await generateDuckDuckGoMessage(prompt);
-  if (ddgResult) {
-    const finalText = ddgResult.substring(0, 400);
-    console.log(`🎉 LLM (DuckDuckGo AI - GPT-4o-mini/Claude) 生成成功！(${finalText.length}文字)`);
-    return finalText;
+  // 4. DuckDuckGo AI Chat
+  try {
+    const ddgResult = await generateDuckDuckGoMessage(prompt);
+    if (ddgResult) {
+      const finalText = ddgResult.substring(0, 400);
+      console.log(`🎉 LLM (DuckDuckGo AI - GPT-4o-mini/Claude) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ DuckDuckGo AI 処理エラー: ${e.message}`);
   }
 
-  // 5. Pollinations AI (キー不要・GET API)
-  const polResult = await generatePollinationsMessage(prompt);
-  if (polResult) {
-    const finalText = polResult.substring(0, 400);
-    console.log(`🎉 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
-    return finalText;
+  // 5. Pollinations AI
+  try {
+    const polResult = await generatePollinationsMessage(prompt);
+    if (polResult) {
+      const finalText = polResult.substring(0, 400);
+      console.log(`🎉 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
+      return finalText;
+    }
+  } catch (e) {
+    console.warn(`⚠️ Pollinations AI 処理エラー: ${e.message}`);
   }
 
   // 6. 最終防衛線: カテゴリ別スマートフォールバック
-  console.warn('⚠️ 無料LLM通信が一時的に全遮断されたため、安全なカテゴリ別スマート文章を使用します。');
+  console.warn('⚠️ すべてのLLM生成が一時的に使用不能のため、安全なカテゴリ別スマート文章を使用します。');
   return generateFallbackMessage(title);
 }
 
