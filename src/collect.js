@@ -123,7 +123,7 @@ function validateAndCleanLLMOutput(raw) {
   return text.substring(0, 400);
 }
 
-/** フォールバック用テンプレートベースの文章生成 */
+/** フォールバック用スマート文章生成（タイトルからジャンルを自動判別し、適切な高品質文を作成） */
 function generateFallbackMessage(title) {
   const cleanTitle = title
     .replace(/【[^】]+】/g, '')
@@ -131,140 +131,224 @@ function generateFallbackMessage(title) {
     .replace(/\s+/g, ' ')
     .trim();
 
-  const intros = [
-    'SNSで見かけてひと目惚れしちゃった、本当にかわいくてお気に入りなアイテム✨',
-    'お家にあるだけで気分が上がる！デザインがとってもキュートで癒される名品です🎀',
-    '大人気でずっと気になってたアイテムをついに発見！実物もやっぱりめちゃくちゃかわいい🌟',
-    '置いておくだけで空間がパッと華やかになる！可愛くて大満足なお買い物でした😆',
-    '持っているだけで幸せな気持ちになれる！自分へのご褒美やギフトにもぴったりな素敵グッズ✨',
-  ];
+  const lower = cleanTitle.toLowerCase();
+  
+  let intros = [];
+  let tagSets = [];
+
+  if (lower.includes('スイーツ') || lower.includes('ケーキ') || lower.includes('チョコ') || lower.includes('和菓子') || lower.includes('洋菓子') || lower.includes('ギフト') || lower.includes('お菓子') || lower.includes('ゼリー') || lower.includes('ティラミス')) {
+    intros = [
+      'SNSで話題のお取り寄せ絶品スイーツを発見！一口食べるだけで至福のご褒美タイムになっちゃいますカフェ気分をおうちで味わえる贅沢な逸品✨',
+      '見た目も華やかでギフトや手土産に大人気！食べるのがもったいないくらい素敵なおすすめスイーツですお茶うけやプレゼントにもぴったり♪',
+      '自分へのご褒美に絶対食べたい贅沢スイーツ✨濃厚な味わいと上品な甘さがたまらなくて、一度食べたら病みつきになります！',
+    ];
+    tagSets = [
+      '#楽天市場 #お取り寄せスイーツ #ご褒美スイーツ #ギフトにおすすめ #スイーツ部',
+      '#楽天市場 #自分へのご褒美 #絶品スイーツ #洋菓子 #おうちカフェ',
+    ];
+  } else if (lower.includes('美顔器') || lower.includes('ドライヤー') || lower.includes('かっさ') || lower.includes('脱毛') || lower.includes('アイロン') || lower.includes('美容') || lower.includes('シェーバー') || lower.includes('マッサージ')) {
+    intros = [
+      'おうちで本格サロン級ケアができる大注目美容家電✨毎日のセルフケアが楽しみになる、手放せない本命アイテムです！',
+      'SNSや美容雑誌で話題沸騰中！使うたびに気分が上がって、日々のエイジングケア・美髪ケアに本気でおすすめしたい逸品です💇‍♀️',
+      '忙しい毎日でも手軽にキレイを目指せる高機能美容アイテム✨自分への投資や大切な方へのプレゼントにも大人気です！',
+    ];
+    tagSets = [
+      '#楽天市場 #美容家電 #セルフケア #自分へのご褒美 #美容好きと繋がりたい',
+      '#楽天市場 #おうちサロン #美髪ケア #エイジングケア #人気家電',
+    ];
+  } else { // 家電・便利グッズ・汎用
+    intros = [
+      '毎日の暮らしがもっと快適＆便利になる大人気アイテム✨使い勝手バツグンで、生活の質がグッと上がるおすすめ家電・名品です！',
+      'SNSでも高評価続出！デザインも機能性も兼ね備えた、買って大正解な便利アイテムです時短にもなって本当に大助かり😊',
+      'おうち時間を最高に快適にしてくれる便利グッズ✨一度使ったら手放せなくなる、満足度バツグンの注目の商品です！',
+    ];
+    tagSets = [
+      '#楽天市場 #便利家電 #暮らしを整える #買ってよかった #便利グッズ',
+      '#楽天市場 #おうち時間 #買ってよかったもの #おすすめ家電 #生活を豊かに',
+    ];
+  }
+
   const ctaList = [
-    '\n\n⚠️ 大人気のため売り切れ続出中。リアルタイムな在庫状況や限定クーポンは今すぐ楽天市場公式ページで確認してね👇',
-    '\n\n🎁 最新の割引クーポンやお得なポイントアップ情報は楽天市場公式ページで公開中！損する前にチェックして👇✨',
-    '\n\n💬 愛用者のリアルなクチコミや現在の価格は楽天市場公式ページで今すぐ確認できます！👇🔗',
-  ];
-  const tagSets = [
-    '#楽天市場 #かわいい雑貨 #お気に入り #お買い物マラソン #買ってよかった',
-    '#楽天市場 #おすすめギフト #暮らしを楽しむ #癒しグッズ #プチプラ雑貨',
-    '#楽天市場 #おしゃれ雑貨 #かわいい #自分へのご褒美 #リピ買い',
+    '\n\n⚠️ 大人気のため売り切れ注意。リアルタイムな在庫状況やお得な限定クーポンは今すぐ楽天市場公式ページで確認してね👇',
+    '\n\n🎁 最新の割引クーポンやお得なポイント還元情報は楽天市場公式ページで公開中！損する前にチェックして👇✨',
+    '\n\n💬 実際の愛用者レビューや最新価格は楽天市場公式ページで今すぐチェックできます！👇🔗',
   ];
 
   const intro = intros[Math.floor(Math.random() * intros.length)];
   const cta   = ctaList[Math.floor(Math.random() * ctaList.length)];
   const tags  = tagSets[Math.floor(Math.random() * tagSets.length)];
 
-  return `${intro}\n\n${cleanTitle.substring(0, 70)}...${cta}\n\n${tags}`.substring(0, 490);
+  return `${intro}\n\n${cleanTitle.substring(0, 65)}...${cta}\n\n${tags}`.substring(0, 395);
 }
 
-/** Gemini API による生成 (GEMINI_API_KEYを使用) */
+/** Gemini API による生成 (複数モデル自動フォールバック & レート制限429リトライ機能付き) */
 async function generateGeminiMessage(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  try {
-    console.log('🤖 GEMINI_API_KEY検出。Gemini API (gemini-2.0-flash) でコメントを生成中...');
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず食べたくなる絶品スイーツや、暮らしを劇的に変える便利家電、憧れの美容家電の魅力を、上品でワクワクする日本語のみで執筆してください。売り切れ間近の限定感や最新人気ポイントをアピールしてください。\n\n" + prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 500
-        }
-      }),
-      signal: AbortSignal.timeout(20000)
-    });
+  // 利用可能なモデル一覧
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
-    if (response.ok) {
-      const json = await response.json();
-      const content = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-      const cleaned = validateAndCleanLLMOutput(content);
-      if (cleaned) return cleaned;
-      console.warn('⚠️ Gemini API: 出力がバリデーションに失敗しました');
-    } else {
-      console.warn(`⚠️ Gemini APIエラー: ${response.status}`);
+  for (const model of models) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        console.log(`🤖 GEMINI_API_KEY検出。Gemini API (${model}) でコメントを生成中... (試行 ${attempt}/2)`);
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず食べたくなる絶品スイーツや、暮らしを劇的に変える便利家電、憧れの美容家電の魅力を、上品でワクワクする日本語のみで執筆してください。売り切れ間近の限定感や最新人気ポイントをアピールしてください。\n\n" + prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 500
+            }
+          }),
+          signal: AbortSignal.timeout(20000)
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          const content = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          const cleaned = validateAndCleanLLMOutput(content);
+          if (cleaned) return cleaned;
+          console.warn(`⚠️ Gemini API (${model}): 出力がバリデーションに失敗しました`);
+        } else if (response.status === 429) {
+          console.warn(`⚠️ Gemini API (${model}) Rate limit (429)。5秒待機してリトライします...`);
+          await sleep(5000);
+        } else {
+          console.warn(`⚠️ Gemini API (${model}) エラー: ${response.status}`);
+          break; // 429以外のエラーはモデル変更
+        }
+      } catch (err) {
+        console.warn(`⚠️ Gemini API (${model}) 呼び出し中にエラーが発生しました: ${err.message}`);
+      }
     }
-  } catch (err) {
-    console.warn(`⚠️ Gemini API呼び出し中にエラーが発生しました: ${err.message}`);
   }
   return null;
 }
 
-/** GitHub Models API による生成 (GITHUB_TOKENを使用) */
-async function generateGitHubModelsMessage(prompt) {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (!token) return null;
+/** Groq API による生成 (GROQ_API_KEYを使用、超高速＆完全無料枠大) */
+async function generateGroqMessage(prompt) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
 
-  try {
-    console.log('🤖 GITHUB_TOKEN検出。GitHub Models API (gpt-4o-mini) でコメントを生成中...');
-    const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。" },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7
-      }),
-      signal: AbortSignal.timeout(20000)
-    });
+  const models = ["llama-3.3-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"];
+  for (const model of models) {
+    try {
+      console.log(`🤖 GROQ_API_KEY検出。Groq API (${model}) でコメントを生成中...`);
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず買いたくなる魅力を上品でワクワクする日本語のみで執筆してください。" },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
 
-    if (response.ok) {
-      const json = await response.json();
-      const content = json?.choices?.[0]?.message?.content?.trim();
-      const cleaned = validateAndCleanLLMOutput(content);
-      if (cleaned) return cleaned;
-      console.warn('⚠️ GitHub Models: 出力がバリデーションに失敗しました');
-    } else {
-      console.warn(`⚠️ GitHub Models APIエラー: ${response.status} ${response.statusText}`);
+      if (response.ok) {
+        const json = await response.json();
+        const content = json?.choices?.[0]?.message?.content?.trim();
+        const cleaned = validateAndCleanLLMOutput(content);
+        if (cleaned) return cleaned;
+      }
+    } catch (err) {
+      console.warn(`⚠️ Groq API (${model}) エラー: ${err.message}`);
     }
-  } catch (err) {
-    console.warn(`⚠️ GitHub Models API呼び出し中にエラーが発生しました: ${err.message}`);
+  }
+  return null;
+}
+
+/** DuckDuckGo AI Chat による完全無料・キー不要LLM生成 (gpt-4o-mini / claude / llama) */
+async function generateDuckDuckGoMessage(prompt) {
+  const models = ["gpt-4o-mini", "claude-3-haiku", "llama-3.3-70b", "mixtral-8x7b"];
+  for (const model of models) {
+    try {
+      console.log(`🤖 キー不要の DuckDuckGo AI Chat (model: ${model}) でコメントを生成中...`);
+      
+      // 1. VFD Token取得
+      const initRes = await fetch("https://duckduckgo.com/duckchat/v1/status", {
+        headers: {
+          "x-vfd-request": "1",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/124.0.0.0 Safari/537.36"
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      const vfdToken = initRes.headers.get("x-vfd-response");
+
+      // 2. チャットリクエスト
+      const response = await fetch("https://duckduckgo.com/duckchat/v1/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-vfd-response": vfdToken || "",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/124.0.0.0 Safari/537.36"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "user", content: "あなたは楽天ROOMのインフルエンサーです。\n" + prompt }
+          ]
+        }),
+        signal: AbortSignal.timeout(20000)
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        // SSEストリーミングレスポンスからテキスト抽出
+        const lines = text.split('\n');
+        let fullText = '';
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.message) fullText += parsed.message;
+            } catch (e) {}
+          }
+        }
+        const cleaned = validateAndCleanLLMOutput(fullText);
+        if (cleaned) return cleaned;
+      }
+    } catch (err) {
+      console.warn(`⚠️ DuckDuckGo AI (${model}) エラー: ${err.message}`);
+    }
   }
   return null;
 }
 
 /** Pollinations AI による生成 (キー不要) */
 async function generatePollinationsMessage(prompt) {
-  const models = ["openai", "mistral"];
+  const models = ["openai", "mistral", "qwen", "llama"];
   for (const model of models) {
     try {
       console.log(`🤖 キー不要の Pollinations AI (model: ${model}) でコメントを生成中...`);
-      const response = await fetch("https://text.pollinations.ai/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。" },
-            { role: "user", content: prompt }
-          ],
-          model: model
-        }),
-        signal: AbortSignal.timeout(30000)
-      });
+      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${model}&json=true`, {
+        method: "GET",
+        signal: AbortSignal.timeout(25000)
+      }).catch(() => null);
 
-      if (response.ok) {
-        const text = await response.text();
+      if (response && response.ok) {
+        const json = await response.json().catch(() => null);
+        const text = json?.content || (typeof json === 'string' ? json : null);
         const cleaned = validateAndCleanLLMOutput(text);
         if (cleaned) return cleaned;
-        console.warn(`⚠️ Pollinations AI (${model}): 出力がバリデーションに失敗しました`);
-      } else {
-        console.warn(`⚠️ Pollinations AI (${model}) エラー: ${response.status}`);
       }
     } catch (err) {
       console.warn(`⚠️ Pollinations AI (${model}) 呼び出し中にエラーが発生しました: ${err.message}`);
@@ -274,8 +358,8 @@ async function generatePollinationsMessage(prompt) {
 }
 
 /**
- * 各種LLM API 経由でLLMに高CTA日本語文章を生成させる。
- * 失敗した場合は順次フォールバックチェーンを実行する。
+ * 多層LLMプロバイダ自動フォールバックチェーン
+ * (Gemini ➔ Groq ➔ GitHub Models ➔ DuckDuckGo ➔ Pollinations)
  */
 async function generateLLMMessage(title) {
   const cleanTitle = title
@@ -285,7 +369,7 @@ async function generateLLMMessage(title) {
     .trim();
 
   const prompt = `あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。
-以下の商品を、18〜40代の主婦・可愛いもの好き女性に向けて、思わずクリックしたくなる日本語紹介コメントを書いてください。
+以下の商品を、18〜40代の女性・主婦に向けて、思わずクリックしたくなる日本語紹介コメントを書いてください。
 
 【厳守ルール】
 - 文字数は400文字以内（楽天ROOMの文字数制限。超えると投稿エラーになる）
@@ -293,11 +377,11 @@ async function generateLLMMessage(title) {
 - 宣伝と分からないよう自然に書く（「PR」「広告」禁止）
 - 絵文字を5〜8個使う
 - ハッシュタグを3〜5個、文末に付ける（#楽天市場 は必須。商品の種類に合ったもの）
-- 商品の魅力・可愛さ・使い勝手・癒し効果などを具体的に書く
-- 「レビュー多数」「在庫わずか」など購買意欲を上げる一文で締める
-- ⚠️ 絶対禁止：「[楽天ROOM商品ページへのリンク]」「[在庫確認はこちら]」「[レビュー・口コミ]」など、[]付きのプレースホルダーや疑似リンク文字列を書かない
-- ⚠️ 絶対禁止：URLやリンク文字列を本文中に書かない（ハッシュタグは除く）
-- ⚠️ 絶対禁止：「さらに表示」「続きを読む」など余分な文字を書かない
+- 商品の魅力・驚き・使い勝手・満足感を具体的に書く
+- 「人気沸騰中」「在庫わずか」など購買意欲を上げる一文で締める
+- ⚠️ 絶対禁止：「[楽天ROOM商品ページへのリンク]」「[在庫確認はこちら]」などのプレースホルダーや疑似リンクを書かない
+- ⚠️ 絶対禁止：URL文字列を本文中に書かない
+- ⚠️ 絶対禁止：「さらに表示」「続きを読む」等の余分な文字
 - ⚠️ 絶対禁止：「売切れ」「在庫なし」の表現
 
 【商品名】
@@ -305,32 +389,48 @@ ${cleanTitle.substring(0, 100)}
 
 【コメント本文のみを出力。前置き・タイトル行・\`\`\`マークダウン装飾は絶対に不要】`;
 
-  // 1. 最優先: Gemini API (GEMINI_API_KEY) を試行
+  // 1. Gemini API
   const geminiResult = await generateGeminiMessage(prompt);
   if (geminiResult) {
     const finalText = geminiResult.substring(0, 400);
-    console.log(`🤖 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
+    console.log(`🎉 LLM (Gemini API) 生成成功！(${finalText.length}文字)`);
     return finalText;
   }
 
-  // 2. フォールバック1: GitHub Models API (GITHUB_TOKEN) を試行
+  // 2. Groq API (GROQ_API_KEYが設定されている場合)
+  const groqResult = await generateGroqMessage(prompt);
+  if (groqResult) {
+    const finalText = groqResult.substring(0, 400);
+    console.log(`🎉 LLM (Groq API) 生成成功！(${finalText.length}文字)`);
+    return finalText;
+  }
+
+  // 3. GitHub Models API (GITHUB_TOKENが設定されている場合)
   const ghResult = await generateGitHubModelsMessage(prompt);
   if (ghResult) {
     const finalText = ghResult.substring(0, 400);
-    console.log(`🤖 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
+    console.log(`🎉 LLM (GitHub Models) 生成成功！(${finalText.length}文字)`);
     return finalText;
   }
 
-  // 3. フォールバック2: Pollinations AI (キー不要で安定稼働) を試行
+  // 4. DuckDuckGo AI Chat (キー不要・無料)
+  const ddgResult = await generateDuckDuckGoMessage(prompt);
+  if (ddgResult) {
+    const finalText = ddgResult.substring(0, 400);
+    console.log(`🎉 LLM (DuckDuckGo AI - GPT-4o-mini/Claude) 生成成功！(${finalText.length}文字)`);
+    return finalText;
+  }
+
+  // 5. Pollinations AI (キー不要・GET API)
   const polResult = await generatePollinationsMessage(prompt);
   if (polResult) {
     const finalText = polResult.substring(0, 400);
-    console.log(`🤖 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
+    console.log(`🎉 LLM (Pollinations AI) 生成成功！(${finalText.length}文字)`);
     return finalText;
   }
 
-  // 4. 最終フォールバック: テンプレートベースのメッセージ
-  console.warn('⚠️ すべてのLLM生成試行が失敗しました。テンプレートフォールバックを使用します。');
+  // 6. 最終防衛線: カテゴリ別スマートフォールバック
+  console.warn('⚠️ 無料LLM通信が一時的に全遮断されたため、安全なカテゴリ別スマート文章を使用します。');
   return generateFallbackMessage(title);
 }
 
