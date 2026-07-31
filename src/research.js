@@ -57,15 +57,17 @@ function saveQueue(data) {
 // 楽天商品検索API（APIキー必須）
 // ──────────────────────────────────────────────────────────
 
-// ターゲットキーワード一覧
+// ターゲットキーワード一覧（3,000円〜100,000円の絶品スイーツ・便利家電・美容家電に特化）
 const TARGET_KEYWORDS = [
-  { query: 'スイーツ', minPrice: 3000, maxPrice: 30000 },
-  { query: 'お菓子', minPrice: 3000, maxPrice: 30000 },
-  { query: 'キッチン用品', minPrice: 3000, maxPrice: 30000 },
-  { query: 'インテリア雑貨', minPrice: 3000, maxPrice: 30000 },
-  { query: 'ふるさと納税', minPrice: 3000, maxPrice: 30000 },
-  { query: '美容', minPrice: 3000, maxPrice: 30000 },
-  { query: '美容家電', minPrice: 3000, maxPrice: 30000 },
+  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 30000 },
+  { query: '高級 チョコレート ギフト', minPrice: 3000, maxPrice: 20000 },
+  { query: '洋菓子 詰め合わせ ギフト', minPrice: 3000, maxPrice: 20000 },
+  { query: '便利家電', minPrice: 5000, maxPrice: 100000 },
+  { query: 'ロボット掃除機', minPrice: 10000, maxPrice: 100000 },
+  { query: 'ノンフライヤー 食洗機', minPrice: 5000, maxPrice: 80000 },
+  { query: '美容家電', minPrice: 5000, maxPrice: 100000 },
+  { query: '高級ドライヤー ヘアドライヤー', minPrice: 8000, maxPrice: 60000 },
+  { query: '美顔器 光美容器', minPrice: 10000, maxPrice: 100000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -85,7 +87,7 @@ async function fetchFromRakutenAPI(data) {
   const newProducts = [];
 
   for (const target of shuffled) {
-    if (newProducts.length >= 5) break;
+    if (newProducts.length >= 15) break;
 
     console.log(`\n📡 楽天API検索中: "${target.query}" (${target.minPrice}〜${target.maxPrice}円)`);
 
@@ -94,7 +96,7 @@ async function fetchFromRakutenAPI(data) {
       keyword: target.query,
       minPrice: target.minPrice.toString(),
       maxPrice: target.maxPrice.toString(),
-      hits: '30',
+      hits: '50',
       sort: 'standard',
       format: 'json',
     });
@@ -179,7 +181,7 @@ async function fetchFromRakutenAPI(data) {
           title: title.substring(0, 80),
           addedAt: new Date().toISOString(),
           status: 'pending',
-          genre: '実用インテリア・キッチン・おしゃれスイーツ',
+          genre: '絶品スイーツ・便利家電・美容家電',
           targetPrice: `〜${item.itemPrice}円`,
           imageUrl,           // ← 楽天APIから取得した実商品画像
           itemCode: item.itemCode || null,
@@ -203,16 +205,16 @@ async function fetchByScrapingWithImages(data) {
 
   const targetUrls = [
     {
-      name: '実用的なキッチン用品（〜10,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%AD%E3%83%83%E3%83%81%E3%83%B3%E7%94%A8%E5%93%81+%E5%AE%9F%E7%94%A8%E7%9A%84/?max=10000&f=1',
+      name: '絶品お取り寄せスイーツ（3,000円〜30,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E5%8F%96%E3%82%8A%E5%AF%84%E3%81%9B%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=3000&max=30000&f=1',
     },
     {
-      name: 'おしゃれなインテリア雑貨（〜15,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%A4%E3%83%B3%E3%83%86%E3%83%AA%E3%82%A2%E9%9B%91%E8%B2%A8+%E3%81%8A%E3%81%97%E3%82%83%E3%82%8C/?max=15000&f=1',
+      name: '話題の便利家電・キッチン家電（5,000円〜100,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E4%BE%BF%E5%88%A9%E5%AE%B6%E9%9B%BB/?min=5000&max=100000&f=1',
     },
     {
-      name: 'お取り寄せスイーツ（〜10,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E5%8F%96%E3%82%8A%E5%AF%84%E3%81%9B%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?max=10000&f=1',
+      name: '人気の高級美容家電（5,000円〜100,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E7%BE%8E%E5%AE%B9%E5%AE%B6%E9%9B%BB/?min=5000&max=100000&f=1',
     },
   ];
 
@@ -384,7 +386,7 @@ async function run() {
   const data = loadQueue();
   const pendingCount = data.queue.filter(p => p.status === 'pending').length;
 
-  if (pendingCount >= 10) {
+  if (pendingCount >= 20) {
     console.log(`💡 pending 商品が ${pendingCount} 件あります。新規リサーチをスキップします。`);
     process.exit(0);
   }

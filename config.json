@@ -1,14 +1,16 @@
 {
   "searchKeywords": [
     "お取り寄せスイーツ",
-    "実用的なキッチン用品",
-    "キッチン便利グッズ",
-    "おしゃれなインテリア雑貨",
-    "食器"
+    "高級和菓子 洋菓子 チョコレート",
+    "便利家電",
+    "ロボット掃除機 食洗機 ノンフライヤー",
+    "美容家電",
+    "高級ドライヤー 美顔器 光美容器 Hair care"
   ],
-  "engagementLimit": 15,
-  "commentLimit": 18,
-  "minDelayMs": 3000,
-  "maxDelayMs": 8000,
-  "postsPerDay": 4
+  "engagementLimit": 20,
+  "commentLimit": 25,
+  "minDelayMs": 2000,
+  "maxDelayMs": 5000,
+  "postsPerDay": 12,
+  "maxPostsPerRun": 5
 }

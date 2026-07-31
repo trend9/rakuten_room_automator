@@ -6,8 +6,8 @@ import { extractProductKey } from './sync.js';
 
 dotenv.config();
 
-// 1回の実行で最大何件を連続投稿するか
-const MAX_POSTS_PER_RUN = 3;
+// 1回の実行で最大何件を連続投稿するか（投稿頻度・件数を増加！）
+const MAX_POSTS_PER_RUN = 5;
 
 // Colab API URL
 let COLAB_API_URL = process.argv.find(arg => arg.startsWith("http://") || arg.startsWith("https://"))
@@ -172,7 +172,7 @@ async function generateGeminiMessage(prompt) {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: "あなたは楽天ROOMでフォロワー急増中の可愛いインテリア・雑貨専門インフルエンサーです。上品で高級感があり、かつワクワクする魅力を日本語のみで執筆してください。\n\n" + prompt
+            text: "あなたは楽天ROOMでフォロワー急増中の大人気インフルエンサーです。思わず食べたくなる絶品スイーツや、暮らしを劇的に変える便利家電、憧れの美容家電の魅力を、上品でワクワクする日本語のみで執筆してください。売り切れ間近の限定感や最新人気ポイントをアピールしてください。\n\n" + prompt
           }]
         }],
         generationConfig: {
@@ -615,6 +615,9 @@ async function postOneProduct(pendingProduct, data) {
         await page.waitForTimeout(2000);
         
         pendingProduct.status = 'duplicate';
+        if (!data.history.includes(pendingProduct.url)) {
+          data.history.push(pendingProduct.url);
+        }
         saveQueue(data);
         return true;
       }
