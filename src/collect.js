@@ -321,7 +321,7 @@ async function generateDuckDuckGoMessage(prompt) {
           'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
           'x-vqd-accept': '1'
         },
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(5000)  // 短縮: 5秒
       });
       const vqd = statusRes.headers.get('x-vqd-4');
       if (!vqd) { console.warn('⚠️ DuckDuckGo: vqdトークン取得失敗'); continue; }
@@ -338,7 +338,7 @@ async function generateDuckDuckGoMessage(prompt) {
           model: model,
           messages: [{ role: 'user', content: prompt }]
         }),
-        signal: AbortSignal.timeout(30000)
+        signal: AbortSignal.timeout(12000)  // 短縮: 12秒
       });
 
       if (!chatRes.ok) { console.warn(`⚠️ DuckDuckGo (${model}): ${chatRes.status}`); continue; }
@@ -367,11 +367,12 @@ async function generateDuckDuckGoMessage(prompt) {
   return null;
 }
 
-/** Hugging Face Inference API による生成（無料・HF_TOKENが有れば高速） */
+/** Hugging Face Inference API による生成（HF_TOKENがある場合のみ有効） */
 async function generateHuggingFaceMessage(prompt) {
   const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_TOKEN;
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  // キーなしの場合、GitHub ActionsのサーバーIPでは利用不可なためスキップ
+  if (!token) return null;
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
   // キー無しでもレート制限付きで動作するモデルを使用
   const models = [
     'mistralai/Mistral-7B-Instruct-v0.3',
@@ -394,7 +395,7 @@ async function generateHuggingFaceMessage(prompt) {
           max_tokens: 500,
           temperature: 0.7
         }),
-        signal: AbortSignal.timeout(30000)
+        signal: AbortSignal.timeout(12000)  // 短縮: 12秒
       });
       if (res.ok) {
         const json = await res.json();
@@ -893,12 +894,18 @@ async function postOneProduct(pendingProduct, data) {
     console.log('⏳ エディタ読み込み後の初期待機中 (3秒)...');
     await page.waitForTimeout(3000);
 
-    // ログインチェック（投稿エディタからトップ等の他URLへリダイレクトされていないかも含めて判定）
+    // ログインチェック（セッション切れの判定）
     const checkUrl = page.url();
-    const isWarpRedirected = !checkUrl.includes('/mix') && !checkUrl.includes('/recommend') && !checkUrl.includes('/items/create');
-    const isLoginNeeded = isWarpRedirected || await page.locator('text=ログイン, input[placeholder*="メール"]').count() > 0;
-    if (isLoginNeeded) {
-      throw new Error('セッション切れ。再度 npm run auth を実行してください。');
+    // /mix, /recommend, /items/create, /items/new, /kore のいずれかが含まれていればOK
+    const validEditorPaths = ['/mix', '/recommend', '/items/create', '/items/new', '/kore', 'room.rakuten.co.jp'];
+    const isValidEditor = validEditorPaths.some(path => checkUrl.includes(path));
+    // ログインページに飛ばされた場合のみセッション切れと判定
+    const isLoginPage = checkUrl.includes('/login') || checkUrl.includes('/mypage/login') || checkUrl.includes('login.rakuten') || await page.locator('input[type="password"]').count() > 0;
+    if (isLoginPage) {
+      throw new Error(`セッション切れ。ログインページ(${checkUrl})にリダイレクトされました。再度 npm run auth を実行してください。`);
+    }
+    if (!isValidEditor) {
+      console.warn(`⚠️ 想定外のURL(${checkUrl})に遷移しましたが、続行を試みます。`);
     }
 
     await takeScreenshot(page, 'step2_editor_loaded');
@@ -1277,6 +1284,12 @@ async function run() {
       // 重複はスキップリストに追加して次の商品へ（ラウンドを消費せずループ継続）
       console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。次の商品を探します。`);
       skippedUrls.add(pendingProduct.url);
+      // 無限ループ防止: キュー内の全pendingがスキップ済みになったら終了
+      const remainingPending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
+      if (remainingPending.length === 0) {
+        console.log('💡 残りの投稿候補がすべて重複済みです。終了します。');
+        break;
+      }
       round--; // ラウンドを消費しない
       continue;
     }
