@@ -4,7 +4,7 @@
       "url": "https://item.rakuten.co.jp/patico/patico-013/",
       "title": "【楽天1位獲得】バスクチーズケーキ 4号 絶品 お取り寄せスイーツ ギフト プレゼント 高級 洋菓子 ケーキ",
       "addedAt": "2026-07-31T15:28:33.721Z",
-      "status": "pending",
+      "status": "duplicate",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "3980円",
       "imageUrl": "https://shop.r10s.jp/patico/cabinet/07954930/08157778/imgrc0098042456.jpg",
@@ -14,7 +14,7 @@
       "url": "https://item.rakuten.co.jp/kasyou-morin/tiramisu-6/",
       "title": "極上のなめらか ティラミス 6個入 高級和洋菓子 お取り寄せ スイーツ ギフト 詰め合わせ",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "pending",
+      "status": "duplicate",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "4280円",
       "imageUrl": "https://shop.r10s.jp/kasyou-morin/cabinet/05891398/imgrc0077884877.jpg",
@@ -24,31 +24,76 @@
       "url": "https://item.rakuten.co.jp/cosme-link/y4987241169627/",
       "title": "パナソニック 美顔器 バイタリフト かっさ 美容家電 高機能 フェイスケア エイジングケア",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "33500円",
-      "imageUrl": "https://shop.r10s.jp/cosme-link/cabinet/item/4987241169627.jpg",
-      "customComment": "おうちで本格サロン級ケア✨SNSや美容雑誌で話題沸騰中の高機能かっさ美顔器！独自EMSと温感機能でフェイスラインをすっきり引き締め、毎日のスキンケアが感動の楽しさに引き上がります洗顔後やシートマスクの上から手軽に使えるのも嬉しいポイント！美肌を目指すなら絶対持っておきたい本命美容家電です美容好き必見！✨\n\n#楽天市場 #美容家電 #美顔器 #パナソニック #自分へのご褒美 #フェイスケア"
+      "imageUrl": "https://r.r10s.jp/com/inc/home/20080930/spt/common/img/20180702_ogp.png",
+      "customComment": "パナソニックの美顔器、バイタリフト かっさは、高機能でコスパの良い美容家電のひとつです。 🔍 この美顔器は、エイジングケアに効果を発揮するかもしれません。 💡 顔のたるみを改善するために、バイタルリフト技術を搭載しています。 ⚡ また、簡単な操作で使用できるので、日常的に使用するのが便利です。 📦 パッケージには、美顔器本体だけでなく、充電ケーブルやマニュアルも含まれています。 📊 価格もお手頃なので、初心者の方にもおすすめかもしれません。 この美顔器の機能や価格についての詳細は、楽天市場で確認できるかもしれません。 #楽天市場 #美容家電 #美顔器 #コスパ"
     },
     {
       "url": "https://item.rakuten.co.jp/dyson/386828-01/",
       "title": "ダイソン Dyson Supersonic Ionic ヘアドライヤー 高級ドライヤー 大風量 速乾 美髪",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "45800円",
-      "imageUrl": "https://shop.r10s.jp/dyson/cabinet/item_image/386828-01.jpg",
-      "customComment": "毎日のヘアドライが変わる！圧倒的な大風量で速乾＆髪のツヤ感が劇的に変わる高級ヘアドライヤー✨過度な熱ダメージを防いで潤いを守るから、サロン帰りのような指通りなめらかな美髪に仕上がります！髪を傷めず早く乾かしたい方に本当におすすめです💇‍♀️憧れのドライヤー、お得なポイント還元期間中にぜひチェックしてね！\n\n#楽天市場 #ダイソン #ドライヤー #美容家電 #美髪ケア #ヘアケア"
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/dyson/logo/logo1n.jpg?_ex=200x200",
+      "customComment": "このヘアドライヤーは、ダイソンというブランドで有名な、高級ドライヤーです。⚡️ 大きな特徴は、大風量で速乾できることです。📊 コスパもよく、長期的に見ると節約になるかもしれません。🔍 実際に調べてみると、Ionic技術で美しい髪の毛を保つことができます。✅ 高級感がありながらも、使用性はとても良いです。📦 商品の評判も良好で、多くの人が購入しています。詳細は楽天市場で確認できるです。 #楽天市場 #ヘアドライヤー #ダイソン #コスパ良好 #美髪"
     },
     {
       "url": "https://item.rakuten.co.jp/roborock-japan/roborock-s8pro/",
       "title": "ロボット掃除機 Roborock S8 Pro Ultra 自動ゴミ収集 水拭き 全自動 便利家電",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "pending",
+      "status": "failed",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "98000円",
-      "imageUrl": "https://shop.r10s.jp/roborock-japan/cabinet/s8pro_main.jpg",
-      "customComment": "掃除の悩みが一瞬でゼロになる夢の全自動ロボット掃除機🤖✨強力吸引だけでなく、水拭き・モップ洗浄・自動乾燥・ゴミ収集まで全て自動で完了！仕事や家事で忙しい毎日に最高のゆとりを届けてくれます。一度使ったら手放せない生活激変の最強時短家電！おうち時間を最高に快適にしたい方に本気でおすすめですスマートライフを始めよう！\n\n#楽天市場 #便利家電 #ロボット掃除機 #Roborock #時短家電 #家事ラク"
+      "imageUrl": "https://r.r10s.jp/com/inc/home/20080930/spt/common/img/20180702_ogp.png",
+      "customComment": "ロボット掃除機のRoborock S8 Pro Ultraは、自動ゴミ収集や水拭き機能を備えています。全自動で運用できるので、家事の負担を軽減できます。掃除能力は高く、複雑な空間でもスムーズに掃除ができます。⚡また、長時間のバッテリー持ちが特徴で、1回の充電で長時間掃除できます。📦 コスパも良好です。🔍 機能や性能を考慮すると、価格は妥当だと思います。📊 便利な家電を探している方にはおすすめかもしれません。詳細は楽天市場で確認できるです。 #ロボット掃除機 #家電 #楽天市場 #掃除機 #生活雑貨"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/brighte-onlineshop/brt-fs145/",
+      "title": "【イベント開催中】【公式】美顔器 リフトアップ ブライト エレキブラシプラス / Brighte ELEKI BRUSH＋ 美顔器 | 美容家電 電気ブラシ リ",
+      "addedAt": "2026-08-01T19:59:55.827Z",
+      "status": "duplicate",
+      "genre": "実用インテリア・キッチン・おしゃれスイーツ",
+      "imageUrl": "https://shop.r10s.jp/brighte-onlineshop/cabinet/10576093/elekibrushplus/brt-fs145_260801.jpg",
+      "customComment": "美顔器を探している方にオススメしたい商品です。リフトアップやブライトニングにも効果があるようです。電気ブラシプラス機能が特徴的で、毛穴の汚れをしっかり落とすことができます。 🔍 美容家電としてのコスパも良さそうです。実際の使用感や詳細な性能については、レビューも参考になるかもしれません。 📊 また、電気ブラシの交換も簡単に行えるので、長期的に使用することができます。 ⚡ これから美容に注力したい方には、ぜひ試してみてください。 🎯 詳細は楽天市場で確認できるです。 #美顔器 #電気ブラシ #楽天市場 #美容家電"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/leapgrow/mt-hs1808b/",
+      "title": "【公式｜MYTREXの日 10％OFFクーポン＋P10倍！】最高峰※ EMSヘッドスパ 頭皮 ヘッドマッサージ EMS 赤色LED 機能搭載【公式】 MYTRE",
+      "addedAt": "2026-08-01T20:00:11.095Z",
+      "status": "duplicate",
+      "genre": "実用インテリア・キッチン・おしゃれスイーツ",
+      "imageUrl": "https://shop.r10s.jp/leapgrow/cabinet/mytrex/p0/p00_hsp_01a.jpg",
+      "customComment": "このヘッドスパは、EMS機能と赤色LEDライトを搭載しており、頭皮の血流を促進し、ストレスを軽減することができます。✅ また、EMSのパルス幅や赤色LEDの照射時間を調整できるので、個々のニーズに合わせて使用することができます。⚡ 使用する際は、水や化粧水などを頭皮に付けておくと、スムーズに使えるようです。📦 コスパも良好で、他の製品と比較して価格が手頃なところが魅力です。💡 このヘッドスパは、頭皮のケアに効果的であり、疲れた頭をリラックスさせるのに役立つかもしれません。🔍 詳細は楽天市場で確認できます。#楽天市場 #ヘッドスパ #EMS #リラックス #頭皮ケア"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/kobe-beauty-labo/sal038/",
+      "title": "＜8/4 20時〜 神トク20％OFFクーポン＞《公式店》最上位モデル 【 SALONIA EMS リフトブラシ 3Dケア 】 サロニア 美顔器 ems リフト",
+      "addedAt": "2026-08-01T20:00:26.117Z",
+      "status": "duplicate",
+      "genre": "実用インテリア・キッチン・おしゃれスイーツ",
+      "imageUrl": "https://shop.r10s.jp/kobe-beauty-labo/cabinet/1st_thum/imgrc0112074261.jpg",
+      "customComment": "この美顔器は、EMSリフト機能を搭載しており、肌のトーンをあげることができます。✅ また、公式店から購入することで、品質と安全性が保障されるので安心です。📦 現在、8/4 20時から20％OFFクーポンが利用できるので、コスパが良さそうです。🔍 詳細なスペックは、美顔器本体の重量が約300gと軽量で持ち運びやすいこと、充電式でバッテリーの交換が不要であることなどが特徴的です。⚡ さらに、クーポンを使用することで、よりお得に購入できるかもしれません。📊 この美顔器のコスパは高いと思います。詳細は楽天市場で確認できるです。 #楽天市場 #美顔器 #コスパ"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/nissoplus/np-rf24/",
+      "title": "【楽天1位★20%OFFクーポン】目元 美顔器 リフトケア NIPLUX REFINE EYE リファインアイ EMS RF ラジオ波 低周波 小顔 電動 美容",
+      "addedAt": "2026-08-01T20:00:41.509Z",
+      "status": "duplicate",
+      "genre": "実用インテリア・キッチン・おしゃれスイーツ",
+      "imageUrl": "https://shop.r10s.jp/nissoplus/cabinet/item/refine_eye/main/re_250424.jpg",
+      "customComment": "目元美顔器のNIPLUX REFINE EYEは、EMSとRFラジオ波の低周波を使用して目元のリフトケアを行うことができます。✅ この技術は、目元の肌を引き上げて小顔効果を実現することができます。📦 また、低周波は肌の深層まで届き、効果的な美容ケアが可能です。🔍 コスパも良好で、他の同等の商品と比べると価格が手頃だと思います。⚡ 使用方法も簡単で、電動式なので手でマッサージする必要がありません。💡 これで目元の美容ケアを効率的に行うことができます。詳細は楽天市場で確認できるです。 #楽天市場 #美容器具 #目元ケア #コスパ重視"
+    },
+    {
+      "url": "https://item.rakuten.co.jp/excitech/massagegun-001/",
+      "title": "筋膜リリースガン ミニ 【楽天1位】 RELX リラクス トータルボディケア mini 320g 超軽量 整体院長監修 20段階強力振動 ハンディガン 小型 筋",
+      "addedAt": "2026-08-01T20:00:56.589Z",
+      "status": "duplicate",
+      "genre": "実用インテリア・キッチン・おしゃれスイーツ",
+      "imageUrl": "https://shop.r10s.jp/excitech/cabinet/relx/massage-gun/imgrc0119001136.jpg",
+      "customComment": "この筋膜リリースガン ミニ RELX は、超軽量で320gと持ち運びが簡単です。整体院長監修のもと開発されたこのガンは、20段階の強力振動を備えています。✅ 使い方も簡単で、ボディケアのために必要な部分に当てて使用するだけで良いのです。📦 小型でコンパクトなデザインなので、自宅で使うのにも適しています。🔍 コスパも良好で、実用的です。⚡ また、ハンディガンなので、持ち運びにも便利です。💡 Detailは、購入する前に確認した方がいいと思います。詳細は楽天市場で確認できるです。 #楽天市場 #筋膜リリースガン #ボディケア #ケア用品 #リラクス"
     }
   ],
   "history": [
@@ -327,6 +372,11 @@
     "https://item.rakuten.co.jp/kinokokinoko/al0066/",
     "https://item.rakuten.co.jp/frenchflow/10001412/",
     "https://item.rakuten.co.jp/kmglobalworks/int-100025/",
-    "https://item.rakuten.co.jp/kirakukan/1160011/"
+    "https://item.rakuten.co.jp/kirakukan/1160011/",
+    "https://item.rakuten.co.jp/brighte-onlineshop/brt-fs145/",
+    "https://item.rakuten.co.jp/leapgrow/mt-hs1808b/",
+    "https://item.rakuten.co.jp/kobe-beauty-labo/sal038/",
+    "https://item.rakuten.co.jp/nissoplus/np-rf24/",
+    "https://item.rakuten.co.jp/excitech/massagegun-001/"
   ]
 }
