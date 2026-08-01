@@ -57,17 +57,34 @@ function saveQueue(data) {
 // 楽天商品検索API（APIキー必須）
 // ──────────────────────────────────────────────────────────
 
-// ターゲットキーワード一覧（3,000円〜100,000円の絶品スイーツ・便利家電・美容家電に特化）
+// ターゲットキーワード一覧（3,000円〜100,000円・ジャンル多様化）
+// ※ランダムに2キーワードずつ抽出されるため、重み付けのために件数で調整
 const TARGET_KEYWORDS = [
-  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 30000 },
-  { query: '高級 チョコレート ギフト', minPrice: 3000, maxPrice: 20000 },
-  { query: '洋菓子 詰め合わせ ギフト', minPrice: 3000, maxPrice: 20000 },
-  { query: '便利家電', minPrice: 5000, maxPrice: 100000 },
+  // 🍰 スイーツ・グルメ（4枠）
+  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 20000 },
+  { query: '高級チョコレート ギフト', minPrice: 3000, maxPrice: 15000 },
+  { query: '洋菓子 詰め合わせ', minPrice: 3000, maxPrice: 15000 },
+  { query: '和菓子 お取り寄せ', minPrice: 3000, maxPrice: 15000 },
+  // 🏠 便利家電・キッチン家電（5枠）
   { query: 'ロボット掃除機', minPrice: 10000, maxPrice: 100000 },
-  { query: 'ノンフライヤー 食洗機', minPrice: 5000, maxPrice: 80000 },
-  { query: '美容家電', minPrice: 5000, maxPrice: 100000 },
+  { query: 'ノンフライヤー エアフライヤー', minPrice: 5000, maxPrice: 40000 },
+  { query: '食洗機 食器洗い乾燥機', minPrice: 10000, maxPrice: 80000 },
+  { query: '電気圧力鍋 炊飯器', minPrice: 5000, maxPrice: 50000 },
+  { query: 'コーヒーメーカー エスプレッソ', minPrice: 5000, maxPrice: 60000 },
+  // 💄 美容家電（2枠のみ — 美顔器を絞る）
   { query: '高級ドライヤー ヘアドライヤー', minPrice: 8000, maxPrice: 60000 },
-  { query: '美顔器 光美容器', minPrice: 10000, maxPrice: 100000 },
+  { query: 'ヘアアイロン カールアイロン', minPrice: 5000, maxPrice: 40000 },
+  // 🎒 アウトドア・スポーツ（3枠）
+  { query: 'キャンプ アウトドア 調理器具', minPrice: 3000, maxPrice: 50000 },
+  { query: 'テント タープ アウトドア', minPrice: 8000, maxPrice: 80000 },
+  { query: 'フィットネス器具 トレーニング', minPrice: 5000, maxPrice: 60000 },
+  // 💻 PC・ガジェット・スマホ周辺機器（3枠）
+  { query: 'ワイヤレスイヤホン', minPrice: 5000, maxPrice: 50000 },
+  { query: 'モバイルバッテリー ガジェット', minPrice: 3000, maxPrice: 20000 },
+  { query: 'キーボード マウス デスク周辺機器', minPrice: 3000, maxPrice: 40000 },
+  // 🏋️ 健康・リカバリー（2枠）
+  { query: '体重計 スマート体重計', minPrice: 3000, maxPrice: 20000 },
+  { query: 'マッサージガン リカバリー', minPrice: 5000, maxPrice: 50000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
