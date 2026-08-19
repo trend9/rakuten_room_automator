@@ -207,10 +207,10 @@ async function generateGeminiMessage(prompt) {
   if (!apiKey) return null;
 
   // 利用可能なモデル一覧（404エラーを防止し最新モデルを最優先）
-  const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = ["gemini-3.7-flash","gemini-3.6-flash","gemini-3.5-flash","gemini-3.5-flash-lite","gemini-3.1-flash-lite","gemini-3.1-pro","gemini-3.0-flash","gemini-2.5-pro","gemini-2.5-flash","gemini-2.5-flash-lite","gemini-2.0-flash","gemini-2.0-flash-lite"];
 
   for (const model of models) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    for (let attempt = 1; attempt <= 1; attempt++) {
       try {
         console.log(`🤖 GEMINI_API_KEY検出。Gemini API (${model}) でコメントを生成中... (試行 ${attempt}/2)`);
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -240,8 +240,7 @@ async function generateGeminiMessage(prompt) {
           if (cleaned) return cleaned;
           console.warn(`⚠️ Gemini API (${model}): 出力がバリデーションに失敗しました`);
         } else if (response.status === 429) {
-          console.warn(`⚠️ Gemini API (${model}) Rate limit (429)。3秒待機してリトライします...`);
-          await sleep(3000);
+          console.warn(`⚠️ Gemini API (${model}) Rate limit (429)。次のモデルへ切り替えます...`);
         } else {
           const errBody = await response.text().catch(() => '');
           console.warn(`⚠️ Gemini API (${model}) エラー: ${response.status} | ${errBody.substring(0, 200)}`);
