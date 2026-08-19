@@ -424,7 +424,7 @@ async function generateGroqMessage(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
-  const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "llama3-8b-8192"];
+  const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
   for (const model of models) {
     try {
       console.log(`🤖 GROQ_API_KEY検出。Groq API (${model}) でコメントを生成中...`);

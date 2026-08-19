@@ -61,30 +61,42 @@ function saveQueue(data) {
 // ※ランダムに2キーワードずつ抽出されるため、重み付けのために件数で調整
 const TARGET_KEYWORDS = [
   // 🍰 スイーツ・グルメ（4枠）
-  { query: 'お取り寄せスイーツ', minPrice: 3000, maxPrice: 20000 },
+  { query: 'お取り寄せスイーツ 人気', minPrice: 3000, maxPrice: 20000 },
   { query: '高級チョコレート ギフト', minPrice: 3000, maxPrice: 15000 },
-  { query: '洋菓子 詰め合わせ', minPrice: 3000, maxPrice: 15000 },
-  { query: '和菓子 お取り寄せ', minPrice: 3000, maxPrice: 15000 },
+  { query: 'バウムクーヘン お取り寄せ', minPrice: 3000, maxPrice: 12000 },
+  { query: 'チーズケーキ お取り寄せ 冷凍', minPrice: 3000, maxPrice: 10000 },
+  // ☕ コーヒー・ドリンク・食材（3枠）
+  { query: 'コーヒー豆 スペシャルティ', minPrice: 3000, maxPrice: 15000 },
+  { query: 'プロテイン サプリメント', minPrice: 3000, maxPrice: 20000 },
+  { query: 'お茶 高級 ギフト', minPrice: 3000, maxPrice: 15000 },
   // 🏠 便利家電・キッチン家電（5枠）
-  { query: 'ロボット掃除機', minPrice: 10000, maxPrice: 100000 },
-  { query: 'ノンフライヤー エアフライヤー', minPrice: 5000, maxPrice: 40000 },
-  { query: '食洗機 食器洗い乾燥機', minPrice: 10000, maxPrice: 80000 },
-  { query: '電気圧力鍋 炊飯器', minPrice: 5000, maxPrice: 50000 },
+  { query: 'ロボット掃除機', minPrice: 15000, maxPrice: 100000 },
+  { query: 'ノンフライヤー エアフライヤー', minPrice: 6000, maxPrice: 40000 },
+  { query: '食洗機 食器洗い乾燥機', minPrice: 15000, maxPrice: 80000 },
+  { query: '電気圧力鍋', minPrice: 5000, maxPrice: 50000 },
   { query: 'コーヒーメーカー エスプレッソ', minPrice: 5000, maxPrice: 60000 },
-  // 💄 美容家電（2枠のみ — 美顔器を絞る）
+  // 🛋️ インテリア・家具・収納（3枠）
+  { query: 'ソファ 一人暮らし コンパクト', minPrice: 10000, maxPrice: 80000 },
+  { query: '収納 おしゃれ 棚', minPrice: 5000, maxPrice: 30000 },
+  { query: '照明 おしゃれ LED', minPrice: 3000, maxPrice: 30000 },
+  // 💄 ヘアケア家電（美顔器を除く）（2枠）
   { query: '高級ドライヤー ヘアドライヤー', minPrice: 8000, maxPrice: 60000 },
   { query: 'ヘアアイロン カールアイロン', minPrice: 5000, maxPrice: 40000 },
   // 🎒 アウトドア・スポーツ（3枠）
-  { query: 'キャンプ アウトドア 調理器具', minPrice: 3000, maxPrice: 50000 },
-  { query: 'テント タープ アウトドア', minPrice: 8000, maxPrice: 80000 },
-  { query: 'フィットネス器具 トレーニング', minPrice: 5000, maxPrice: 60000 },
-  // 💻 PC・ガジェット・スマホ周辺機器（3枠）
-  { query: 'ワイヤレスイヤホン', minPrice: 5000, maxPrice: 50000 },
-  { query: 'モバイルバッテリー ガジェット', minPrice: 3000, maxPrice: 20000 },
-  { query: 'キーボード マウス デスク周辺機器', minPrice: 3000, maxPrice: 40000 },
+  { query: 'キャンプ アウトドア 焚き火台', minPrice: 5000, maxPrice: 50000 },
+  { query: 'テント ソロキャンプ 軽量', minPrice: 10000, maxPrice: 80000 },
+  { query: 'フィットネス 筋トレ ダンベル', minPrice: 5000, maxPrice: 40000 },
+  // 💻 PC・ガジェット・スマホ周辺機器（4枠）
+  { query: 'ワイヤレスイヤホン ノイズキャンセリング', minPrice: 5000, maxPrice: 50000 },
+  { query: 'ゲーミングチェア デスクチェア', minPrice: 15000, maxPrice: 100000 },
+  { query: 'スマートウォッチ ウェアラブル', minPrice: 5000, maxPrice: 60000 },
+  { query: 'キーボード メカニカル ゲーミング', minPrice: 5000, maxPrice: 40000 },
   // 🏋️ 健康・リカバリー（2枠）
-  { query: '体重計 スマート体重計', minPrice: 3000, maxPrice: 20000 },
+  { query: '体重計 スマート体重計 体組成計', minPrice: 3000, maxPrice: 20000 },
   { query: 'マッサージガン リカバリー', minPrice: 5000, maxPrice: 50000 },
+  // 🎮 ホビー・趣味・エンタメ（2枠）
+  { query: 'ボードゲーム カードゲーム 人気', minPrice: 3000, maxPrice: 15000 },
+  { query: 'プラモデル ガンプラ 人気', minPrice: 3000, maxPrice: 20000 },
 ];
 
 async function fetchFromRakutenAPI(data) {
