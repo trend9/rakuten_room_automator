@@ -76,8 +76,8 @@ function validateAndCleanLLMOutput(raw) {
   const ascii = text.replace(/[\s\d#@!？！♪♡✨🌟💕🥰😍🎉💖🌸🛁🍃⚠️\p{Emoji}]/gu, '');
   const englishChars = (ascii.match(/[a-zA-Z]/g) || []).length;
   const totalChars = ascii.length;
-  if (totalChars > 20 && englishChars / totalChars > 0.4) {
-    console.warn('⚠️ LLM出力reject: 英語テキストが多すぎます（reasoning漏れの可能性）');
+  if (totalChars > 20 && englishChars / totalChars > 0.6) {
+    console.warn(`⚠️ LLM出力reject: 英語テキストが多すぎます（英語率: ${Math.round(englishChars/totalChars*100)}%）`);
     return null;
   }
 
@@ -207,7 +207,7 @@ async function generateGeminiMessage(prompt) {
   if (!apiKey) return null;
 
   // 利用可能なモデル一覧（404エラーを防止し最新モデルを最優先）
-  const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-8b"];
+  const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.0-flash", "gemini-1.5-flash"];
 
   for (const model of models) {
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -222,7 +222,7 @@ async function generateGeminiMessage(prompt) {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。\n\n" + prompt
+                text: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。\n\n" + prompt
               }]
             }],
             generationConfig: {
@@ -281,7 +281,7 @@ async function generateOpenRouterMessage(prompt) {
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。" },
+            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。" },
             { role: "user", content: prompt }
           ],
           temperature: 0.7
@@ -389,7 +389,7 @@ async function generateHuggingFaceMessage(prompt) {
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: 'system', content: 'あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。' },
+            { role: 'system', content: 'あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。' },
             { role: 'user', content: prompt }
           ],
           max_tokens: 500,
@@ -435,7 +435,7 @@ async function generateGroqMessage(prompt) {
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。" },
+            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。" },
             { role: "user", content: prompt }
           ],
           temperature: 0.7,
@@ -449,6 +449,7 @@ async function generateGroqMessage(prompt) {
         const content = json?.choices?.[0]?.message?.content?.trim();
         const cleaned = validateAndCleanLLMOutput(content);
         if (cleaned) return cleaned;
+        console.warn(`⚠️ Groq API (${model}): 出力が検証に失敗 (長さ: ${content?.length ?? 0}文字)`);
       }
     } catch (err) {
       console.warn(`⚠️ Groq API (${model}) エラー: ${err.message}`);
@@ -468,7 +469,7 @@ async function generatePollinationsMessage(prompt) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
-            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。" },
+            { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。" },
             { role: "user", content: prompt }
           ],
           model: model,
@@ -510,7 +511,7 @@ async function generateGitHubModelsMessage(prompt) {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。" },
+          { role: "system", content: "あなたは楽天ROOMで商品を紹介している人の立場で、自然な丸い口調で商品の良さを伝えてください。語尾は「〜です」「〜ます」「〜かもしれません」のような温かい丁寧語で。ギャルっぽい口調・ハート系絵文字（♡・💕・💗など）・極端な断定口調（「〜だ」「〜はずだ」）は使わないこと。必ず日本語のみで回答してください。" },
           { role: "user", content: prompt }
         ],
         temperature: 0.7
