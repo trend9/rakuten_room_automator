@@ -240,10 +240,11 @@ async function generateGeminiMessage(prompt) {
           if (cleaned) return cleaned;
           console.warn(`⚠️ Gemini API (${model}): 出力がバリデーションに失敗しました`);
         } else if (response.status === 429) {
-          console.warn(`⚠️ Gemini API (${model}) Rate limit (429)。5秒待機してリトライします...`);
-          await sleep(5000);
+          console.warn(`⚠️ Gemini API (${model}) Rate limit (429)。3秒待機してリトライします...`);
+          await sleep(3000);
         } else {
-          console.warn(`⚠️ Gemini API (${model}) エラー: ${response.status}`);
+          const errBody = await response.text().catch(() => '');
+          console.warn(`⚠️ Gemini API (${model}) エラー: ${response.status} | ${errBody.substring(0, 200)}`);
           break; // 429以外のエラーはモデル変更
         }
       } catch (err) {
@@ -310,6 +311,8 @@ async function generateOpenRouterMessage(prompt) {
 
 /** DuckDuckGo AI Chat による生成（キー不要・完全無料） */
 async function generateDuckDuckGoMessage(prompt) {
+  // GitHub ActionsのAzure IPからはvqdトークン取得がブロックされるためスキップ
+  if (process.env.GITHUB_ACTIONS === 'true') return null;
   // DuckDuckGo AI Chat公式API（キー不要）
   const models = ['gpt-4o-mini', 'claude-3-haiku-20240307', 'meta-llama/Llama-3-70b-chat-hf', 'mistralai/Mixtral-8x7B-Instruct-v0.1'];
   for (const model of models) {
@@ -422,7 +425,7 @@ async function generateGroqMessage(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
-  const models = ["llama-3.3-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"];
+  const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "llama3-8b-8192"];
   for (const model of models) {
     try {
       console.log(`🤖 GROQ_API_KEY検出。Groq API (${model}) でコメントを生成中...`);
@@ -449,7 +452,10 @@ async function generateGroqMessage(prompt) {
         const content = json?.choices?.[0]?.message?.content?.trim();
         const cleaned = validateAndCleanLLMOutput(content);
         if (cleaned) return cleaned;
-        console.warn(`⚠️ Groq API (${model}): 出力が検証に失敗 (長さ: ${content?.length ?? 0}文字)`);
+        console.warn(`⚠️ Groq API (${model}): 出力が検証に失敗 (長さ: ${content?.length ?? 0}文字, 先頭: ${content?.substring(0,80)})`);
+      } else {
+        const errText = await response.text().catch(() => '');
+        console.warn(`⚠️ Groq API (${model}) HTTPエラー: ${response.status} ${errText.substring(0, 150)}`);
       }
     } catch (err) {
       console.warn(`⚠️ Groq API (${model}) エラー: ${err.message}`);
@@ -460,6 +466,8 @@ async function generateGroqMessage(prompt) {
 
 /** Pollinations AI によるPOST直接通信（エラー出力を強化） */
 async function generatePollinationsMessage(prompt) {
+  // GitHub Actions環境では402/404が続くためスキップ
+  if (process.env.GITHUB_ACTIONS === 'true') return null;
   const models = ["openai", "qwen-coder", "llama"];
   for (const model of models) {
     try {
