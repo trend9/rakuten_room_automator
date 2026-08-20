@@ -24,7 +24,7 @@
       "url": "https://item.rakuten.co.jp/cosme-link/y4987241169627/",
       "title": "パナソニック 美顔器 バイタリフト かっさ 美容家電 高機能 フェイスケア エイジングケア",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "failed",
+      "status": "room_incompatible",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "33500円",
       "imageUrl": "https://r.r10s.jp/com/inc/home/20080930/spt/common/img/20180702_ogp.png",
@@ -34,7 +34,7 @@
       "url": "https://item.rakuten.co.jp/dyson/386828-01/",
       "title": "ダイソン Dyson Supersonic Ionic ヘアドライヤー 高級ドライヤー 大風量 速乾 美髪",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "failed",
+      "status": "room_incompatible",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "45800円",
       "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/dyson/logo/logo1n.jpg?_ex=200x200",
@@ -44,7 +44,7 @@
       "url": "https://item.rakuten.co.jp/roborock-japan/roborock-s8pro/",
       "title": "ロボット掃除機 Roborock S8 Pro Ultra 自動ゴミ収集 水拭き 全自動 便利家電",
       "addedAt": "2026-07-31T15:28:33.723Z",
-      "status": "failed",
+      "status": "room_incompatible",
       "genre": "絶品スイーツ・便利家電・美容家電",
       "targetPrice": "98000円",
       "imageUrl": "https://r.r10s.jp/com/inc/home/20080930/spt/common/img/20180702_ogp.png",
@@ -428,5 +428,6 @@
     "https://item.rakuten.co.jp/howzit/cbd-111/",
     "https://item.rakuten.co.jp/victoriancafe/10000013/",
     "https://item.rakuten.co.jp/sucreyshop/bb02103f/"
-  ]
+  ],
+  "pending": []
 }

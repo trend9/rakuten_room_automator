@@ -960,18 +960,25 @@ async function postOneProduct(pendingProduct, data) {
     const afterWarpTitle = await page.title().catch(() => '');
     console.log(`📍 遷移後URL: ${afterWarpUrl} | タイトル: ${afterWarpTitle}`);
 
-    // ログインチェック（セッション切れの判定）
+    // ── URL判定: /mix/items = ROOMブラウジング画面（エディター非対応商品）→即スキップ ──
     const checkUrl = page.url();
-    // /mix, /recommend, /items/create, /items/new, /kore のいずれかが含まれていればOK
-    const validEditorPaths = ['/mix', '/recommend', '/items/create', '/items/new', '/kore', 'room.rakuten.co.jp'];
-    const isValidEditor = validEditorPaths.some(path => checkUrl.includes(path));
+    if (checkUrl.includes('/mix/items')) {
+      console.warn(`⚠️ この商品はROOMに対応していません（/mix/items → ROOM未登録商品）。永続スキップします。`);
+      pendingProduct.status = 'room_incompatible'; // failed復活ロジックの対象外
+      if (!data.history.includes(pendingProduct.url)) {
+        data.history.push(pendingProduct.url);
+      }
+      saveQueue(data);
+      return 'failed';
+    }
+    // /mix/collect = 正規エディター ✅
+    if (checkUrl.includes('/mix/collect')) {
+      console.log('✅ /mix/collect エディター確認。投稿処理を続行します。');
+    }
     // ログインページに飛ばされた場合のみセッション切れと判定
     const isLoginPage = checkUrl.includes('/login') || checkUrl.includes('/mypage/login') || checkUrl.includes('login.rakuten') || await page.locator('input[type="password"]').count() > 0;
     if (isLoginPage) {
       throw new Error(`セッション切れ。ログインページ(${checkUrl})にリダイレクトされました。再度 npm run auth を実行してください。`);
-    }
-    if (!isValidEditor) {
-      console.warn(`⚠️ 想定外のURL(${checkUrl})に遷移しましたが、続行を試みます。`);
     }
 
     await takeScreenshot(page, 'step2_editor_loaded');
@@ -1371,12 +1378,13 @@ async function run() {
   // 重複スキップした商品URLのセット（同ラン内での無限ループ防止）
   const skippedUrls = new Set();
 
-  // 実行開始時に全failedを pending に復活させる（スキップ後も新しい候補が見つかるように）
+  // 実行開始時に全failedを pending に復活させる（room_incompatible以外）
   {
     const data = loadQueue();
     let revived = 0;
     data.queue.forEach(p => {
-      if (p.status === 'failed') {
+      // 'failed' のみ復活。room_incompatibleは永続スキップ
+      if (p.status === 'failed' && p.status !== 'room_incompatible') {
         p.status = 'pending';
         revived++;
       }
