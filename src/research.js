@@ -18,6 +18,7 @@ const QUEUE_PATH = path.resolve('storage/queue.json');
 
 // ターゲット外商品の除外キーワード一覧
 const EXCLUDE_KEYWORDS = [
+  'カーペット', 'ラグ', '絨毯', 'シャギーラグ', 'マット', '訪問着', '中古', '置物', '風水', '貔貅', '観葉植物', '生ぶり', '鰤', 
   'playstation', 'ps5', 'ps4', 'dvd', 'blu-ray', 'ゲーム', '初回生産限定',
   'book', 'magazine', 'コミック', '漫画', 'ムック', '雑誌',
   '炭酸水', '500ml', '骨取り', 'お米', '白米', '無洗米', '天然水', 'ブレンド米',
@@ -211,48 +212,24 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-    const targetUrls = [
-    {
-      name: '人気スイーツ（1,000円〜30,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E4%BA%BA%E6%B0%97%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=1000&max=30000&f=1',
-    },
-    {
-      name: 'チョコレート（1,000円〜30,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%83%81%E3%83%A7%E3%82%B3%E3%83%AC%E3%83%BC%E3%83%88/?min=1000&max=30000&f=1',
-    },
-    {
-      name: 'スイーツ（200円〜30,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=200&max=30000&f=1',
-    },
-    {
-      name: '人気デザート（500円〜30,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E4%BA%BA%E6%B0%97%E3%83%87%E3%82%96%E3%83%BC%E3%83%88/?min=500&max=30000&f=1',
-    },
-    {
-      name: 'コスメ（1,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B3%E3%82%B9%E3%83%A1/?min=1000&max=50000&f=1',
-    },
-    {
-      name: '化粧品（1,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E5%8C%96%E7%B2%A7%E5%93%81/?min=1000&max=50000&f=1',
-    },
-    {
-      name: 'デパコス（1,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%83%87%E3%83%91%E3%82%B3%E3%82%B9/?min=1000&max=50000&f=1',
-    },
-    {
-      name: '制汗剤（1,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E5%88%B6%E6% sweat%E5%89%A4/?min=1000&max=50000&f=1'.replace('sweat', '%B1%97'),
-    },
-    {
-      name: 'ふるさと納税（2,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%B5%E3%82%8B%E3%81%95%E3%81%A8%E7%B4%8D%E7%A8%8E/?min=2000&max=50000&f=1',
-    },
-    {
-      name: 'おせち（1,000円〜50,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E3%81%9B%E3%81%A1/?min=1000&max=50000&f=1',
-    }
+      const rawKeywords = [
+    { name: '人気スイーツ（1,000円〜30,000円）', query: '人気スイーツ', min: 1000, max: 30000 },
+    { name: 'チョコレート（1,000円〜30,000円）', query: 'チョコレート', min: 1000, max: 30000 },
+    { name: 'スイーツ（200円〜30,000円）', query: 'スイーツ', min: 200, max: 30000 },
+    { name: '人気デザート（500円〜30,000円）', query: '人気デザート', min: 500, max: 30000 },
+    { name: 'コスメ（1,000円〜50,000円）', query: 'コスメ', min: 1000, max: 50000 },
+    { name: '化粧品（1,000円〜50,000円）', query: '化粧品', min: 1000, max: 50000 },
+    { name: 'EMS（1,000円〜50,000円）', query: 'EMS 美容', min: 1000, max: 50000 },
+    { name: 'デパコス（1,000円〜50,000円）', query: 'デパコス', min: 1000, max: 50000 },
+    { name: '制汗剤（1,000円〜50,000円）', query: '制汗剤', min: 1000, max: 50000 },
+    { name: 'ふるさと納税（2,000円〜50,000円）', query: 'ふるさと納税', min: 2000, max: 50000 },
+    { name: 'おせち（1,000円〜50,000円）', query: 'おせち', min: 1000, max: 50000 },
   ];
+
+  const targetUrls = rawKeywords.map(k => ({
+    name: k.name,
+    url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&f=1`
+  }));
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
