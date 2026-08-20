@@ -424,7 +424,7 @@ async function generateGroqMessage(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
-  const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
+  const models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b"];
   for (const model of models) {
     try {
       console.log(`🤖 GROQ_API_KEY検出。Groq API (${model}) でコメントを生成中...`);
@@ -997,37 +997,65 @@ async function postOneProduct(pendingProduct, data) {
     await takeScreenshot(page, 'step3_name_checked');
 
     // ── ステップ4: コメント入力欄が表示されるまでリトライ付きで待機 ──
-    const commentAreaSelector = 'textarea[placeholder*="コメント"], textarea[placeholder*="オススメ"], textarea[placeholder*="オススメポイント"], textarea[placeholder*="魅力"], textarea[placeholder*="紹介"], textarea';
+    // textarea / contenteditable / div[role=textbox] 全対応
+    const commentAreaSelectors = [
+      'textarea[placeholder*="コメント"]',
+      'textarea[placeholder*="オススメ"]',
+      'textarea[placeholder*="オススメポイント"]',
+      'textarea[placeholder*="魅力"]',
+      'textarea[placeholder*="紹介"]',
+      'textarea[placeholder*="ひとこと"]',
+      'textarea[placeholder*="message"]',
+      'textarea',
+      'div[role="textbox"]',
+      '[contenteditable="true"]',
+      'div[contenteditable]',
+    ];
     let commentArea = null;
+    let commentIsContentEditable = false;
     console.log('⏳ コメント入力欄が表示されるのを待機しています...');
-    
-    for (let attempt = 1; attempt <= 5; attempt++) {
-      await page.waitForSelector(commentAreaSelector, { timeout: 10000 }).catch(() => {});
-      const area = page.locator(commentAreaSelector).first();
-      if (await area.count() > 0 && await area.isVisible()) {
-        commentArea = area;
-        break;
+
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      // 重複チェック
+      if (await checkDuplicateModal()) return 'duplicate';
+
+      for (const sel of commentAreaSelectors) {
+        const el = page.locator(sel).first();
+        if (await el.count() > 0 && await el.isVisible().catch(() => false)) {
+          commentArea = el;
+          commentIsContentEditable = sel.includes('contenteditable') || sel.includes('role="textbox"');
+          console.log(`✅ コメント欄検出: セレクター="${sel}"`);
+          break;
+        }
       }
-      console.log(`⏳ コメント欄が見つかりません。リトライ中... (${attempt}/5)`);
-      await page.waitForTimeout(2000);
-      
-      // もし重複モーダルが割り込んで出現していれば、ここで再度閉じる処理を走らせる
-      if (await checkDuplicateModal()) {
-        return 'duplicate';
+      if (commentArea) break;
+
+      console.log(`⏳ コメント欄が見つかりません。リトライ中... (${attempt}/6)`);
+      await page.waitForTimeout(3000);
+
+      // デバッグ: 5回目でページのinput/textarea要素を全部ログ出力
+      if (attempt === 5) {
+        const debugInfo = await page.evaluate(() => {
+          const inputs = Array.from(document.querySelectorAll('textarea, input, [contenteditable], [role="textbox"]'));
+          return inputs.slice(0, 10).map(el => ({
+            tag: el.tagName,
+            type: el.type || '',
+            placeholder: el.placeholder || '',
+            role: el.getAttribute('role') || '',
+            contenteditable: el.getAttribute('contenteditable') || '',
+            visible: el.offsetParent !== null,
+            id: el.id || '',
+            className: el.className?.substring(0, 60) || '',
+          }));
+        }).catch(() => []);
+        console.log('🔍 [デバッグ] 画面上の入力要素:', JSON.stringify(debugInfo, null, 2));
       }
     }
 
-    if (!commentArea) {
-      // 最終手段: 画面上の全 textarea 要素から取得
-      const fallbackTextareas = page.locator('textarea');
-      if (await fallbackTextareas.count() > 0) {
-        commentArea = fallbackTextareas.first();
-        console.log('💡 汎用 textarea セレクターでコメント欄を検出しました。');
-      }
-    }
-
-    if (!commentArea || !(await commentArea.isVisible())) {
-      throw new Error('コメント入力欄 (textarea) が表示されませんでした。タイムアウトまたはページ構成の変更エラー。');
+    if (!commentArea || !(await commentArea.isVisible().catch(() => false))) {
+      // スクリーンショット撮影してからエラー
+      await takeScreenshot(page, 'step4_textarea_notfound');
+      throw new Error('コメント入力欄が表示されませんでした。楽天ROOMのUI変更の可能性があります（デバッグ画像: step4_textarea_notfound.png）');
     }
 
     if (!customComment || customComment.trim() === '') {
@@ -1037,12 +1065,23 @@ async function postOneProduct(pendingProduct, data) {
     console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
     await commentArea.focus();
     await commentArea.click({ force: true }).catch(() => {});
-    await commentArea.evaluate((el, val) => {
-      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
-      nativeSetter.call(el, val);
-      el.dispatchEvent(new Event('input',  { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, customComment);
+    if (commentIsContentEditable) {
+      // contenteditable の場合は execCommand or innerText で入力
+      await commentArea.evaluate((el, val) => {
+        el.focus();
+        el.innerText = val;
+        el.dispatchEvent(new Event('input',  { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }, customComment);
+    } else {
+      // textarea の場合は React nativeSetter
+      await commentArea.evaluate((el, val) => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+        nativeSetter.call(el, val);
+        el.dispatchEvent(new Event('input',  { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }, customComment);
+    }
     await page.waitForTimeout(1000);
     
     // 入力の検証とPlaywrightによる直接フォールバック
