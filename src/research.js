@@ -288,92 +288,41 @@ async function fetchByScrapingWithImages(data) {
           }));
         });
 
-        // 各商品を検証してキューへ
-        const valPage = await context.newPage();
-        try {
-          for (const item of items) {
-            if (newProducts.length >= 25) break;
+        // 各商品を一覧から即座にキューへ追加（画像・個別アクセスの待ち時間完全カット）
+        for (const item of items) {
+          if (newProducts.length >= 25) break;
 
-            let url = item.href;
-            if (!url.endsWith('/')) url += '/';
+          let url = item.href;
+          if (!url.endsWith('/')) url += '/';
 
-            const targetKey = extractProductKey(url);
-            const inQueue = data.queue.some(p => {
-              const k = extractProductKey(p.url);
-              return k && k === targetKey;
-            });
-            const inHistory = (data.history || []).some(h => {
-              const k = extractProductKey(h);
-              return k && k === targetKey;
-            });
-            if (inQueue || inHistory) continue;
+          const targetKey = extractProductKey(url);
+          const inQueue = data.queue.some(p => {
+            const k = extractProductKey(p.url);
+            return k && k === targetKey;
+          });
+          const inHistory = (data.history || []).some(h => {
+            const k = extractProductKey(h);
+            return k && k === targetKey;
+          });
+          if (inQueue || inHistory) continue;
 
-            let title = item.text.replace(/\s+/g, ' ').replace(/[\n\r]/g, '').trim();
-            title = title.replace(/^\d+位\s*/, '').replace(/レビュー高評価|スーパーDEAL|送料無料/gi, '').trim();
-            if (title.length < 15) continue;
-            if (isExcludedProduct(title, url)) {
-              console.log(`  ❌ 除外: ${title.substring(0, 40)}`);
-              continue;
-            }
-
-            // 商品ページのOGP画像を取得（スクレイピング）
-            let imageUrl = item.imgUrl || null;
-            if (!imageUrl) {
-              try {
-                await valPage.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-                await valPage.waitForTimeout(4000);
-
-                // OGP画像取得
-                imageUrl = await valPage.evaluate(() => {
-                  const og = document.querySelector('meta[property="og:image"]');
-                  if (og?.content) return og.content.split('?')[0];
-                  const r10 = document.querySelector('img[src*="r10s.jp"]');
-                  if (r10?.src) return r10.src.split('?')[0];
-                  return null;
-                }).catch(() => null);
-
-                // 在庫チェック (テキスト + 特定のボタン要素の有無)
-                const bodyText = await valPage.innerText('body').catch(() => '');
-                const cartButtonCount = await valPage.locator('button, input, a').evaluateAll(elements => {
-                  return elements.filter(el => {
-                    const text = (el.innerText || el.value || '').trim();
-                    return text.includes('買い物かごに入れる') ||
-                      text.includes('カートに入れる') ||
-                      text.includes('ご購入手続き') ||
-                      text.includes('寄付を申し込む') ||
-                      text.includes('かごに追加') ||
-                      text.includes('カートに追加');
-                  }).length;
-                }).catch(() => 0);
-
-                const hasCart = bodyText.includes('買い物かごに入れる') ||
-                  bodyText.includes('カートに入れる') ||
-                  bodyText.includes('ご購入手続き') ||
-                  bodyText.includes('寄付を申し込む') ||
-                  cartButtonCount > 0;
-
-                if (!hasCart) {
-                  console.log(`  ❌ 売切れ・店舗TOPへ転送を検出: ${title.substring(0, 40)}`);
-                  continue;
-                }
-              } catch (e) {
-                console.warn(`  ⚠️ 検証エラー: ${e.message}`);
-                continue;
-              }
-            }
-
-            newProducts.push({
-              url,
-              title: title.substring(0, 80),
-              addedAt: new Date().toISOString(),
-              status: 'pending',
-              genre: '実用インテリア・キッチン・おしゃれスイーツ',
-              imageUrl: imageUrl || null,
-            });
-            console.log(`  ✅ 追加: ${title.substring(0, 50)} | 画像: ${imageUrl ? '✓' : '×'}`);
+          let title = item.text.replace(/\s+/g, ' ').replace(/[\n\r]/g, '').trim();
+          title = title.replace(/^\d+位\s*/, '').replace(/レビュー高評価|スーパーDEAL|送料無料/gi, '').trim();
+          if (title.length < 15) continue;
+          if (isExcludedProduct(title, url)) {
+            console.log(`  ❌ 除外: ${title.substring(0, 40)}`);
+            continue;
           }
-        } finally {
-          await valPage.close().catch(() => { });
+
+          newProducts.push({
+            url,
+            title: title.substring(0, 80),
+            addedAt: new Date().toISOString(),
+            status: 'pending',
+            genre: target.name,
+            imageUrl: item.imgUrl || null,
+          });
+          console.log(`  ✅ 追加: ${title.substring(0, 50)}`);
         }
 
         if (newProducts.length >= 25) break;
