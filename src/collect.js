@@ -704,7 +704,7 @@ async function getRakutenImage(url) {
   
   try {
     console.log(`📡 楽天APIから画像URLを取得中... (itemCode: ${itemCode})`);
-    const apiUrl = `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706`;
+    const apiUrl = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601`;
     const params = new URLSearchParams({
       applicationId: appId,
       itemCode: itemCode,
@@ -916,7 +916,7 @@ async function postOneProduct(pendingProduct, data) {
       const shopSlug = extractItemCodeFromUrl(targetUrl); // shop:slug形式
       if (appId && shopSlug) {
         try {
-          const apiUrl = `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?applicationId=${appId}&itemCode=${encodeURIComponent(shopSlug)}&format=json`;
+          const apiUrl = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?applicationId=${appId}&itemCode=${encodeURIComponent(shopSlug)}&format=json`;
           const res = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
           if (res.ok) {
             const json = await res.json();

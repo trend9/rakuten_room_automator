@@ -22,7 +22,7 @@ const EXCLUDE_KEYWORDS = [
   'book', 'magazine', 'コミック', '漫画', 'ムック', '雑誌',
   '炭酸水', '500ml', '骨取り', 'お米', '白米', '無洗米', '天然水', 'ブレンド米',
   'コンタクトレンズ', 'ワンデーアキュビュー', 'カラコン', 'エバーカラー', 'teamo', '1day',
-  'プロテイン', 'おむつ', 'オムツ', 'パンパース', 'メリーズ', 'マミーポコ',
+  'おむつ', 'オムツ', 'パンパース', 'メリーズ', 'マミーポコ',
   '医薬部外品', 'シャンプー', 'トリートメント', 'ブラトップ', 'キャミソール',
   'タンクトップ', '哺乳瓶', 'ミルク 粉', '離乳食',
   'ぬいぐるみ', 'マスコット', 'キャラクター', 'おもちゃ', '玩具', 'フィギュア',
@@ -90,11 +90,11 @@ async function fetchFromRakutenAPI(data) {
   console.log(`✅ RAKUTEN_APP_ID を検出しました。楽天APIリサーチを開始します。`);
 
   // ランダムに2キーワードを選んで並列検索
-  const shuffled = [...TARGET_KEYWORDS].sort(() => Math.random() - 0.5).slice(0, 2);
+  const shuffled = [...TARGET_KEYWORDS].sort(() => Math.random() - 0.5).slice(0, 5);
   const newProducts = [];
 
   for (const target of shuffled) {
-    if (newProducts.length >= 15) break;
+    if (newProducts.length >= 30) break;
 
     console.log(`\n📡 楽天API検索中: "${target.query}" (${target.minPrice}〜${target.maxPrice}円)`);
 
@@ -104,10 +104,11 @@ async function fetchFromRakutenAPI(data) {
       minPrice: target.minPrice.toString(),
       maxPrice: target.maxPrice.toString(),
       hits: '50',
-      sort: 'standard',
+      sort: Math.random() > 0.5 ? '-reviewCount' : 'standard',
       format: 'json',
     });
     if (affiliateId) params.append('affiliateId', affiliateId);
+    if (accessKey) params.append('accessKey', accessKey);
 
     const fetchHeaders = {};
     if (accessKey) {
@@ -116,7 +117,7 @@ async function fetchFromRakutenAPI(data) {
 
     try {
       const res = await fetch(
-        `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?${params}`,
+        `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?${params}`,
         {
           headers: fetchHeaders,
           signal: AbortSignal.timeout(20000)
@@ -138,7 +139,7 @@ async function fetchFromRakutenAPI(data) {
       console.log(`  📦 ${items.length} 件取得`);
 
       for (const wrapper of items) {
-        if (newProducts.length >= 5) break;
+        // if (newProducts.length >= 25) break;
 
         const item = wrapper.Item;
         if (!item) continue;
@@ -210,19 +211,47 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-  const targetUrls = [
+    const targetUrls = [
     {
-      name: '絶品お取り寄せスイーツ（3,000円〜30,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E5%8F%96%E3%82%8A%E5%AF%84%E3%81%9B%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=3000&max=30000&f=1',
+      name: '人気スイーツ（1,000円〜30,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E4%BA%BA%E6%B0%97%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=1000&max=30000&f=1',
     },
     {
-      name: '話題の便利家電・キッチン家電（5,000円〜100,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E4%BE%BF%E5%88%A9%E5%AE%B6%E9%9B%BB/?min=5000&max=100000&f=1',
+      name: 'チョコレート（1,000円〜30,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%83%81%E3%83%A7%E3%82%B3%E3%83%AC%E3%83%BC%E3%83%88/?min=1000&max=30000&f=1',
     },
     {
-      name: '人気の高級美容家電（5,000円〜100,000円）',
-      url: 'https://search.rakuten.co.jp/search/mall/%E7%BE%8E%E5%AE%B9%E5%AE%B6%E9%9B%BB/?min=5000&max=100000&f=1',
+      name: 'スイーツ（200円〜30,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B9%E3%82%A4%E3%83%BC%E3%83%84/?min=200&max=30000&f=1',
     },
+    {
+      name: '人気デザート（500円〜30,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E4%BA%BA%E6%B0%97%E3%83%87%E3%82%96%E3%83%BC%E3%83%88/?min=500&max=30000&f=1',
+    },
+    {
+      name: 'コスメ（1,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%82%B3%E3%82%B9%E3%83%A1/?min=1000&max=50000&f=1',
+    },
+    {
+      name: '化粧品（1,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E5%8C%96%E7%B2%A7%E5%93%81/?min=1000&max=50000&f=1',
+    },
+    {
+      name: 'デパコス（1,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%83%87%E3%83%91%E3%82%B3%E3%82%B9/?min=1000&max=50000&f=1',
+    },
+    {
+      name: '制汗剤（1,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E5%88%B6%E6% sweat%E5%89%A4/?min=1000&max=50000&f=1'.replace('sweat', '%B1%97'),
+    },
+    {
+      name: 'ふるさと納税（2,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%B5%E3%82%8B%E3%81%95%E3%81%A8%E7%B4%8D%E7%A8%8E/?min=2000&max=50000&f=1',
+    },
+    {
+      name: 'おせち（1,000円〜50,000円）',
+      url: 'https://search.rakuten.co.jp/search/mall/%E3%81%8A%E3%81%9B%E3%81%A1/?min=1000&max=50000&f=1',
+    }
   ];
 
   const browser = await chromium.launch({ headless: true });
@@ -240,7 +269,7 @@ async function fetchByScrapingWithImages(data) {
 
   try {
     for (const target of targetUrls.sort(() => Math.random() - 0.5)) {
-      if (newProducts.length >= 5) break;
+      if (newProducts.length >= 25) break;
 
       console.log(`\n🌐 ${target.name} をスクレイピング中...`);
       try {
@@ -286,7 +315,7 @@ async function fetchByScrapingWithImages(data) {
         const valPage = await context.newPage();
         try {
           for (const item of items) {
-            if (newProducts.length >= 5) break;
+            if (newProducts.length >= 25) break;
 
             let url = item.href;
             if (!url.endsWith('/')) url += '/';
@@ -370,7 +399,7 @@ async function fetchByScrapingWithImages(data) {
           await valPage.close().catch(() => { });
         }
 
-        if (newProducts.length >= 5) break;
+        if (newProducts.length >= 25) break;
       } catch (err) {
         console.warn(`  ⚠️ ${target.name} でエラー: ${err.message}`);
       }
