@@ -441,7 +441,7 @@ async function generateGroqMessage(prompt) {
             { role: "user", content: prompt }
           ],
           temperature: 0.7,
-          max_tokens: 500
+          max_tokens: 2000
         }),
         signal: AbortSignal.timeout(20000)
       });
@@ -851,7 +851,8 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     if (loaded) {
-      await page.waitForTimeout(2000);
+      // 動的コンテンツの読み込みを十分に待つ（5秒）
+      await page.waitForTimeout(5000);
       await takeScreenshot(page, 'step1_rakuten_loaded');
 
       const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
@@ -862,23 +863,77 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ── ステップ2: ROOMの投稿編集画面へ遷移 ──
-    // 第一選択: 楽天市場の商品ページから「ROOMに投稿」リンク（/mix?itemcode=...）を抽出する
+    // 第一選択: 楽天市場の商品ページ上の全ROOMリンクを検索
     let warpUrl = null;
     if (loaded) {
-      const roomLinkEl = page.locator('a[href*="room.rakuten.co.jp"]').first();
-      if (await roomLinkEl.count() > 0) {
-        const href = await roomLinkEl.getAttribute('href') || '';
-        if (href.includes('/mix') || href.includes('/recommend') || href.includes('itemcode=')) {
-          warpUrl = href;
-          console.log(`🎯 楽天市場の商品ページから公式ROOM投稿URLを抽出しました: ${warpUrl}`);
+      // 全ROOMリンクを取得して数値itemcodeを持つものを優先
+      const allRoomLinks = await page.locator('a[href*="room.rakuten.co.jp"]').all();
+      for (const el of allRoomLinks) {
+        const href = await el.getAttribute('href').catch(() => '');
+        if (href && href.includes('itemcode=')) {
+          // itemcodeが数値ベース（例: shop:12345）かチェック
+          const codeMatch = href.match(/itemcode=([^&]+)/);
+          if (codeMatch) {
+            const code = decodeURIComponent(codeMatch[1]);
+            const parts = code.split(':');
+            // 右辺が純粋な数値のものを優先
+            if (parts.length === 2 && /^d+$/.test(parts[1])) {
+              warpUrl = href;
+              console.log(`🎯 楽天市場の商品ページから公式ROOM投稿URLを抽出しました: ${warpUrl}`);
+              break;
+            } else if (!warpUrl) {
+              warpUrl = href; // 数値でなくても暫定的に保持
+            }
+          } else if (!warpUrl && (href.includes('/mix') || href.includes('/recommend'))) {
+            warpUrl = href;
+          }
         }
+      }
+      if (warpUrl && !/itemcode=.+:d+/.test(warpUrl)) {
+        console.log(`🎯 楽天市場の商品ページからROOM投稿URLを抽出しました（スラグ形式）: ${warpUrl}`);
       }
     }
 
-    // 第二選択: recommend.html を使用（shop名:slug形式のitemcodeはROOMエディターを開けないため）
+    // 第二選択: 商品ページ上の「コレ！」ボタンを探してクリック→URLをキャプチャ
+    if (!warpUrl && loaded) {
+      try {
+        const koreBtn = page.locator('a:has-text("コレ！"), button:has-text("コレ！"), a[data-ratid*="room"], a[href*="room.rakuten"]').first();
+        if (await koreBtn.count() > 0) {
+          const btnHref = await koreBtn.getAttribute('href').catch(() => null);
+          if (btnHref && btnHref.includes('room.rakuten')) {
+            warpUrl = btnHref;
+            console.log(`🎯 「コレ！」ボタンのhrefからURL取得: ${warpUrl}`);
+          }
+        }
+      } catch(e) {}
+    }
+
+    // 第三選択: 商品URLから mix?itemcode= を組み立て（数値IDが必要だがなければ試行）
+    // recommend.html はエディターが描画されないため使用しない
     if (!warpUrl) {
-      warpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
-      console.log(`💡 ROOMリンク未検出のため recommend.html 方式で遷移します: ${warpUrl}`);
+      // 楽天APIで正しいitemcodeを取得できるか試みる
+      const appId = process.env.RAKUTEN_APP_ID || process.env.RAKUTEN_APPLICATION_ID;
+      const shopSlug = extractItemCodeFromUrl(targetUrl); // shop:slug形式
+      if (appId && shopSlug) {
+        try {
+          const apiUrl = `https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?applicationId=${appId}&itemCode=${encodeURIComponent(shopSlug)}&format=json`;
+          const res = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
+          if (res.ok) {
+            const json = await res.json();
+            const item = json.Items?.[0]?.Item;
+            if (item?.itemCode) {
+              // 楽天APIから正規itemcode取得 (shop:12345 形式)
+              warpUrl = `https://room.rakuten.co.jp/mix?itemcode=${encodeURIComponent(item.itemCode)}&scid=we_room_upc60`;
+              console.log(`✅ 楽天APIから正規itemcode取得 → ROOMエディターURL: ${warpUrl}`);
+            }
+          }
+        } catch(e) {}
+      }
+      // それでも取得できなければフォールバック（試行のみ・エラーは許容）
+      if (!warpUrl && shopSlug) {
+        warpUrl = `https://room.rakuten.co.jp/mix?itemcode=${encodeURIComponent(shopSlug)}&scid=we_room_upc60`;
+        console.log(`💡 itemcode組み立てで試行します（失敗する可能性あり）: ${warpUrl}`);
+      }
     }
 
     console.log(`🚀 ROOMの投稿編集画面（ワープURL）へ遷移します:\n👉 ${warpUrl}`);
@@ -899,8 +954,11 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ダイアログやコンテンツの非同期表示を待つため少し待機
-    console.log('⏳ エディタ読み込み後の初期待機中 (3秒)...');
-    await page.waitForTimeout(3000);
+    console.log('⏳ エディタ読み込み後の初期待機中 (5秒)...');
+    await page.waitForTimeout(5000);
+    const afterWarpUrl = page.url();
+    const afterWarpTitle = await page.title().catch(() => '');
+    console.log(`📍 遷移後URL: ${afterWarpUrl} | タイトル: ${afterWarpTitle}`);
 
     // ログインチェック（セッション切れの判定）
     const checkUrl = page.url();
