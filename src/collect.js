@@ -449,9 +449,15 @@ async function generateGroqMessage(prompt) {
       if (response.ok) {
         const json = await response.json();
         const content = json?.choices?.[0]?.message?.content?.trim();
+        if (!content) {
+          // finish_reason を確認してなぜ空か調べる
+          const reason = json?.choices?.[0]?.finish_reason || 'unknown';
+          const usage = json?.usage ? JSON.stringify(json.usage) : '';
+          console.warn(`⚠️ Groq API (${model}): 空レスポンス (finish_reason=${reason} ${usage})`);
+        }
         const cleaned = validateAndCleanLLMOutput(content);
         if (cleaned) return cleaned;
-        console.warn(`⚠️ Groq API (${model}): 出力が検証に失敗 (長さ: ${content?.length ?? 0}文字, 先頭: ${content?.substring(0,80)})`);
+        if (content) console.warn(`⚠️ Groq API (${model}): 出力が検証に失敗 (長さ: ${content?.length ?? 0}文字, 先頭: ${content?.substring(0,80)})`);
       } else {
         const errText = await response.text().catch(() => '');
         console.warn(`⚠️ Groq API (${model}) HTTPエラー: ${response.status} ${errText.substring(0, 150)}`);
@@ -869,17 +875,10 @@ async function postOneProduct(pendingProduct, data) {
       }
     }
 
-    // 第二選択: 抽出できなかった場合の自動組み立てフォールバック（新形式URL）
+    // 第二選択: recommend.html を使用（shop名:slug形式のitemcodeはROOMエディターを開けないため）
     if (!warpUrl) {
-      const itemCode = extractItemCodeFromUrl(targetUrl);
-      if (itemCode) {
-        warpUrl = `https://room.rakuten.co.jp/mix?itemcode=${encodeURIComponent(itemCode)}&scid=we_room_upc60`;
-        console.log(`💡 商品URLから公式ROOM投稿URL（新形式）を組み立てました: ${warpUrl}`);
-      } else {
-        // 第三選択: 従来のrecommend.html遷移
-        warpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
-        console.log(`⚠️ itemcodeの抽出に失敗したため、旧ワープURLを使用します: ${warpUrl}`);
-      }
+      warpUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
+      console.log(`💡 ROOMリンク未検出のため recommend.html 方式で遷移します: ${warpUrl}`);
     }
 
     console.log(`🚀 ROOMの投稿編集画面（ワープURL）へ遷移します:\n👉 ${warpUrl}`);
@@ -976,7 +975,7 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ── ステップ3: 商品名入力欄の自動穴埋め ──
-    const nameInputSelector = 'input[placeholder*="商品名"], input[placeholder*="タイトル"], input[name*="title"], input[name*="name"], input[type="text"]';
+    const nameInputSelector = 'input[placeholder*="商品名"], input[placeholder*="タイトル"], input[name*="title"], input[name*="name"]';
     const nameInput = page.locator(nameInputSelector).first();
     if (await nameInput.isVisible()) {
       const currentName = await nameInput.inputValue();
@@ -1053,9 +1052,33 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     if (!commentArea || !(await commentArea.isVisible().catch(() => false))) {
-      // スクリーンショット撮影してからエラー
       await takeScreenshot(page, 'step4_textarea_notfound');
-      throw new Error('コメント入力欄が表示されませんでした。楽天ROOMのUI変更の可能性があります（デバッグ画像: step4_textarea_notfound.png）');
+      // ── リカバリー: recommend.html?url= で再試行 ──
+      const recoverUrl = `https://room.rakuten.co.jp/recommend/recommend.html?url=${encodeURIComponent(targetUrl)}`;
+      if (!warpUrl.includes('recommend.html')) {
+        console.warn(`⚠️ エディター未検出。recommend.html 方式でリカバリーします: ${recoverUrl}`);
+        try {
+          await page.goto(recoverUrl, { waitUntil: 'load', timeout: 50000 });
+          await page.waitForTimeout(4000);
+          // 重複チェック再実行
+          if (await checkDuplicateModal()) return 'duplicate';
+          // 再度コメント欄を探す
+          for (const sel of commentAreaSelectors) {
+            const el = page.locator(sel).first();
+            if (await el.count() > 0 && await el.isVisible().catch(() => false)) {
+              commentArea = el;
+              commentIsContentEditable = sel.includes('contenteditable') || sel.includes('role="textbox"');
+              console.log(`✅ [リカバリー] コメント欄検出: "${sel}"`);
+              break;
+            }
+          }
+        } catch(recErr) {
+          console.warn(`⚠️ リカバリー遷移失敗: ${recErr.message}`);
+        }
+      }
+      if (!commentArea || !(await commentArea.isVisible().catch(() => false))) {
+        throw new Error('コメント入力欄が表示されませんでした。楽天ROOMのUI変更の可能性があります（デバッグ画像: step4_textarea_notfound.png）');
+      }
     }
 
     if (!customComment || customComment.trim() === '') {
