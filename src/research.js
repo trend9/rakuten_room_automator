@@ -365,7 +365,7 @@ async function run() {
   // 古い重複・非対応ステータスの商品をキューから除外してスリム化
   data.queue = data.queue.filter(p => p.status === 'pending');
 
-  console.log(`📋 現在の pending 件数: ${pendingCount} 件。新商品を補充します。`);
+  console.log(`📋 現在の pending 件数: ${validPending.length} 件。新商品を補充します。`);
 
   // 1. 楽天API（優先）
   let newProducts = await fetchFromRakutenAPI(data);

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { extractProductKey } from './sync.js';
+import { execSync } from 'child_process';
 
 dotenv.config();
 
@@ -1412,9 +1413,21 @@ async function run() {
   }
 
   for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
-    const data = loadQueue();
+    let data = loadQueue();
     // スキップ済みを除いた次の pending 商品を選択
     let pendingProduct = data.queue.find(p => p.status === 'pending' && !skippedUrls.has(p.url));
+
+    // 万が一キューが空の場合は、その場で即座にリサーチを呼び出して新商品を自動補充
+    if (!pendingProduct) {
+      console.log('⚠️ キューに投稿可能な商品がありません。即座にリサーチを実行して商品を自動補充します...');
+      try {
+        execSync('node src/research.js', { stdio: 'inherit' });
+        data = loadQueue();
+        pendingProduct = data.queue.find(p => p.status === 'pending' && !skippedUrls.has(p.url));
+      } catch (err) {
+        console.warn('⚠️ 自動リサーチのオンデマンド実行に失敗しました:', err.message);
+      }
+    }
 
     if (!pendingProduct) {
       console.log(`💡 投稿待ちの商品がありません。今回は ${postedCount} 件投稿して終了します。`);
