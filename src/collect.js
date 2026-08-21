@@ -968,8 +968,8 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     // ダイアログやコンテンツの非同期表示を待つため少し待機
-    console.log('⏳ エディタ読み込み後の初期待機中 (5秒)...');
-    await page.waitForTimeout(5000);
+    console.log('⏳ エディタ読み込み待機中...');
+    await page.waitForTimeout(2500);
     const afterWarpUrl = page.url();
     const afterWarpTitle = await page.title().catch(() => '');
     console.log(`📍 遷移後URL: ${afterWarpUrl} | タイトル: ${afterWarpTitle}`);
@@ -1391,6 +1391,8 @@ async function run() {
   const postedProducts = [];
   // 重複スキップした商品URLのセット（同ラン内での無限ループ防止）
   const skippedUrls = new Set();
+  let duplicateSkipCount = 0;
+  const MAX_DUPLICATE_SKIPS_PER_RUN = 5; // 1回の実行で重複スキップは最大5件までに抑えてタイムアウトを完全防止
 
   // 実行開始時に全failedを pending に復活させる（room_incompatible以外）
   {
@@ -1432,10 +1434,15 @@ async function run() {
         roomUrl: pendingProduct.roomUrl  // ← 自分のROOM URL
       });
     } else if (result === 'duplicate') {
-      // 重複はスキップリストに追加して次の商品へ（ラウンドを消費せずループ継続）
       console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。次の商品を探します。`);
       skippedUrls.add(pendingProduct.url);
-      // 無限ループ防止: キュー内の全pendingがスキップ済みになったら終了
+      duplicateSkipCount++;
+
+      if (duplicateSkipCount >= MAX_DUPLICATE_SKIPS_PER_RUN) {
+        console.log(`⚠️ 重複検知が連続${MAX_DUPLICATE_SKIPS_PER_RUN}件に達しました。アクションのタイムアウトを防ぐためコレ！を終了し、次回リサーチで新商品を一新します。`);
+        break;
+      }
+
       const remainingPending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
       if (remainingPending.length === 0) {
         console.log('💡 残りの投稿候補がすべて重複済みです。終了します。');

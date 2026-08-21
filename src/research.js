@@ -226,10 +226,13 @@ async function fetchByScrapingWithImages(data) {
     { name: 'おせち（1,000円〜50,000円）', query: 'おせち', min: 1000, max: 50000 },
   ];
 
-  const targetUrls = rawKeywords.map(k => ({
-    name: k.name,
-    url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&f=1`
-  }));
+  const targetUrls = rawKeywords.map(k => {
+    const pageNum = Math.floor(Math.random() * 4) + 1; // 1〜4ページ目をランダム選択
+    return {
+      name: `${k.name} (p.${pageNum})`,
+      url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&p=${pageNum}&f=1`
+    };
+  });
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -346,12 +349,21 @@ async function run() {
   console.log('🔍 トレンド商品の自動リサーチを開始します...');
 
   const data = loadQueue();
-  const pendingCount = data.queue.filter(p => p.status === 'pending').length;
+  // history（重複判定済み）に含まれていない真のpending件数をカウント
+  const existingKeys = new Set((data.history || []).map(u => extractProductKey(u)).filter(Boolean));
+  const validPending = data.queue.filter(p => {
+    if (p.status !== 'pending') return false;
+    const k = extractProductKey(p.url);
+    return !existingKeys.has(k);
+  });
 
-  if (pendingCount >= 20) {
-    console.log(`💡 pending 商品が ${pendingCount} 件あります。新規リサーチをスキップします。`);
+  if (validPending.length >= 15) {
+    console.log(`💡 有効な pending 商品が ${validPending.length} 件あります。新規リサーチをスキップします。`);
     process.exit(0);
   }
+
+  // 古い重複・非対応ステータスの商品をキューから除外してスリム化
+  data.queue = data.queue.filter(p => p.status === 'pending');
 
   console.log(`📋 現在の pending 件数: ${pendingCount} 件。新商品を補充します。`);
 
