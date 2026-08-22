@@ -70,7 +70,7 @@ const TARGET_KEYWORDS = [
   { query: '美容家電', minPrice: 1000, maxPrice: 50000 },
   { query: 'コスメ', minPrice: 1000, maxPrice: 50000 },
   { query: '化粧品', minPrice: 1000, maxPrice: 50000 },
-  { query: 'EMS', minPrice: 1000, maxPrice: 50000 },
+  { query: 'お菓子', minPrice: 500, maxPrice: 50000 },
   { query: 'デパコス', minPrice: 1000, maxPrice: 50000 },
   { query: '制汗剤', minPrice: 1000, maxPrice: 50000 },
   // 🎁 その他
@@ -219,7 +219,7 @@ async function fetchByScrapingWithImages(data) {
     { name: '人気デザート（500円〜30,000円）', query: '人気デザート', min: 500, max: 30000 },
     { name: 'コスメ（1,000円〜50,000円）', query: 'コスメ', min: 1000, max: 50000 },
     { name: '化粧品（1,000円〜50,000円）', query: '化粧品', min: 1000, max: 50000 },
-    { name: 'EMS（1,000円〜50,000円）', query: 'EMS 美容', min: 1000, max: 50000 },
+    { name: 'お菓子（500円〜50,000円）', query: 'お菓子', min: 500, max: 50000 },
     { name: 'デパコス（1,000円〜50,000円）', query: 'デパコス', min: 1000, max: 50000 },
     { name: '制汗剤（1,000円〜50,000円）', query: '制汗剤', min: 1000, max: 50000 },
     { name: 'ふるさと納税（2,000円〜50,000円）', query: 'ふるさと納税', min: 2000, max: 50000 },
