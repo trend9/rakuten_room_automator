@@ -1392,6 +1392,9 @@ async function run() {
   const postedProducts = [];
   // 重複スキップした商品URLのセット（同ラン内での無限ループ防止）
   const skippedUrls = new Set();
+  const postedGenres = new Set();
+  const postedShops = new Set();
+  const postedTitles = [];
   let duplicateSkipCount = 0;
   const MAX_DUPLICATE_SKIPS_PER_RUN = 5; // 1回の実行で重複スキップは最大5件までに抑えてタイムアウトを完全防止
 
@@ -1414,8 +1417,34 @@ async function run() {
 
   for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
     let data = loadQueue();
-    // スキップ済みを除いた次の pending 商品を選択
-    let pendingProduct = data.queue.find(p => p.status === 'pending' && !skippedUrls.has(p.url));
+    // スキップ済みを除いた pending 商品リスト
+    const availablePending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
+
+    // ジャンル・店舗・タイトルが重複しない商品を優先探索
+    let pendingProduct = availablePending.find(p => {
+      const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
+      const genre = p.genre || '';
+      const titlePrefix = p.title?.substring(0, 15) || '';
+
+      const isSameGenre = genre && postedGenres.has(genre);
+      const isSameShop = shop && postedShops.has(shop);
+      const isSimilarTitle = postedTitles.some(t => t && titlePrefix && (t.startsWith(titlePrefix) || titlePrefix.startsWith(t)));
+
+      return !isSameGenre && !isSameShop && !isSimilarTitle;
+    });
+
+    // 理想的なバラバラ候補が見つからない場合は、ショップ被りのみを避けて選択
+    if (!pendingProduct) {
+      pendingProduct = availablePending.find(p => {
+        const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
+        return !postedShops.has(shop);
+      });
+    }
+
+    // それでもなければ残りの pending から選択
+    if (!pendingProduct) {
+      pendingProduct = availablePending[0];
+    }
 
     // 万が一キューが空の場合は、その場で即座にリサーチを呼び出して新商品を自動補充
     if (!pendingProduct) {
@@ -1439,6 +1468,11 @@ async function run() {
 
     if (result === 'posted') {
       postedCount++;
+      const shop = pendingProduct.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
+      if (pendingProduct.genre) postedGenres.add(pendingProduct.genre);
+      if (shop) postedShops.add(shop);
+      if (pendingProduct.title) postedTitles.push(pendingProduct.title.substring(0, 15));
+
       postedProducts.push({
         url: pendingProduct.url,
         title: pendingProduct.title,

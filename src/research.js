@@ -291,9 +291,12 @@ async function fetchByScrapingWithImages(data) {
           }));
         });
 
-        // 各商品を一覧から即座にキューへ追加（画像・個別アクセスの待ち時間完全カット）
+        // 各ジャンルから偏りなく集めるため、1ジャンルあたり最大3件に制限
+        let categoryCount = 0;
+        const MAX_PER_CATEGORY = 3;
         for (const item of items) {
           if (newProducts.length >= 25) break;
+          if (categoryCount >= MAX_PER_CATEGORY) break;
 
           let url = item.href;
           if (!url.endsWith('/')) url += '/';
@@ -317,6 +320,7 @@ async function fetchByScrapingWithImages(data) {
             continue;
           }
 
+          categoryCount++;
           newProducts.push({
             url,
             title: title.substring(0, 80),
