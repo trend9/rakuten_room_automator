@@ -1420,30 +1420,35 @@ async function run() {
     // スキップ済みを除いた pending 商品リスト
     const availablePending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
 
-    // ジャンル・店舗・タイトルが重複しない商品を優先探索
+    // 🚨 厳格ルール: 1回の実行で1ジャンルにつき最大1個まで！同一ジャンル・同一店舗・同一商品の連続は絶対禁止
     let pendingProduct = availablePending.find(p => {
       const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
-      const genre = p.genre || '';
-      const titlePrefix = p.title?.substring(0, 15) || '';
+      const genre = (p.genre || '').replace(/\s*\(p\.\d+\)/, '').trim();
+      const titlePrefix = p.title?.substring(0, 12) || '';
 
       const isSameGenre = genre && postedGenres.has(genre);
       const isSameShop = shop && postedShops.has(shop);
-      const isSimilarTitle = postedTitles.some(t => t && titlePrefix && (t.startsWith(titlePrefix) || titlePrefix.startsWith(t)));
+      const isSimilarTitle = postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
 
       return !isSameGenre && !isSameShop && !isSimilarTitle;
     });
 
-    // 理想的なバラバラ候補が見つからない場合は、ショップ被りのみを避けて選択
+    // 厳格ルールに合致する別ジャンルの商品がない場合は、リサーチを実行して新ジャンルを補充
     if (!pendingProduct) {
-      pendingProduct = availablePending.find(p => {
-        const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
-        return !postedShops.has(shop);
-      });
-    }
-
-    // それでもなければ残りの pending から選択
-    if (!pendingProduct) {
-      pendingProduct = availablePending[0];
+      console.log('💡 同一ラン内で未投稿の別ジャンル商品が不足しています。新ジャンル商品を補充するためリサーチを呼び出します...');
+      try {
+        execSync('node src/research.js', { stdio: 'inherit' });
+        data = loadQueue();
+        const refreshedPending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
+        pendingProduct = refreshedPending.find(p => {
+          const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
+          const genre = (p.genre || '').replace(/\s*\(p\.\d+\)/, '').trim();
+          const titlePrefix = p.title?.substring(0, 12) || '';
+          return !postedGenres.has(genre) && !postedShops.has(shop) && !postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
+        });
+      } catch (err) {
+        console.warn('⚠️ 自動リサーチ実行エラー:', err.message);
+      }
     }
 
     // 万が一キューが空の場合は、その場で即座にリサーチを呼び出して新商品を自動補充

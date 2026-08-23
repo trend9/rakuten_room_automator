@@ -212,24 +212,25 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-      const rawKeywords = [
-    { name: '人気スイーツ（1,000円〜30,000円）', query: '人気スイーツ', min: 1000, max: 30000 },
-    { name: 'チョコレート（1,000円〜30,000円）', query: 'チョコレート', min: 1000, max: 30000 },
-    { name: 'スイーツ（200円〜30,000円）', query: 'スイーツ', min: 200, max: 30000 },
-    { name: '人気デザート（500円〜30,000円）', query: '人気デザート', min: 500, max: 30000 },
-    { name: 'コスメ（1,000円〜50,000円）', query: 'コスメ', min: 1000, max: 50000 },
-    { name: '化粧品（1,000円〜50,000円）', query: '化粧品', min: 1000, max: 50000 },
-    { name: 'お菓子（500円〜50,000円）', query: 'お菓子', min: 500, max: 50000 },
-    { name: 'デパコス（1,000円〜50,000円）', query: 'デパコス', min: 1000, max: 50000 },
-    { name: '制汗剤（1,000円〜50,000円）', query: '制汗剤', min: 1000, max: 50000 },
-    { name: 'ふるさと納税（2,000円〜50,000円）', query: 'ふるさと納税', min: 2000, max: 50000 },
-    { name: 'おせち（1,000円〜50,000円）', query: 'おせち', min: 1000, max: 50000 },
+            const rawKeywords = [
+    { name: '人気スイーツ', genre: 'スイーツ', query: '人気スイーツ', min: 1000, max: 30000 },
+    { name: 'チョコレート', genre: 'チョコレート', query: 'チョコレート', min: 1000, max: 30000 },
+    { name: 'スイーツ', genre: 'スイーツ', query: 'スイーツ', min: 200, max: 30000 },
+    { name: '人気デザート', genre: 'デザート', query: '人気デザート', min: 500, max: 30000 },
+    { name: 'コスメ', genre: 'コスメ', query: 'コスメ', min: 1000, max: 50000 },
+    { name: '化粧品', genre: '化粧品', query: '化粧品', min: 1000, max: 50000 },
+    { name: 'お菓子', genre: 'お菓子', query: 'お菓子', min: 500, max: 50000 },
+    { name: 'デパコス', genre: 'デパコス', query: 'デパコス', min: 1000, max: 50000 },
+    { name: '制汗剤', genre: '制汗剤', query: '制汗剤', min: 1000, max: 50000 },
+    { name: 'ふるさと納税', genre: 'ふるさと納税', query: 'ふるさと納税', min: 2000, max: 50000 },
+    { name: 'おせち', genre: 'おせち', query: 'おせち', min: 1000, max: 50000 },
   ];
 
   const targetUrls = rawKeywords.map(k => {
     const pageNum = Math.floor(Math.random() * 4) + 1; // 1〜4ページ目をランダム選択
     return {
       name: `${k.name} (p.${pageNum})`,
+      genre: k.genre,
       url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&p=${pageNum}&f=1`
     };
   });
@@ -326,7 +327,7 @@ async function fetchByScrapingWithImages(data) {
             title: title.substring(0, 80),
             addedAt: new Date().toISOString(),
             status: 'pending',
-            genre: target.name,
+            genre: target.genre || target.name,
             imageUrl: item.imgUrl || null,
           });
           console.log(`  ✅ 追加: ${title.substring(0, 50)}`);
