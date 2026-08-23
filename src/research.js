@@ -321,6 +321,16 @@ async function fetchByScrapingWithImages(data) {
             continue;
           }
 
+          // キュー内・新規追加リスト内の類似タイトルを事前チェック
+          const titleCore = title.replace(/【[^】]+】/g, '').replace(/\s+/g, ' ').trim().substring(0, 15);
+          const isDupTitle = data.queue.some(p => p.title && (p.title.includes(titleCore) || titleCore.includes(p.title.substring(0, 15)))) ||
+                             newProducts.some(p => p.title && (p.title.includes(titleCore) || titleCore.includes(p.title.substring(0, 15))));
+
+          if (isDupTitle) {
+            console.log(`  ⏭️ 類似タイトル事前スキップ: ${title.substring(0, 40)}`);
+            continue;
+          }
+
           categoryCount++;
           newProducts.push({
             url,

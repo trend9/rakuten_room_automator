@@ -9,6 +9,11 @@ dotenv.config();
 
 // 1回の実行で最大何件を連続投稿するか（投稿頻度・件数を増加！）
 const MAX_POSTS_PER_RUN = 5;
+function normalizeGenreName(rawGenre) {
+  if (!rawGenre) return 'その他';
+  return rawGenre.replace(/\s*\(p\.\d+\)/g, '').replace(/（[0-9,〜円]+）/g, '').trim();
+}
+
 
 // Colab API URL
 let COLAB_API_URL = process.argv.find(arg => arg.startsWith("http://") || arg.startsWith("https://"))
@@ -1423,12 +1428,17 @@ async function run() {
     // 🚨 厳格ルール: 1回の実行で1ジャンルにつき最大1個まで！同一ジャンル・同一店舗・同一商品の連続は絶対禁止
     let pendingProduct = availablePending.find(p => {
       const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
-      const genre = (p.genre || '').replace(/\s*\(p\.\d+\)/, '').trim();
+      const genre = normalizeGenreName(p.genre);
       const titlePrefix = p.title?.substring(0, 12) || '';
 
       const isSameGenre = genre && postedGenres.has(genre);
       const isSameShop = shop && postedShops.has(shop);
-      const isSimilarTitle = postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
+      const words = (p.title || '').replace(/【[^】]+】/g, '').trim().split(/[\s・／/]+/);
+      const isSimilarTitle = postedTitles.some(t => {
+        if (!t) return false;
+        if (titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t))) return true;
+        return words.some(w => w.length >= 4 && t.includes(w));
+      });
 
       return !isSameGenre && !isSameShop && !isSimilarTitle;
     });
@@ -1442,7 +1452,7 @@ async function run() {
         const refreshedPending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
         pendingProduct = refreshedPending.find(p => {
           const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
-          const genre = (p.genre || '').replace(/\s*\(p\.\d+\)/, '').trim();
+          const genre = normalizeGenreName(p.genre);
           const titlePrefix = p.title?.substring(0, 12) || '';
           return !postedGenres.has(genre) && !postedShops.has(shop) && !postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
         });
@@ -1474,7 +1484,7 @@ async function run() {
     if (result === 'posted') {
       postedCount++;
       const shop = pendingProduct.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
-      if (pendingProduct.genre) postedGenres.add(pendingProduct.genre);
+      if (pendingProduct.genre) postedGenres.add(normalizeGenreName(pendingProduct.genre));
       if (shop) postedShops.add(shop);
       if (pendingProduct.title) postedTitles.push(pendingProduct.title.substring(0, 15));
 
@@ -1488,6 +1498,8 @@ async function run() {
     } else if (result === 'duplicate') {
       console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。次の商品を探します。`);
       skippedUrls.add(pendingProduct.url);
+      if (pendingProduct.genre) postedGenres.add(normalizeGenreName(pendingProduct.genre));
+      if (pendingProduct.title) postedTitles.push(pendingProduct.title.substring(0, 15));
       duplicateSkipCount++;
 
       if (duplicateSkipCount >= MAX_DUPLICATE_SKIPS_PER_RUN) {
