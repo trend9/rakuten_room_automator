@@ -8,7 +8,7 @@
     "高級ドライヤー 美顔器 光美容器 Hair care"
   ],
   "engagementLimit": 20,
-  "commentLimit": 25,
+  "commentLimit": 3,
   "minDelayMs": 2000,
   "maxDelayMs": 5000,
   "postsPerDay": 12,

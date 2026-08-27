@@ -145,7 +145,7 @@ async function run() {
     }
 
     let commentCount = 0;
-    const limit = config.commentLimit || 18; // 1回あたりのコメント送信上限
+    const limit = config.commentLimit || 3; // 2〜3人で素早く切り上げ // 1回あたりのコメント送信上限
     let processedIndex = 0;
     let scrollAttempts = 0;
     const maxScrollAttempts = 15;

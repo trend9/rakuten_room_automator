@@ -1227,15 +1227,31 @@ async function postOneProduct(pendingProduct, data) {
       return 'duplicate';
     }
 
-    // 通常の投稿ボタンクリックを試みる
-    const submitBtn = page.locator('button:has-text("投稿"), button:has-text("完了"), button:has-text("コレ！"), button[class*="submit"], button[class*="post"], button[type="submit"], a:has-text("完了"), a:has-text("投稿"), a:has-text("コレ！")').first();
+    // 投稿完了ボタンの検出とクリック
+    const submitSelectors = [
+      'button:has-text("完了")',
+      'a:has-text("完了")',
+      'button:has-text("投稿")',
+      'button:has-text("コレ！")',
+      'button[type="submit"]',
+      'button[class*="submit"]',
+      'button[class*="post"]',
+      '.submit-button',
+      '.post-button'
+    ];
     let posted = false;
 
-    if (await submitBtn.count() > 0 && await submitBtn.isVisible() && await submitBtn.isEnabled()) {
-      await takeScreenshot(page, 'step6_before_click');
-      await submitBtn.click({ force: true });
-      console.log('🎉 コレ！の自動投稿ボタンをクリックしました！');
-      posted = true;
+    for (const sel of submitSelectors) {
+      const btn = page.locator(sel).first();
+      if (await btn.count() > 0 && await btn.isVisible()) {
+        await btn.scrollIntoViewIfNeeded().catch(() => {});
+        await page.waitForTimeout(500);
+        await takeScreenshot(page, 'step6_before_click');
+        await btn.click({ force: true });
+        console.log(`🎉 コレ！の自動投稿ボタンをクリックしました！ (selector: ${sel})`);
+        posted = true;
+        break;
+      }
     } else {
       // ── 🚨 核オプション: キーボード操作で「完了」を強制送信 ──
       // Playwrightのビジュアル操作の代わりに、Tabキーでフォーカスを移動してEnterキーで送信する
@@ -1333,7 +1349,10 @@ async function postOneProduct(pendingProduct, data) {
     if (isConfirmed) {
       console.log('🎉 コレ！投稿完了を正式に確認しました！');
     } else {
-      console.log('⚠️ 投稿完了の確認が取れませんでしたが、ボタンクリックは完了しているため成功とみなします。');
+      console.warn('❌ 投稿完了の確認が取れませんでした（画面が遷移していません）。未投稿として処理します。');
+      pendingProduct.status = 'failed';
+      saveQueue(data);
+      return 'failed';
     }
 
     // ── 楽天ROOMの自分の商品ページURL（アフィリエイトリンク）を取得 ──
