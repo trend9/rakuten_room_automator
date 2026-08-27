@@ -61,21 +61,33 @@ function saveQueue(data) {
 // ターゲットキーワード一覧（3,000円〜100,000円・ジャンル多様化）
 // ※ランダムに2キーワードずつ抽出されるため、重み付けのために件数で調整
 const TARGET_KEYWORDS = [
-  // 🍰 スイーツ・グルメ
-  { query: '人気スイーツ', minPrice: 1000, maxPrice: 30000 },
-  { query: 'チョコレート', minPrice: 1000, maxPrice: 30000 },
-  { query: 'スイーツ', minPrice: 200, maxPrice: 30000 },
-  { query: '人気デザート', minPrice: 500, maxPrice: 30000 },
-  // 💄 美容家電・コスメ・化粧品
-  { query: '美容家電', minPrice: 1000, maxPrice: 50000 },
-  { query: 'コスメ', minPrice: 1000, maxPrice: 50000 },
-  { query: '化粧品', minPrice: 1000, maxPrice: 50000 },
-  { query: 'お菓子', minPrice: 500, maxPrice: 50000 },
-  { query: 'デパコス', minPrice: 1000, maxPrice: 50000 },
-  { query: '制汗剤', minPrice: 1000, maxPrice: 50000 },
-  // 🎁 その他
-  { query: 'ふるさと納税', minPrice: 2000, maxPrice: 50000 },
-  { query: 'おせち', minPrice: 1000, maxPrice: 50000 },
+  // 🍰 スイーツ・グルメ（超狭小・限定フレーズ）
+  { query: '生カヌレ 専門', minPrice: 1500, maxPrice: 8000, genre: 'スイーツ' },
+  { query: '高級 ピスタチオ ケーキ', minPrice: 2000, maxPrice: 12000, genre: 'スイーツ' },
+  { query: '和栗 モンブラン 絞りたて 冷凍', minPrice: 2500, maxPrice: 15000, genre: 'スイーツ' },
+  { query: 'テリーヌ ショコラ 濃厚 熟成', minPrice: 2000, maxPrice: 10000, genre: 'チョコレート' },
+  { query: 'クラフト チョコレート 産地別 食べ比べ', minPrice: 1500, maxPrice: 9000, genre: 'チョコレート' },
+  { query: '生チョコクッキー 贅沢 個包装', minPrice: 1200, maxPrice: 6000, genre: 'チョコレート' },
+  { query: '極上 プリン 瓶入り 濃厚', minPrice: 1800, maxPrice: 7000, genre: '人気デザート' },
+  { query: '完熟 フルーツタルト 産直', minPrice: 3000, maxPrice: 12000, genre: '人気デザート' },
+  { query: 'バターサンド 濃厚 フレーバー 詰め合わせ', minPrice: 2000, maxPrice: 8000, genre: 'お菓子' },
+  { query: '極厚 フィナンシェ 発酵バター', minPrice: 1500, maxPrice: 6000, genre: 'お菓子' },
+
+  // 💄 美容家電・コスメ・化粧品（超狭小・専門フレーズ）
+  { query: 'レチノール 高濃度 美容液 カプセル', minPrice: 2000, maxPrice: 15000, genre: 'コスメ' },
+  { query: 'ガラクトミセス 発酵 化粧水 美白', minPrice: 1800, maxPrice: 9000, genre: '化粧品' },
+  { query: 'クレンジング バーム とろける 毛穴ケア', minPrice: 1500, maxPrice: 6000, genre: '化粧品' },
+  { query: '薬用 デオドラント ジェル 無香料 密着', minPrice: 1200, maxPrice: 5000, genre: '制汗剤' },
+  { query: '制汗 スティック 殺菌 防臭 高持続', minPrice: 1000, maxPrice: 4500, genre: '制汗剤' },
+  { query: 'デパコス リップ オイル 保湿 ツヤ', minPrice: 2500, maxPrice: 8000, genre: 'デパコス' },
+  { query: 'デパコス スキンケア トライアル セット', minPrice: 3000, maxPrice: 15000, genre: 'デパコス' },
+  { query: '頭皮 マッサージ ブラシ 音波振動', minPrice: 3000, maxPrice: 20000, genre: '美容家電' },
+
+  // 🎁 ふるさと納税・おせち（狭小特定ワード）
+  { query: 'ふるさと納税 シャインマスカット 特秀 産地直送', minPrice: 5000, maxPrice: 30000, genre: 'ふるさと納税' },
+  { query: 'ふるさと納税 熟成 クラフトビール 飲み比べ', minPrice: 8000, maxPrice: 25000, genre: 'ふるさと納税' },
+  { query: 'おせち 2027 個食 1人前 2個セット', minPrice: 6000, maxPrice: 25000, genre: 'おせち' },
+  { query: 'おせち 和洋折衷 オードブル 重箱 冷蔵便', minPrice: 10000, maxPrice: 35000, genre: 'おせち' },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -202,7 +214,7 @@ async function fetchFromRakutenAPI(data) {
           title: title.substring(0, 80),
           addedAt: new Date().toISOString(),
           status: 'pending',
-          genre: '絶品スイーツ・便利家電・美容家電',
+          genre: target.genre || 'おすすめ商品',
           targetPrice: `〜${item.itemPrice}円`,
           imageUrl,           // ← 楽天APIから取得した実商品画像
           itemCode: item.itemCode || null,
