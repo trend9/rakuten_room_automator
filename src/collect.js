@@ -1252,7 +1252,9 @@ async function postOneProduct(pendingProduct, data) {
         posted = true;
         break;
       }
-    } else {
+    }
+
+    if (!posted) {
       // ── 🚨 核オプション: キーボード操作で「完了」を強制送信 ──
       // Playwrightのビジュアル操作の代わりに、Tabキーでフォーカスを移動してEnterキーで送信する
       console.log('⚠️ 投稿ボタンが検出できませんでした。キーボード操作（核オプション）で強制送信を試みます...');
