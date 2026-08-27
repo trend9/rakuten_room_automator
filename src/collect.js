@@ -862,7 +862,7 @@ async function postOneProduct(pendingProduct, data) {
     let loaded = false;
     for (let retries = 0; retries < 3 && !loaded; retries++) {
       try {
-        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
         loaded = true;
       } catch (err) {
         console.warn(`⚠️ アクセス一時エラー: ${err.message}。リトライします...`);
@@ -871,8 +871,8 @@ async function postOneProduct(pendingProduct, data) {
     }
 
     if (loaded) {
-      // 動的コンテンツの読み込みを十分に待つ（5秒）
-      await page.waitForTimeout(5000);
+      // 動的コンテンツ読み込み待機（1.5秒に短縮）
+      await page.waitForTimeout(1500);
       await takeScreenshot(page, 'step1_rakuten_loaded');
 
       const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content').catch(() => null);
@@ -960,7 +960,7 @@ async function postOneProduct(pendingProduct, data) {
     let isWarpLoaded = false;
     for (let r = 0; r < 3; r++) {
       try {
-        await page.goto(warpUrl, { waitUntil: 'load', timeout: 50000 });
+        await page.goto(warpUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
         isWarpLoaded = true;
         break;
       } catch (err) {
@@ -1432,8 +1432,9 @@ async function run() {
   while (postedCount < TARGET_POSTS_PER_RUN) {
     // タイムアウト防衛（15分経過＆最低2件達成していれば次へ進む）
     const elapsed = Date.now() - startTime;
-    if (postedCount >= MIN_SUCCESS_REQUIRED && elapsed > MAX_LOOP_TIME_MS) {
-      console.log(`⏱️ コレ！実行時間が15分を経過し、最低目標の ${postedCount} 件コレ！に成功したため、いいね・コメント巡回へ進みます。`);
+    // 12分経過かつ1件以上成功している場合は、アクション全体のタイムアウトを防ぐため巡回へパス
+    if (postedCount >= 1 && elapsed > 12 * 60 * 1000) {
+      console.log(`⏱️ コレ！実行時間が12分を経過し、${postedCount} 件コレ！に成功しているため、タイムアウト防止のためいいね・コメント巡回へ進みます。`);
       break;
     }
 

@@ -228,7 +228,7 @@ async function fetchByScrapingWithImages(data) {
 
   const sorts = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice'];
   const targetUrls = rawKeywords.map(k => {
-    const pageNum = Math.floor(Math.random() * 15) + 1; // 1〜15ページ目からランダム取得（すでにコレ！された先頭ページを完全回避）
+    const pageNum = Math.floor(Math.random() * 25) + 3; // 3〜27ページ目を指定して過去3700件の既投稿と絶対被らないゾーンを探索 // 1〜15ページ目からランダム取得（すでにコレ！された先頭ページを完全回避）
     const randomSort = sorts[Math.floor(Math.random() * sorts.length)];
     return {
       name: `${k.name} (p.${pageNum})`,
