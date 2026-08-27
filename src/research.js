@@ -257,8 +257,9 @@ async function fetchByScrapingWithImages(data) {
     { name: 'シャインマスカット', genre: 'シャインマスカット', query: 'シャインマスカット', min: 2000, max: 40000 },
   ];
 
+  const sorts = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice'];
   const targetUrls = rawKeywords.map(k => {
-    const pageNum = Math.floor(Math.random() * 20) + 1; // 1〜20ページ目をランダム選択
+    const pageNum = Math.floor(Math.random() * 5) + 1; // 1〜5ページ目（確実に商品が存在する範囲）
     const randomSort = sorts[Math.floor(Math.random() * sorts.length)];
     return {
       name: `${k.genre}: ${k.query} (p.${pageNum})`,
@@ -298,18 +299,25 @@ async function fetchByScrapingWithImages(data) {
         await page.evaluate(() => window.scrollBy(0, window.innerHeight * 0.8));
         await page.waitForTimeout(2000);
 
-        // 商品カード抽出（URL + タイトル + 画像）
+        // 商品カード抽出（楽天市場の全バージョンDOM構造に対応）
         const items = await page.evaluate(() => {
           const allLinks = Array.from(document.querySelectorAll('a[href*="item.rakuten.co.jp"]'));
           const urlMap = new Map();
           for (const a of allLinks) {
             const href = a.href.split('?')[0].split('#')[0];
-            const txt = (a.innerText || '').trim();
-            // 最も長いテキストを採用
-            if (txt.length >= 15) {
+            if (!href.includes('item.rakuten.co.jp/')) continue;
+
+            const card = a.closest('div, li, article, section') || a;
+            let txt = (a.innerText || a.getAttribute('title') || '').trim();
+            if (txt.length < 10 && card) {
+              const titleEl = card.querySelector('h2, h3, [class*="title"], [class*="name"], img[alt]');
+              if (titleEl) {
+                txt = (titleEl.innerText || titleEl.getAttribute('alt') || titleEl.getAttribute('title') || '').trim();
+              }
+            }
+
+            if (txt.length >= 10) {
               if (!urlMap.has(href) || urlMap.get(href).text.length < txt.length) {
-                // 同カードの画像を探す
-                const card = a.closest('div, li, article, section');
                 let imgUrl = null;
                 if (card) {
                   const img = card.querySelector('img[src]');
