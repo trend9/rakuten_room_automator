@@ -94,18 +94,28 @@ async function fetchFromRakutenAPI(data) {
   const shuffled = [...TARGET_KEYWORDS].sort(() => Math.random() - 0.5).slice(0, 5);
   const newProducts = [];
 
+    const sortOptions = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice', '-itemPrice'];
+  const subModifiers = ['ギフト', '限定', '2026', 'お取り寄せ', '大容量', '個包装', '高級', '訳あり', '国産', '人気', 'ランキング', '送料無料', 'セット', '詰め合わせ', '公式', '贅沢'];
+
   for (const target of shuffled) {
     if (newProducts.length >= 30) break;
 
-    console.log(`\n📡 楽天API検索中: "${target.query}" (${target.minPrice}〜${target.maxPrice}円)`);
+    // 検索語にサブモディファイアをランダムに付与して超ニッチ化
+    const modifier = Math.random() > 0.3 ? subModifiers[Math.floor(Math.random() * subModifiers.length)] : '';
+    const query = modifier ? `${target.query} ${modifier}` : target.query;
+    const pageNum = Math.floor(Math.random() * 15) + 1; // APIの1〜15ページ目
+    const sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+
+    console.log(`\n📡 楽天API検索中: "${query}" (p.${pageNum}, sort:${sort}, ${target.minPrice}〜${target.maxPrice}円)`);
 
     const params = new URLSearchParams({
       applicationId: appId,
-      keyword: target.query,
+      keyword: query,
       minPrice: target.minPrice.toString(),
       maxPrice: target.maxPrice.toString(),
-      hits: '50',
-      sort: Math.random() > 0.5 ? '-reviewCount' : 'standard',
+      page: pageNum.toString(),
+      hits: '30',
+      sort: sort,
       format: 'json',
     });
     if (affiliateId) params.append('affiliateId', affiliateId);
@@ -212,26 +222,31 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-            const rawKeywords = [
-    { name: '人気スイーツ', genre: 'スイーツ', query: '人気スイーツ', min: 1000, max: 30000 },
-    { name: 'チョコレート', genre: 'チョコレート', query: 'チョコレート', min: 1000, max: 30000 },
-    { name: 'スイーツ', genre: 'スイーツ', query: 'スイーツ', min: 200, max: 30000 },
-    { name: '人気デザート', genre: 'デザート', query: '人気デザート', min: 500, max: 30000 },
-    { name: 'コスメ', genre: 'コスメ', query: 'コスメ', min: 1000, max: 50000 },
-    { name: '化粧品', genre: '化粧品', query: '化粧品', min: 1000, max: 50000 },
-    { name: 'お菓子', genre: 'お菓子', query: 'お菓子', min: 500, max: 50000 },
-    { name: 'デパコス', genre: 'デパコス', query: 'デパコス', min: 1000, max: 50000 },
-    { name: '制汗剤', genre: '制汗剤', query: '制汗剤', min: 1000, max: 50000 },
-    { name: 'ふるさと納税', genre: 'ふるさと納税', query: 'ふるさと納税', min: 2000, max: 50000 },
-    { name: 'おせち', genre: 'おせち', query: 'おせち', min: 1000, max: 50000 },
+                  const baseGenres = [
+    { genre: '人気スイーツ', queries: ['人気スイーツ ギフト', '人気スイーツ 個包装', '人気スイーツ 詰め合わせ', '人気スイーツ お取り寄せ 高級', '人気スイーツ 2026', 'スイーツ 焼き菓子'] },
+    { genre: 'チョコレート', queries: ['チョコレート 高級 ギフト', '生チョコ 濃厚', 'トリュフ チョコ 個包装', 'チョコサンド クッキー', 'チョコレート 詰め合わせ 国産'] },
+    { genre: 'スイーツ', queries: ['和スイーツ 大福', 'ロールケーキ 冷凍', 'プリン 詰め合わせ', 'バウムクーヘン ギフト', 'タルト ケーキ スイーツ'] },
+    { genre: '人気デザート', queries: ['フルーツ ゼリー 高級', 'アイスクリーム 詰め合わせ', 'シャーベット ギフト', 'パフェ スイーツ', 'デザート 詰め合わせ'] },
+    { genre: 'コスメ', queries: ['韓国 コスメ 美容液', 'リップ ティント 人気', 'アイシャドウ パレット', 'フェイス パウダー', 'クッション ファンデ'] },
+    { genre: '化粧品', queries: ['化粧水 高保湿', '乳液 保湿 美白', 'クレンジング バーム', '美容 オイル フェイス', 'シートマスク パック 大容量'] },
+    { genre: 'お菓子', queries: ['お菓子 クッキー 缶', 'せんべい あられ 詰め合わせ', 'フィナンシェ マドレーヌ', 'カステラ 和菓子', 'ラスク ギフト'] },
+    { genre: 'デパコス', queries: ['デパコス リップ 口紅', 'デパコス ハンドクリーム', 'デパコス アイシャドウ', 'デパコス スキンケア ギフト', 'デパコス フェイスパウダー'] },
+    { genre: '制汗剤', queries: ['制汗剤 ロールオン デオドラント', '制汗 スプレー 無香料', '薬用 デオドラント クリーム', '制汗 ジェル', 'デオドラント スティック'] },
+    { genre: 'ふるさと納税', queries: ['ふるさと納税 スイーツ 定期便', 'ふるさと納税 アイス 詰め合わせ', 'ふるさと納税 チーズケーキ', 'ふるさと納税 フルーツ ぶどう 桃', 'ふるさと納税 肉 惣菜 鍋'] },
+    { genre: 'おせち', queries: ['おせち 2027 予約 冷蔵', 'おせち 和風 二段重', 'おせち 三段重 個包装', 'おせち 早割 高級', 'おせち オードブル 中華'] },
   ];
 
   const sorts = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice'];
+  const rawKeywords = baseGenres.map(b => {
+    const q = b.queries[Math.floor(Math.random() * b.queries.length)];
+    return { name: q, genre: b.genre, query: q, min: 500, max: 50000 };
+  });
+
   const targetUrls = rawKeywords.map(k => {
-    const pageNum = Math.floor(Math.random() * 25) + 3; // 3〜27ページ目を指定して過去3700件の既投稿と絶対被らないゾーンを探索 // 1〜15ページ目からランダム取得（すでにコレ！された先頭ページを完全回避）
+    const pageNum = Math.floor(Math.random() * 20) + 1; // 1〜20ページ目をランダム選択
     const randomSort = sorts[Math.floor(Math.random() * sorts.length)];
     return {
-      name: `${k.name} (p.${pageNum})`,
+      name: `${k.genre}: ${k.query} (p.${pageNum})`,
       genre: k.genre,
       url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&p=${pageNum}&s=${encodeURIComponent(randomSort)}&f=1`
     };

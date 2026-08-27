@@ -1432,10 +1432,15 @@ async function run() {
   while (postedCount < TARGET_POSTS_PER_RUN) {
     // タイムアウト防衛（15分経過＆最低2件達成していれば次へ進む）
     const elapsed = Date.now() - startTime;
-    // 12分経過かつ1件以上成功している場合は、アクション全体のタイムアウトを防ぐため巡回へパス
-    if (postedCount >= 1 && elapsed > 12 * 60 * 1000) {
-      console.log(`⏱️ コレ！実行時間が12分を経過し、${postedCount} 件コレ！に成功しているため、タイムアウト防止のためいいね・コメント巡回へ進みます。`);
-      break;
+    // 最低2件成功するまで粘る（ただし全体タイムアウト25分を防ぐため18分で安全脱出）
+    if (postedCount >= 2 || (postedCount >= 1 && elapsed > 18 * 60 * 1000)) {
+      if (postedCount >= 2) {
+        // 2件以上成功していればそのまま5件目指すか安全に進む
+      }
+      if (elapsed > 18 * 60 * 1000) {
+        console.log(`⏱️ コレ！実行時間が18分を経過し、${postedCount} 件コレ！に成功しているため、いいね・コメント巡回へ進みます。`);
+        break;
+      }
     }
 
     let data = loadQueue();
