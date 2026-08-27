@@ -1420,12 +1420,25 @@ async function run() {
     }
   }
 
-  for (let round = 0; round < MAX_POSTS_PER_RUN; round++) {
+    const MIN_SUCCESS_REQUIRED = 2; // 最低2件成功するまで絶対に諦めずリサーチ＆コレ！をループ
+  const TARGET_POSTS_PER_RUN = 5; // 最大5件コレ！
+  const startTime = Date.now();
+  const MAX_LOOP_TIME_MS = 15 * 60 * 1000; // 安全タイムリミット: 15分（いいね・コメント・保存の時間を確保）
+
+  let consecutiveResearchFails = 0;
+
+  while (postedCount < TARGET_POSTS_PER_RUN) {
+    // タイムアウト防衛（15分経過＆最低2件達成していれば次へ進む）
+    const elapsed = Date.now() - startTime;
+    if (postedCount >= MIN_SUCCESS_REQUIRED && elapsed > MAX_LOOP_TIME_MS) {
+      console.log(`⏱️ コレ！実行時間が15分を経過し、最低目標の ${postedCount} 件コレ！に成功したため、いいね・コメント巡回へ進みます。`);
+      break;
+    }
+
     let data = loadQueue();
-    // スキップ済みを除いた pending 商品リスト
     const availablePending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
 
-    // 🚨 厳格ルール: 1回の実行で1ジャンルにつき最大1個まで！同一ジャンル・同一店舗・同一商品の連続は絶対禁止
+    // 🚨 1実行1ジャンル1個の厳格分散ルールで次の商品を選択
     let pendingProduct = availablePending.find(p => {
       const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
       const genre = normalizeGenreName(p.genre);
@@ -1443,9 +1456,9 @@ async function run() {
       return !isSameGenre && !isSameShop && !isSimilarTitle;
     });
 
-    // 厳格ルールに合致する別ジャンルの商品がない場合は、リサーチを実行して新ジャンルを補充
+    // 候補がなければリサーチを実行して新商品を即座に補充
     if (!pendingProduct) {
-      console.log('💡 同一ラン内で未投稿の別ジャンル商品が不足しています。新ジャンル商品を補充するためリサーチを呼び出します...');
+      console.log(`🔄 投稿可能な新ジャンル商品が不足しています（現在成功: ${postedCount}/${TARGET_POSTS_PER_RUN}件）。即座にリサーチを実行して新商品を補充します...`);
       try {
         execSync('node src/research.js', { stdio: 'inherit' });
         data = loadQueue();
@@ -1456,33 +1469,37 @@ async function run() {
           const titlePrefix = p.title?.substring(0, 12) || '';
           return !postedGenres.has(genre) && !postedShops.has(shop) && !postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
         });
+
+        // 厳格分散で見つからない場合でも、ショップ・類似タイトルが被らなければ許容
+        if (!pendingProduct) {
+          pendingProduct = refreshedPending.find(p => {
+            const shop = p.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
+            const titlePrefix = p.title?.substring(0, 12) || '';
+            return !postedShops.has(shop) && !postedTitles.some(t => t && titlePrefix && (t.includes(titlePrefix) || titlePrefix.includes(t)));
+          });
+        }
       } catch (err) {
         console.warn('⚠️ 自動リサーチ実行エラー:', err.message);
-      }
-    }
-
-    // 万が一キューが空の場合は、その場で即座にリサーチを呼び出して新商品を自動補充
-    if (!pendingProduct) {
-      console.log('⚠️ キューに投稿可能な商品がありません。即座にリサーチを実行して商品を自動補充します...');
-      try {
-        execSync('node src/research.js', { stdio: 'inherit' });
-        data = loadQueue();
-        pendingProduct = data.queue.find(p => p.status === 'pending' && !skippedUrls.has(p.url));
-      } catch (err) {
-        console.warn('⚠️ 自動リサーチのオンデマンド実行に失敗しました:', err.message);
+        consecutiveResearchFails++;
+        if (consecutiveResearchFails >= 5 && postedCount >= MIN_SUCCESS_REQUIRED) {
+          console.log(`⚠️ リサーチが連続失敗しましたが、${postedCount} 件コレ！に成功しているため巡回へ進みます。`);
+          break;
+        }
       }
     }
 
     if (!pendingProduct) {
-      console.log(`💡 投稿待ちの商品がありません。今回は ${postedCount} 件投稿して終了します。`);
-      break;
+      console.log(`⏳ 候補が一時的に見つかりません。5秒待機して再探索します... (現在成功: ${postedCount}/${TARGET_POSTS_PER_RUN}件)`);
+      await sleep(5000);
+      continue;
     }
 
-    console.log(`\n━━━ ラウンド ${round + 1}/${MAX_POSTS_PER_RUN} ━━━`);
+    console.log(`\n━━━ コレ！試行 (${postedCount + 1}/${TARGET_POSTS_PER_RUN}件目 挑戦中) ━━━`);
     const result = await postOneProduct(pendingProduct, data);
 
     if (result === 'posted') {
       postedCount++;
+      consecutiveResearchFails = 0;
       const shop = pendingProduct.url?.split('item.rakuten.co.jp/')?.[1]?.split('/')?.[0] || '';
       if (pendingProduct.genre) postedGenres.add(normalizeGenreName(pendingProduct.genre));
       if (shop) postedShops.add(shop);
@@ -1493,33 +1510,25 @@ async function run() {
         title: pendingProduct.title,
         comment: pendingProduct.customComment,
         imageUrl: pendingProduct.imageUrl,
-        roomUrl: pendingProduct.roomUrl  // ← 自分のROOM URL
+        roomUrl: pendingProduct.roomUrl
       });
+
+      console.log(`🎉 コレ！成功！現在 ${postedCount}/${TARGET_POSTS_PER_RUN} 件完了`);
+
+      if (postedCount < TARGET_POSTS_PER_RUN) {
+        console.log('⏱️ 次の投稿まで20秒待機します...');
+        await sleep(20000);
+      }
     } else if (result === 'duplicate') {
-      console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。次の商品を探します。`);
+      console.log(`⏭️ 「${pendingProduct.title.substring(0, 30)}...」は重複のためスキップ。即座に別の商品を探します。`);
       skippedUrls.add(pendingProduct.url);
       if (pendingProduct.genre) postedGenres.add(normalizeGenreName(pendingProduct.genre));
       if (pendingProduct.title) postedTitles.push(pendingProduct.title.substring(0, 15));
-      duplicateSkipCount++;
-
-      if (duplicateSkipCount >= MAX_DUPLICATE_SKIPS_PER_RUN) {
-        console.log(`⚠️ 重複検知が連続${MAX_DUPLICATE_SKIPS_PER_RUN}件に達しました。アクションのタイムアウトを防ぐためコレ！を終了し、次回リサーチで新商品を一新します。`);
-        break;
-      }
-
-      const remainingPending = data.queue.filter(p => p.status === 'pending' && !skippedUrls.has(p.url));
-      if (remainingPending.length === 0) {
-        console.log('💡 残りの投稿候補がすべて重複済みです。終了します。');
-        break;
-      }
-      round--; // ラウンドを消費しない
-      continue;
-    }
-
-    // 次ラウンドまで待機（投稿成功・失敗時のみ）
-    if (round < MAX_POSTS_PER_RUN - 1) {
-      console.log('⏱️ 次の投稿まで30秒待機します...');
-      await sleep(30000);
+      await sleep(2000);
+    } else {
+      console.log(`⚠️ 投稿失敗。即座に次の商品を試みます。`);
+      skippedUrls.add(pendingProduct.url);
+      await sleep(2000);
     }
   }
 
