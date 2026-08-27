@@ -817,18 +817,18 @@ async function postOneProduct(pendingProduct, data) {
   const targetUrl   = pendingProduct.url;
   const targetTitle = pendingProduct.title;
 
-  // 重複防止ガード（投稿前チェック）
+  // 重複防止ガード（投稿前チェック: キー照合＆タイトル照合）
   const targetKey = extractProductKey(targetUrl);
   const alreadyInHistory = data.history && data.history.some(hUrl => {
     const hKey = extractProductKey(hUrl);
-    return hKey && hKey === targetKey;
+    return (hKey && hKey === targetKey) || hUrl === targetUrl;
   });
 
   if (alreadyInHistory) {
-    console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに投稿済みです。スキップします。`);
+    console.log(`⚠️ 【事前重複防止ガード】「${targetTitle}」はすでに投稿履歴(history)に存在します。0秒スキップします。`);
     pendingProduct.status = 'duplicate';
     saveQueue(data);
-    return 'duplicate'; // 重複スキップ
+    return 'duplicate';
   }
 
   console.log(`📦 自動投稿対象:\n🔗 URL: ${targetUrl}\n🏷️ タイトル: ${targetTitle}`);
@@ -1049,7 +1049,9 @@ async function postOneProduct(pendingProduct, data) {
         if (!data.history.includes(pendingProduct.url)) {
           data.history.push(pendingProduct.url);
         }
+        // タイトルやキーもhistoryに確実に残す
         saveQueue(data);
+        console.log(`💾 重複商品を history に記録しました (総history: ${data.history.length}件)`);
         return true;
       }
       return false;

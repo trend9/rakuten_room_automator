@@ -226,12 +226,14 @@ async function fetchByScrapingWithImages(data) {
     { name: 'おせち', genre: 'おせち', query: 'おせち', min: 1000, max: 50000 },
   ];
 
+  const sorts = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice'];
   const targetUrls = rawKeywords.map(k => {
-    const pageNum = Math.floor(Math.random() * 4) + 1; // 1〜4ページ目をランダム選択
+    const pageNum = Math.floor(Math.random() * 15) + 1; // 1〜15ページ目からランダム取得（すでにコレ！された先頭ページを完全回避）
+    const randomSort = sorts[Math.floor(Math.random() * sorts.length)];
     return {
       name: `${k.name} (p.${pageNum})`,
       genre: k.genre,
-      url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&p=${pageNum}&f=1`
+      url: `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(k.query)}/?min=${k.min}&max=${k.max}&p=${pageNum}&s=${encodeURIComponent(randomSort)}&f=1`
     };
   });
 
