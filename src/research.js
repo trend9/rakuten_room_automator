@@ -61,33 +61,31 @@ function saveQueue(data) {
 // ターゲットキーワード一覧（3,000円〜100,000円・ジャンル多様化）
 // ※ランダムに2キーワードずつ抽出されるため、重み付けのために件数で調整
 const TARGET_KEYWORDS = [
-  // 🍰 スイーツ・グルメ（超狭小・限定フレーズ）
-  { query: '生カヌレ 専門', minPrice: 1500, maxPrice: 8000, genre: 'スイーツ' },
-  { query: '高級 ピスタチオ ケーキ', minPrice: 2000, maxPrice: 12000, genre: 'スイーツ' },
-  { query: '和栗 モンブラン 絞りたて 冷凍', minPrice: 2500, maxPrice: 15000, genre: 'スイーツ' },
-  { query: 'テリーヌ ショコラ 濃厚 熟成', minPrice: 2000, maxPrice: 10000, genre: 'チョコレート' },
-  { query: 'クラフト チョコレート 産地別 食べ比べ', minPrice: 1500, maxPrice: 9000, genre: 'チョコレート' },
-  { query: '生チョコクッキー 贅沢 個包装', minPrice: 1200, maxPrice: 6000, genre: 'チョコレート' },
-  { query: '極上 プリン 瓶入り 濃厚', minPrice: 1800, maxPrice: 7000, genre: '人気デザート' },
-  { query: '完熟 フルーツタルト 産直', minPrice: 3000, maxPrice: 12000, genre: '人気デザート' },
-  { query: 'バターサンド 濃厚 フレーバー 詰め合わせ', minPrice: 2000, maxPrice: 8000, genre: 'お菓子' },
-  { query: '極厚 フィナンシェ 発酵バター', minPrice: 1500, maxPrice: 6000, genre: 'お菓子' },
+  // 🍰 スイーツ・お菓子・グルメ
+  { query: 'スイーツ', minPrice: 500, maxPrice: 30000, genre: 'スイーツ' },
+  { query: 'デザート', minPrice: 500, maxPrice: 30000, genre: 'デザート' },
+  { query: 'プリン', minPrice: 500, maxPrice: 15000, genre: 'プリン' },
+  { query: 'ピスタチオ', minPrice: 500, maxPrice: 20000, genre: 'ピスタチオ' },
+  { query: 'モンブラン', minPrice: 800, maxPrice: 20000, genre: 'モンブラン' },
+  { query: 'バームクーヘン', minPrice: 800, maxPrice: 20000, genre: 'バームクーヘン' },
+  { query: 'お菓子', minPrice: 500, maxPrice: 30000, genre: 'お菓子' },
+  { query: 'おつまみ', minPrice: 500, maxPrice: 30000, genre: 'おつまみ' },
+  { query: 'チョコレート', minPrice: 500, maxPrice: 30000, genre: 'チョコレート' },
+  { query: 'フィナンシェ', minPrice: 500, maxPrice: 20000, genre: 'フィナンシェ' },
 
-  // 💄 美容家電・コスメ・化粧品（超狭小・専門フレーズ）
-  { query: 'レチノール 高濃度 美容液 カプセル', minPrice: 2000, maxPrice: 15000, genre: 'コスメ' },
-  { query: 'ガラクトミセス 発酵 化粧水 美白', minPrice: 1800, maxPrice: 9000, genre: '化粧品' },
-  { query: 'クレンジング バーム とろける 毛穴ケア', minPrice: 1500, maxPrice: 6000, genre: '化粧品' },
-  { query: '薬用 デオドラント ジェル 無香料 密着', minPrice: 1200, maxPrice: 5000, genre: '制汗剤' },
-  { query: '制汗 スティック 殺菌 防臭 高持続', minPrice: 1000, maxPrice: 4500, genre: '制汗剤' },
-  { query: 'デパコス リップ オイル 保湿 ツヤ', minPrice: 2500, maxPrice: 8000, genre: 'デパコス' },
-  { query: 'デパコス スキンケア トライアル セット', minPrice: 3000, maxPrice: 15000, genre: 'デパコス' },
-  { query: '頭皮 マッサージ ブラシ 音波振動', minPrice: 3000, maxPrice: 20000, genre: '美容家電' },
+  // 💄 コスメ・スキンケア・ビューティー
+  { query: 'コスメ', minPrice: 800, maxPrice: 50000, genre: 'コスメ' },
+  { query: 'スキンケア', minPrice: 800, maxPrice: 50000, genre: 'スキンケア' },
+  { query: 'リップ', minPrice: 500, maxPrice: 15000, genre: 'リップ' },
+  { query: 'バーム', minPrice: 500, maxPrice: 20000, genre: 'バーム' },
+  { query: 'アディクション', minPrice: 1000, maxPrice: 30000, genre: 'アディクション' },
+  { query: 'デパコス', minPrice: 1000, maxPrice: 50000, genre: 'デパコス' },
+  { query: '頭皮ケア', minPrice: 800, maxPrice: 30000, genre: '頭皮ケア' },
 
-  // 🎁 ふるさと納税・おせち（狭小特定ワード）
-  { query: 'ふるさと納税 シャインマスカット 特秀 産地直送', minPrice: 5000, maxPrice: 30000, genre: 'ふるさと納税' },
-  { query: 'ふるさと納税 熟成 クラフトビール 飲み比べ', minPrice: 8000, maxPrice: 25000, genre: 'ふるさと納税' },
-  { query: 'おせち 2027 個食 1人前 2個セット', minPrice: 6000, maxPrice: 25000, genre: 'おせち' },
-  { query: 'おせち 和洋折衷 オードブル 重箱 冷蔵便', minPrice: 10000, maxPrice: 35000, genre: 'おせち' },
+  // 🎁 季節・ふるさと納税
+  { query: 'おせち', minPrice: 2000, maxPrice: 50000, genre: 'おせち' },
+  { query: 'ふるさと納税', minPrice: 2000, maxPrice: 50000, genre: 'ふるさと納税' },
+  { query: 'シャインマスカット', minPrice: 2000, maxPrice: 40000, genre: 'シャインマスカット' },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -236,25 +234,28 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-                  const baseGenres = [
-    { genre: '人気スイーツ', queries: ['人気スイーツ ギフト', '人気スイーツ 個包装', '人気スイーツ 詰め合わせ', '人気スイーツ お取り寄せ 高級', '人気スイーツ 2026', 'スイーツ 焼き菓子'] },
-    { genre: 'チョコレート', queries: ['チョコレート 高級 ギフト', '生チョコ 濃厚', 'トリュフ チョコ 個包装', 'チョコサンド クッキー', 'チョコレート 詰め合わせ 国産'] },
-    { genre: 'スイーツ', queries: ['和スイーツ 大福', 'ロールケーキ 冷凍', 'プリン 詰め合わせ', 'バウムクーヘン ギフト', 'タルト ケーキ スイーツ'] },
-    { genre: '人気デザート', queries: ['フルーツ ゼリー 高級', 'アイスクリーム 詰め合わせ', 'シャーベット ギフト', 'パフェ スイーツ', 'デザート 詰め合わせ'] },
-    { genre: 'コスメ', queries: ['韓国 コスメ 美容液', 'リップ ティント 人気', 'アイシャドウ パレット', 'フェイス パウダー', 'クッション ファンデ'] },
-    { genre: '化粧品', queries: ['化粧水 高保湿', '乳液 保湿 美白', 'クレンジング バーム', '美容 オイル フェイス', 'シートマスク パック 大容量'] },
-    { genre: 'お菓子', queries: ['お菓子 クッキー 缶', 'せんべい あられ 詰め合わせ', 'フィナンシェ マドレーヌ', 'カステラ 和菓子', 'ラスク ギフト'] },
-    { genre: 'デパコス', queries: ['デパコス リップ 口紅', 'デパコス ハンドクリーム', 'デパコス アイシャドウ', 'デパコス スキンケア ギフト', 'デパコス フェイスパウダー'] },
-    { genre: '制汗剤', queries: ['制汗剤 ロールオン デオドラント', '制汗 スプレー 無香料', '薬用 デオドラント クリーム', '制汗 ジェル', 'デオドラント スティック'] },
-    { genre: 'ふるさと納税', queries: ['ふるさと納税 スイーツ 定期便', 'ふるさと納税 アイス 詰め合わせ', 'ふるさと納税 チーズケーキ', 'ふるさと納税 フルーツ ぶどう 桃', 'ふるさと納税 肉 惣菜 鍋'] },
-    { genre: 'おせち', queries: ['おせち 2027 予約 冷蔵', 'おせち 和風 二段重', 'おせち 三段重 個包装', 'おせち 早割 高級', 'おせち オードブル 中華'] },
+                        const rawKeywords = [
+    { name: 'スイーツ', genre: 'スイーツ', query: 'スイーツ', min: 500, max: 30000 },
+    { name: 'デザート', genre: 'デザート', query: 'デザート', min: 500, max: 30000 },
+    { name: 'プリン', genre: 'プリン', query: 'プリン', min: 500, max: 15000 },
+    { name: 'ピスタチオ', genre: 'ピスタチオ', query: 'ピスタチオ', min: 500, max: 20000 },
+    { name: 'モンブラン', genre: 'モンブラン', query: 'モンブラン', min: 800, max: 20000 },
+    { name: 'バームクーヘン', genre: 'バームクーヘン', query: 'バームクーヘン', min: 800, max: 20000 },
+    { name: 'お菓子', genre: 'お菓子', query: 'お菓子', min: 500, max: 30000 },
+    { name: 'おつまみ', genre: 'おつまみ', query: 'おつまみ', min: 500, max: 30000 },
+    { name: 'チョコレート', genre: 'チョコレート', query: 'チョコレート', min: 500, max: 30000 },
+    { name: 'フィナンシェ', genre: 'フィナンシェ', query: 'フィナンシェ', min: 500, max: 20000 },
+    { name: 'コスメ', genre: 'コスメ', query: 'コスメ', min: 800, max: 50000 },
+    { name: 'スキンケア', genre: 'スキンケア', query: 'スキンケア', min: 800, max: 50000 },
+    { name: 'リップ', genre: 'リップ', query: 'リップ', min: 500, max: 15000 },
+    { name: 'バーム', genre: 'バーム', query: 'バーム', min: 500, max: 20000 },
+    { name: 'アディクション', genre: 'アディクション', query: 'アディクション', min: 1000, max: 30000 },
+    { name: 'デパコス', genre: 'デパコス', query: 'デパコス', min: 1000, max: 50000 },
+    { name: '頭皮ケア', genre: '頭皮ケア', query: '頭皮ケア', min: 800, max: 30000 },
+    { name: 'おせち', genre: 'おせち', query: 'おせち', min: 2000, max: 50000 },
+    { name: 'ふるさと納税', genre: 'ふるさと納税', query: 'ふるさと納税', min: 2000, max: 50000 },
+    { name: 'シャインマスカット', genre: 'シャインマスカット', query: 'シャインマスカット', min: 2000, max: 40000 },
   ];
-
-  const sorts = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice'];
-  const rawKeywords = baseGenres.map(b => {
-    const q = b.queries[Math.floor(Math.random() * b.queries.length)];
-    return { name: q, genre: b.genre, query: q, min: 500, max: 50000 };
-  });
 
   const targetUrls = rawKeywords.map(k => {
     const pageNum = Math.floor(Math.random() * 20) + 1; // 1〜20ページ目をランダム選択

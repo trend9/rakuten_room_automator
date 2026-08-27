@@ -11,7 +11,7 @@ dotenv.config();
 const MAX_POSTS_PER_RUN = 5;
 function normalizeGenreName(rawGenre) {
   if (!rawGenre) return 'その他';
-  return rawGenre.replace(/\s*\(p\.\d+\)/g, '').replace(/（[0-9,〜円]+）/g, '').trim();
+  return rawGenre.replace(/\s*\(p\.\d+\)/g, '').replace(/（[0-9,〜円]+）/g, '').split(':')[0].trim();
 }
 
 
