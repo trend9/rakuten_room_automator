@@ -1537,55 +1537,7 @@ async function run() {
 
   console.log(`\n🏁 今回の実行で合計 ${postedCount} 件のコレ！を新規自動投稿しました！`);
 
-  // 実際に新規投稿に成功した商品のみを対象にする (postedProductsは success=true すなわち新規投稿成功時のみ格納される)
-  if (postedProducts.length > 0) {
-    const targetProduct = postedProducts[0];
-    console.log(`\n📤 Webhook経由でSNSへの自動投稿を実行します (対象: ${targetProduct.title})`);
-    
-    try {
-      const resolvedImage = await resolveProductImage(targetProduct);
-      // LLMが生成したコメントをバリデーション＆クリーニング
-      let cleanComment = validateAndCleanLLMOutput(targetProduct.comment);
-      if (!cleanComment) {
-        // バリデーション失敗時はテンプレートフォールバック
-        console.warn('⚠️ SNS用コメントのバリデーション失敗。テンプレートを使用します。');
-        cleanComment = generateFallbackMessage(targetProduct.title);
-      }
-      // ★ 重要: SNSに投稿するリンクは自分の楽天ROOM URL（アフィリエイトリンク）
-      // item.rakuten.co.jp（他人の店のURL）を絶対に使ってはいけない
-      let snsUrl = targetProduct.roomUrl || '';
-      if (!snsUrl) {
-        console.warn('⚠️ 楽天ROOM URLが取得できませんでした。固定マイページURLを使用します。');
-        snsUrl = 'https://room.rakuten.co.jp/jack555/items';
-      } else {
-        console.log(`🔗 SNS投稿に使用するROOM URL: ${snsUrl}`);
-      }
-      const postText = `${cleanComment}\n\n${snsUrl}`.trim();
-      
-      console.log(`📡 Make.com Webhookへリクエストを送信中...`);
-      console.log(`🖼️ 画像URL: ${resolvedImage}`);
-      console.log(`📝 送信テキスト:\n${postText}`);
-      
-      const response = await fetch("https://hook.us1.make.com/vrank20zgvnokm5ad539yimyktnhmtqb", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          image_url: resolvedImage,
-          text: postText
-        })
-      });
-      
-      if (response.ok) {
-        console.log(`🎉 Webhook自動投稿の送信が完了しました！ (ステータス: ${response.status})`);
-      } else {
-        console.warn(`⚠️ Webhook自動投稿の送信に失敗しました (ステータス: ${response.status})`);
-      }
-    } catch (webhookError) {
-      console.error(`❌ Webhook送信中にエラーが発生しました:`, webhookError.message);
-    }
-  }
+  // SNS Webhookは廃止（楽天ROOMへのコレ！・いいね・コメントに専念）
 }
 
 run();
