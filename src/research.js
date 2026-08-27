@@ -108,8 +108,10 @@ async function fetchFromRakutenAPI(data) {
 
     console.log(`\n📡 楽天API検索中: "${query}" (p.${pageNum}, sort:${sort}, ${target.minPrice}〜${target.maxPrice}円)`);
 
+    const cleanAccessKey = (accessKey || '').trim();
     const params = new URLSearchParams({
-      applicationId: appId,
+      applicationId: (appId || '').trim(),
+      accessKey: cleanAccessKey,
       keyword: query,
       minPrice: target.minPrice.toString(),
       maxPrice: target.maxPrice.toString(),
@@ -118,17 +120,17 @@ async function fetchFromRakutenAPI(data) {
       sort: sort,
       format: 'json',
     });
-    if (affiliateId) params.append('affiliateId', affiliateId);
-    if (accessKey) params.append('accessKey', accessKey);
+    if (affiliateId) params.append('affiliateId', affiliateId.trim());
 
-    const fetchHeaders = {};
-    if (accessKey) {
-      fetchHeaders['accessKey'] = accessKey;
-    }
+    const fetchHeaders = {
+      'accessKey': cleanAccessKey,
+      'Referer': 'https://www.rakuten.co.jp/',
+      'Origin': 'https://www.rakuten.co.jp',
+    };
 
     try {
       const res = await fetch(
-        `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?${params}`,
+        `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?${params.toString()}`,
         {
           headers: fetchHeaders,
           signal: AbortSignal.timeout(20000)

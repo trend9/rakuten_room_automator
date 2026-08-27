@@ -936,8 +936,12 @@ async function postOneProduct(pendingProduct, data) {
       const shopSlug = extractItemCodeFromUrl(targetUrl); // shop:slug形式
       if (appId && shopSlug) {
         try {
-          const apiUrl = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?applicationId=${appId}&itemCode=${encodeURIComponent(shopSlug)}&format=json`;
-          const res = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
+          const accessKey = (process.env.RAKUTEN_ACCESS_KEY || '').trim();
+          const apiUrl = `https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601?applicationId=${(appId||'').trim()}&accessKey=${accessKey}&itemCode=${encodeURIComponent(shopSlug)}&format=json`;
+          const res = await fetch(apiUrl, {
+            headers: { 'accessKey': accessKey, 'Referer': 'https://www.rakuten.co.jp/' },
+            signal: AbortSignal.timeout(10000)
+          });
           if (res.ok) {
             const json = await res.json();
             const item = json.Items?.[0]?.Item;
