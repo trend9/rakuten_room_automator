@@ -1481,25 +1481,20 @@ async function run() {
     }
   }
 
-    const MIN_SUCCESS_REQUIRED = 2; // 最低2件成功するまで絶対に諦めずリサーチ＆コレ！をループ
-  const TARGET_POSTS_PER_RUN = 5; // 最大5件コレ！
+    const MIN_SUCCESS_REQUIRED = 2; // 最低2件成功したらスムーズに巡回へ進む
+  const TARGET_POSTS_PER_RUN = 3; // 25分アクション全体を12〜15分で収めるため1回あたり最大3件に最適化
   const startTime = Date.now();
-  const MAX_LOOP_TIME_MS = 15 * 60 * 1000; // 安全タイムリミット: 15分（いいね・コメント・保存の時間を確保）
+  const MAX_LOOP_TIME_MS = 8 * 60 * 1000; // コレ！の上限時間を8分に設定（全体完走を保証）
 
   let consecutiveResearchFails = 0;
 
   while (postedCount < TARGET_POSTS_PER_RUN) {
     // タイムアウト防衛（15分経過＆最低2件達成していれば次へ進む）
     const elapsed = Date.now() - startTime;
-    // 最低2件成功するまで粘る（ただし全体タイムアウト25分を防ぐため18分で安全脱出）
-    if (postedCount >= 2 || (postedCount >= 1 && elapsed > 18 * 60 * 1000)) {
-      if (postedCount >= 2) {
-        // 2件以上成功していればそのまま5件目指すか安全に進む
-      }
-      if (elapsed > 18 * 60 * 1000) {
-        console.log(`⏱️ コレ！実行時間が18分を経過し、${postedCount} 件コレ！に成功しているため、いいね・コメント巡回へ進みます。`);
-        break;
-      }
+    // 2件以上成功 または 8分経過（1件以上成功）で即座にいいね・コメント巡回へ進む
+    if (postedCount >= MIN_SUCCESS_REQUIRED || (postedCount >= 1 && elapsed > MAX_LOOP_TIME_MS)) {
+      console.log(`✅ コレ！目標件数（${postedCount}件）を達成しました。いいね・コメント巡回へ進みます。`);
+      break;
     }
 
     let data = loadQueue();
