@@ -1092,17 +1092,19 @@ async function postOneProduct(pendingProduct, data) {
     // ── ステップ4: コメント入力欄が表示されるまでリトライ付きで待機 ──
     // textarea / contenteditable / div[role=textbox] 全対応
     const commentAreaSelectors = [
+      'textarea[name*="comment" i]',
+      'textarea[name*="caption" i]',
       'textarea[placeholder*="コメント"]',
       'textarea[placeholder*="オススメ"]',
-      'textarea[placeholder*="オススメポイント"]',
       'textarea[placeholder*="魅力"]',
       'textarea[placeholder*="紹介"]',
       'textarea[placeholder*="ひとこと"]',
-      'textarea[placeholder*="message"]',
+      'textarea.collect-item-comment',
+      'textarea[class*="comment" i]',
+      'textarea[class*="caption" i]',
       'textarea',
-      'div[role="textbox"]',
-      '[contenteditable="true"]',
-      'div[contenteditable]',
+      'div[role="textbox"][contenteditable="true"]',
+      '[contenteditable="true"]'
     ];
     let commentArea = null;
     let commentIsContentEditable = false;
@@ -1233,10 +1235,26 @@ async function postOneProduct(pendingProduct, data) {
     await page.waitForTimeout(1000);
     await takeScreenshot(page, 'step4_message_typed');
 
-    // ── ステップ5: 投稿確定ボタンを押す ──
+    // ── ステップ5: 投稿確定ボタンを押す前の最終確認ガード ──
+    // スクロールや画面再描画でコメントがクリアされていないか直前チェック
+    let preSubmitCheck = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
+    if (!preSubmitCheck || preSubmitCheck.trim().length < 30) {
+      console.warn('⚠️ 完了ボタン押下直前にコメント消失を検知！再入力して確定します...');
+      await commentArea.focus();
+      await page.keyboard.press('Control+A').catch(() => {});
+      await page.keyboard.press('Backspace').catch(() => {});
+      await page.keyboard.insertText(customComment);
+      await page.waitForTimeout(500);
+      preSubmitCheck = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
+      if (!preSubmitCheck || preSubmitCheck.trim().length < 30) {
+        throw new Error('完了ボタン押下直前検証に失敗しました。空投稿を絶対に防ぐため中止します。');
+      }
+    }
+    console.log(`🔒 投稿直前最終検証クリア: コメント「${preSubmitCheck.substring(0, 30)}...」が確実にセットされています。`);
+
     console.log('📜 投稿完了ボタンを表示させるため、画面の最下部へスクロールします...');
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
     await takeScreenshot(page, 'step5_scrolled_to_bottom');
 
     if (await checkDuplicateModal()) {
