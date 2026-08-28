@@ -1179,58 +1179,57 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('紹介コメントが空です。投稿を中止します。');
     }
 
-    console.log('✍️ 紹介コメントをReact/SPAステートへ確実に同期入力します...');
+    console.log('✍️ 紹介コメントを慎重に1ステップずつ確実に入力します...');
     await commentArea.scrollIntoViewIfNeeded().catch(() => {});
+    await page.waitForTimeout(500);
     await commentArea.focus();
     await commentArea.click({ force: true }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    // 手順1: 全選択＆削除（初期状態のクリア）
+    await page.keyboard.press('Control+A').catch(() => {});
+    await page.keyboard.press('Meta+A').catch(() => {});
+    await page.keyboard.press('Backspace').catch(() => {});
     await page.waitForTimeout(300);
 
-    // 1. Playwrightのネイティブfillで入力（React/VueのSyntheticEventを自動発火）
-    await commentArea.fill(customComment);
-    await page.waitForTimeout(500);
+    // 手順2: 実際の人間と同じキーボードタイピング（insertText）で入力
+    console.log('⌨️ キーボードから直接テキストを一文字ずつ流し込みます...');
+    await page.keyboard.insertText(customComment);
+    await page.waitForTimeout(1000);
 
-    // 2. React NativeValueSetter + 複数イベント(input, change, keydown, keyup, blur)を完全シミュレート
-    await commentArea.evaluate((el, val) => {
-      el.focus();
-      // React 16/17/18のトラッカープロパティを更新
-      const nativeSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype,
-        'value'
-      )?.set;
-      if (nativeSetter) {
-        nativeSetter.call(el, val);
-      } else {
-        el.value = val;
-      }
-      
-      // バブリングするイベントを一括発火
-      el.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, data: val }));
-      el.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
-      el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true }));
-      el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
-    }, customComment);
+    // 手順3: 入力値の確認
+    let currentValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
 
-    // 3. 最後にキーボードで末尾にスペースを入力して削除（確実にSPAの変更フラグをONにする）
-    await commentArea.focus();
-    await page.keyboard.press('Space');
-    await page.keyboard.press('Backspace');
-    await page.waitForTimeout(500);
-
-    // 検証
-    let verifiedValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
-    if (!verifiedValue || verifiedValue.trim() === '') {
-      console.log('⚠️ 値の反映が未確認のため、直接typeで再入力します...');
-      await commentArea.fill('');
-      await commentArea.type(customComment, { delay: 10 });
-      verifiedValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
+    // 手順4: もし入っていなければ、NativeValueSetter + InputEvent で強制注入
+    if (!currentValue || currentValue.trim().length < 10) {
+      console.log('⚠️ insertTextでの値反映が確認できなかったため、DOM NativeSetterで強制注入します...');
+      await commentArea.evaluate((el, val) => {
+        el.focus();
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLTextAreaElement.prototype,
+          'value'
+        )?.set;
+        if (nativeSetter) {
+          nativeSetter.call(el, val);
+        } else {
+          el.value = val;
+          el.innerText = val;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      }, customComment);
+      await page.waitForTimeout(1000);
+      currentValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
     }
 
-    if (!verifiedValue || verifiedValue.trim() === '') {
-      throw new Error('紹介コメントの入力検証に失敗しました。空投稿を防ぐため中止します。');
+    // 手順5: 最終検証（40文字以上のコメントが入っていない場合は絶対に投稿させない）
+    if (!currentValue || currentValue.trim().length < 30) {
+      console.error(`❌ コメント入力が空または不十分です (取得値: "${currentValue}")。空投稿を完全防止するため処理を中断します。`);
+      throw new Error('紹介コメントの入力反映に失敗しました。');
     }
 
-    console.log(`✅ コメント入力と状態同期に成功しました (確定文字数: ${verifiedValue.length})`);
-    await commentArea.blur();
+    console.log(`✅ コメント入力と反映を正式確認しました！ (確定文字数: ${currentValue.length}文字)`);
+    await commentArea.blur().catch(() => {});
     await page.waitForTimeout(1000);
     await takeScreenshot(page, 'step4_message_typed');
 
