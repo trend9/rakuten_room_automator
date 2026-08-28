@@ -862,7 +862,8 @@ async function postOneProduct(pendingProduct, data) {
     let loaded = false;
     for (let retries = 0; retries < 3 && !loaded; retries++) {
       try {
-        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.goto(targetUrl, { waitUntil: 'commit', timeout: 30000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
         loaded = true;
       } catch (err) {
         console.warn(`⚠️ アクセス一時エラー: ${err.message}。リトライします...`);
@@ -964,12 +965,14 @@ async function postOneProduct(pendingProduct, data) {
     let isWarpLoaded = false;
     for (let r = 0; r < 3; r++) {
       try {
-        await page.goto(warpUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        // リダイレクト(/mix -> /mix/collect)の完了を確実に待つため commit / domcontentloaded を柔軟にハンドリング
+        await page.goto(warpUrl, { waitUntil: 'commit', timeout: 35000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 35000 }).catch(() => {});
         isWarpLoaded = true;
         break;
       } catch (err) {
-        console.warn(`⚠️ 投稿編集画面への遷移失敗 (リトライ ${r + 1}/3): ${err.message}`);
-        await page.waitForTimeout(3000);
+        console.warn(`⚠️ 投稿編集画面への遷移一時失敗 (リトライ ${r + 1}/3): ${err.message}`);
+        await page.waitForTimeout(2000);
       }
     }
 
