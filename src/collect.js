@@ -1179,43 +1179,57 @@ async function postOneProduct(pendingProduct, data) {
       throw new Error('紹介コメントが空です。投稿を中止します。');
     }
 
-    console.log('✍️ 独自のおすすめメッセージをReactセッター経由で確実に入力します...');
+    console.log('✍️ 紹介コメントをReact/SPAステートへ確実に同期入力します...');
+    await commentArea.scrollIntoViewIfNeeded().catch(() => {});
     await commentArea.focus();
     await commentArea.click({ force: true }).catch(() => {});
-    if (commentIsContentEditable) {
-      // contenteditable の場合は execCommand or innerText で入力
-      await commentArea.evaluate((el, val) => {
-        el.focus();
-        el.innerText = val;
-        el.dispatchEvent(new Event('input',  { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, customComment);
-    } else {
-      // textarea の場合は React nativeSetter
-      await commentArea.evaluate((el, val) => {
-        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+    await page.waitForTimeout(300);
+
+    // 1. Playwrightのネイティブfillで入力（React/VueのSyntheticEventを自動発火）
+    await commentArea.fill(customComment);
+    await page.waitForTimeout(500);
+
+    // 2. React NativeValueSetter + 複数イベント(input, change, keydown, keyup, blur)を完全シミュレート
+    await commentArea.evaluate((el, val) => {
+      el.focus();
+      // React 16/17/18のトラッカープロパティを更新
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        'value'
+      )?.set;
+      if (nativeSetter) {
         nativeSetter.call(el, val);
-        el.dispatchEvent(new Event('input',  { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, customComment);
-    }
-    await page.waitForTimeout(1000);
-    
-    // 入力の検証とPlaywrightによる直接フォールバック
-    let verifiedValue = await commentArea.inputValue();
+      } else {
+        el.value = val;
+      }
+      
+      // バブリングするイベントを一括発火
+      el.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, data: val }));
+      el.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+    }, customComment);
+
+    // 3. 最後にキーボードで末尾にスペースを入力して削除（確実にSPAの変更フラグをONにする）
+    await commentArea.focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('Backspace');
+    await page.waitForTimeout(500);
+
+    // 検証
+    let verifiedValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
     if (!verifiedValue || verifiedValue.trim() === '') {
-      console.log('⚠️ 値が空のため、Playwright直接入力で再試行します。');
-      await commentArea.focus();
-      await commentArea.fill(customComment);
-      await page.waitForTimeout(1000);
-      verifiedValue = await commentArea.inputValue();
+      console.log('⚠️ 値の反映が未確認のため、直接typeで再入力します...');
+      await commentArea.fill('');
+      await commentArea.type(customComment, { delay: 10 });
+      verifiedValue = await commentArea.evaluate(el => el.value || el.innerText || '').catch(() => '');
     }
 
     if (!verifiedValue || verifiedValue.trim() === '') {
-      throw new Error('紹介コメントの入力検証に失敗しました。空のまま投稿されるのを防ぐため、中止します。');
+      throw new Error('紹介コメントの入力検証に失敗しました。空投稿を防ぐため中止します。');
     }
 
-    console.log(`✅ コメント入力の検証に成功しました (文字数: ${verifiedValue.length})`);
+    console.log(`✅ コメント入力と状態同期に成功しました (確定文字数: ${verifiedValue.length})`);
     await commentArea.blur();
     await page.waitForTimeout(1000);
     await takeScreenshot(page, 'step4_message_typed');
