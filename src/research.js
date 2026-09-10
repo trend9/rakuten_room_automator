@@ -82,6 +82,11 @@ const TARGET_KEYWORDS = [
   { query: 'デパコス', minPrice: 1000, maxPrice: 50000, genre: 'デパコス' },
   { query: '頭皮ケア', minPrice: 800, maxPrice: 30000, genre: '頭皮ケア' },
 
+  // 🎃 ハロウィン
+  { query: 'ハロウィンお菓子', minPrice: 500, maxPrice: 20000, genre: 'ハロウィンお菓子' },
+  { query: 'ハロウィン仮装', minPrice: 1000, maxPrice: 30000, genre: 'ハロウィン仮装' },
+  { query: 'ハロウィングッズ', minPrice: 500, maxPrice: 30000, genre: 'ハロウィングッズ' },
+
   // 🎁 季節・ふるさと納税
   { query: 'おせち', minPrice: 2000, maxPrice: 50000, genre: 'おせち' },
   { query: 'ふるさと納税', minPrice: 2000, maxPrice: 50000, genre: 'ふるさと納税' },
@@ -234,7 +239,7 @@ async function fetchFromRakutenAPI(data) {
 async function fetchByScrapingWithImages(data) {
   console.log('💡 APIキーなし。Playwrightスクレイピングを実行します。');
 
-                        const rawKeywords = [
+                              const rawKeywords = [
     { name: 'スイーツ', genre: 'スイーツ', query: 'スイーツ', min: 500, max: 30000 },
     { name: 'デザート', genre: 'デザート', query: 'デザート', min: 500, max: 30000 },
     { name: 'プリン', genre: 'プリン', query: 'プリン', min: 500, max: 15000 },
@@ -252,6 +257,9 @@ async function fetchByScrapingWithImages(data) {
     { name: 'アディクション', genre: 'アディクション', query: 'アディクション', min: 1000, max: 30000 },
     { name: 'デパコス', genre: 'デパコス', query: 'デパコス', min: 1000, max: 50000 },
     { name: '頭皮ケア', genre: '頭皮ケア', query: '頭皮ケア', min: 800, max: 30000 },
+    { name: 'ハロウィンお菓子', genre: 'ハロウィンお菓子', query: 'ハロウィンお菓子', min: 500, max: 20000 },
+    { name: 'ハロウィン仮装', genre: 'ハロウィン仮装', query: 'ハロウィン仮装', min: 1000, max: 30000 },
+    { name: 'ハロウィングッズ', genre: 'ハロウィングッズ', query: 'ハロウィングッズ', min: 500, max: 30000 },
     { name: 'おせち', genre: 'おせち', query: 'おせち', min: 2000, max: 50000 },
     { name: 'ふるさと納税', genre: 'ふるさと納税', query: 'ふるさと納税', min: 2000, max: 50000 },
     { name: 'シャインマスカット', genre: 'シャインマスカット', query: 'シャインマスカット', min: 2000, max: 40000 },
