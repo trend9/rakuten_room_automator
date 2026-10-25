@@ -60,37 +60,43 @@ function saveQueue(data) {
 
 // ターゲットキーワード一覧（3,000円〜100,000円・ジャンル多様化）
 // ※ランダムに2キーワードずつ抽出されるため、重み付けのために件数で調整
+// ターゲットキーワード一覧（秋冬特化：コスメ6割、防寒・寒さ対策3割、トラベル1割）
 const TARGET_KEYWORDS = [
-  // 🍰 スイーツ・お菓子・グルメ
-  { query: 'スイーツ', minPrice: 500, maxPrice: 30000, genre: 'スイーツ' },
-  { query: 'デザート', minPrice: 500, maxPrice: 30000, genre: 'デザート' },
-  { query: 'プリン', minPrice: 500, maxPrice: 15000, genre: 'プリン' },
-  { query: 'ピスタチオ', minPrice: 500, maxPrice: 20000, genre: 'ピスタチオ' },
-  { query: 'モンブラン', minPrice: 800, maxPrice: 20000, genre: 'モンブラン' },
-  { query: 'バームクーヘン', minPrice: 800, maxPrice: 20000, genre: 'バームクーヘン' },
-  { query: 'お菓子', minPrice: 500, maxPrice: 30000, genre: 'お菓子' },
-  { query: 'おつまみ', minPrice: 500, maxPrice: 30000, genre: 'おつまみ' },
-  { query: 'チョコレート', minPrice: 500, maxPrice: 30000, genre: 'チョコレート' },
-  { query: 'フィナンシェ', minPrice: 500, maxPrice: 20000, genre: 'フィナンシェ' },
+  // 💄 コスメ・スキンケア・メイク・乾燥対策（6割）
+  { query: '化粧水 高保湿', minPrice: 1000, maxPrice: 30000, genre: '化粧水' },
+  { query: '美容液 保湿', minPrice: 1500, maxPrice: 40000, genre: '美容液' },
+  { query: 'フェイスクリーム 保湿', minPrice: 1000, maxPrice: 30000, genre: 'フェイスクリーム' },
+  { query: '化粧下地 保湿 ツヤ', minPrice: 1000, maxPrice: 20000, genre: '化粧下地' },
+  { query: 'ファンデーション 保湿 秋冬', minPrice: 1500, maxPrice: 25000, genre: 'ファンデーション' },
+  { query: 'リップ 保湿 リップバーム', minPrice: 500, maxPrice: 15000, genre: 'リップ' },
+  { query: 'リップオイル ツヤ', minPrice: 1000, maxPrice: 15000, genre: 'リップオイル' },
+  { query: 'クレンジングバーム 保湿', minPrice: 1200, maxPrice: 15000, genre: 'クレンジング' },
+  { query: 'シートマスク パック 高保湿', minPrice: 800, maxPrice: 15000, genre: 'シートマスク' },
+  { query: 'アイクリーム 保湿 乾燥小じわ', minPrice: 1500, maxPrice: 30000, genre: 'アイクリーム' },
+  { query: 'ヘアオイル 保湿 ダメージ補修', minPrice: 1000, maxPrice: 20000, genre: 'ヘアケア' },
+  { query: 'ヘアミルク トリートメント', minPrice: 1000, maxPrice: 15000, genre: 'ヘアケア' },
+  { query: 'ハンドクリーム 高保湿 ギフト', minPrice: 800, maxPrice: 15000, genre: 'ハンドケア' },
+  { query: 'ボディクリーム 高保湿 乾燥肌', minPrice: 1000, maxPrice: 20000, genre: 'ボディケア' },
+  { query: 'デパコス リップ 口紅', minPrice: 2000, maxPrice: 25000, genre: 'デパコス' },
+  { query: 'デパコス アイシャドウ パレット', minPrice: 2500, maxPrice: 30000, genre: 'デパコス' },
+  { query: 'デパコス フェイスパウダー', minPrice: 2500, maxPrice: 30000, genre: 'デパコス' },
+  { query: 'フェイスパウダー 乾燥しにくい', minPrice: 1000, maxPrice: 20000, genre: 'メイクアイテム' },
 
-  // 💄 コスメ・スキンケア・ビューティー
-  { query: 'コスメ', minPrice: 800, maxPrice: 50000, genre: 'コスメ' },
-  { query: 'スキンケア', minPrice: 800, maxPrice: 50000, genre: 'スキンケア' },
-  { query: 'リップ', minPrice: 500, maxPrice: 15000, genre: 'リップ' },
-  { query: 'バーム', minPrice: 500, maxPrice: 20000, genre: 'バーム' },
-  { query: 'アディクション', minPrice: 1000, maxPrice: 30000, genre: 'アディクション' },
-  { query: 'デパコス', minPrice: 1000, maxPrice: 50000, genre: 'デパコス' },
-  { query: '頭皮ケア', minPrice: 800, maxPrice: 30000, genre: '頭皮ケア' },
+  // ❄️ 冬の寒さ対策・防寒・あったかグッズ（3割）
+  { query: 'まるでこたつソックス 靴下 あたたかい', minPrice: 800, maxPrice: 8000, genre: 'あったか靴下' },
+  { query: '電気毛布 洗える ブランケット ひざ掛け', minPrice: 2000, maxPrice: 20000, genre: 'ブランケット・電気毛布' },
+  { query: '着る毛布 ルームウェア あったか', minPrice: 2000, maxPrice: 15000, genre: '防寒ルームウェア' },
+  { query: 'セラミックファンヒーター 省エネ 速暖', minPrice: 3000, maxPrice: 35000, genre: 'ヒーター・暖房器具' },
+  { query: 'パネルヒーター 足元 デスク', minPrice: 2500, maxPrice: 15000, genre: 'パネルヒーター' },
+  { query: '加湿器 超音波 大容量 アロマ', minPrice: 2000, maxPrice: 30000, genre: '加湿器' },
+  { query: '充電式カイロ 繰り返し 使える', minPrice: 1500, maxPrice: 8000, genre: '防寒小物・カイロ' },
+  { query: '湯たんぽ 充電式 お湯不要', minPrice: 1500, maxPrice: 10000, genre: '湯たんぽ' },
+  { query: 'マフラー ストール カシミヤ 大判', minPrice: 2000, maxPrice: 35000, genre: '防寒マフラー' },
 
-  // 🎃 ハロウィン
-  { query: 'ハロウィンお菓子', minPrice: 500, maxPrice: 20000, genre: 'ハロウィンお菓子' },
-  { query: 'ハロウィン仮装', minPrice: 1000, maxPrice: 30000, genre: 'ハロウィン仮装' },
-  { query: 'ハロウィングッズ', minPrice: 500, maxPrice: 30000, genre: 'ハロウィングッズ' },
-
-  // 🎁 季節・ふるさと納税
-  { query: 'おせち', minPrice: 2000, maxPrice: 50000, genre: 'おせち' },
-  { query: 'ふるさと納税', minPrice: 2000, maxPrice: 50000, genre: 'ふるさと納税' },
-  { query: 'シャインマスカット', minPrice: 2000, maxPrice: 40000, genre: 'シャインマスカット' },
+  // ✈️ トラベル系・旅行グッズ（1割）
+  { query: 'トラベルポーチ 圧縮 吊り下げ', minPrice: 1000, maxPrice: 10000, genre: 'トラベルグッズ' },
+  { query: 'スキンケア トラベルセット 旅行用 小分け', minPrice: 1000, maxPrice: 15000, genre: 'トラベルセット' },
+  { query: 'スーツケース キャリーケース 軽量', minPrice: 4000, maxPrice: 40000, genre: 'スーツケース' },
 ];
 
 async function fetchFromRakutenAPI(data) {
@@ -110,7 +116,7 @@ async function fetchFromRakutenAPI(data) {
   const newProducts = [];
 
     const sortOptions = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice', '-itemPrice'];
-  const subModifiers = ['ギフト', '限定', '2026', 'お取り寄せ', '大容量', '個包装', '高級', '訳あり', '国産', '人気', 'ランキング', '送料無料', 'セット', '詰め合わせ', '公式', '贅沢'];
+  const subModifiers = ['保湿', '潤い', '2026', '人気', 'ランキング', '送料無料', 'セット', '限定', '大人気', '公式', '高評価', '秋冬', '防寒', 'あったか', '便利'];
 
   for (const target of shuffled) {
     if (newProducts.length >= 30) break;

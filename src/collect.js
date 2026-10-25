@@ -154,15 +154,34 @@ function generateFallbackMessage(title) {
   let intros = [];
   let tagSets = [];
 
-  if (lower.includes('スイーツ') || lower.includes('ケーキ') || lower.includes('チョコ') || lower.includes('和菓子') || lower.includes('洋菓子') || lower.includes('お菓子') || lower.includes('ゼリー') || lower.includes('ティラミス')) {
+  if (lower.includes('コスメ') || lower.includes('化粧') || lower.includes('スキンケア') || lower.includes('美容液') || lower.includes('クリーム') || lower.includes('リップ') || lower.includes('ファンデ') || lower.includes('ヘア') || lower.includes('ハンド') || lower.includes('デパコス') || lower.includes('保湿') || lower.includes('乾燥')) {
     intros = [
-      'お取り寄せで話題になっているスイーツです。素材の良さや丁寧な仕事っぷりが口コミにも反映されていて、自分用にもギフトにも使いやすい一品だと思います。✨🍫',
-      '楽天市場で繰り返し購入されているお菓子です。一口食べると素材の馥郁さが伝わってきて、プレゼントや贈答にも喜ばれそうです。🏆🍰',
-      '見た目もきれいで、味の完成度も高いお取り寄せスイーツです。ギフトとして送っても恥ずかしくない、信頼できる品質のお菓子だと思います。🎁✨',
+      '乾燥が気になるこの季節にぴったりの高保湿アイテムです。肌なじみが良くて毎日のスキンケアやメイクが楽しみになる使い心地だと思います。✨🧴',
+      '秋冬の乾燥対策にSNSや口コミでも高評価を集めている注目のコスメです。しっとり潤い感が続いて、自分へのご褒美やプレゼントにも良さそうです。💄✨',
+      'テクスチャーが良く、毎日のデイリーケアに無理なく取り入れられる実力派アイテムです。乾燥に負けない潤いをキープしたい方におすすめです。🌟',
     ];
     tagSets = [
-      '#楽天市場 #お取り寄せスイーツ #ギフト #食べ物 #楽天グルメ',
-      '#楽天市場 #スイーツ #お取り寄せグルメ #贈り物 #おすすめ',
+      '#楽天市場 #コスメ #スキンケア #乾燥肌 #保湿ケア',
+      '#楽天市場 #デパコス #冬コスメ #美容 #おすすめコスメ',
+    ];
+  } else if (lower.includes('ヒーター') || lower.includes('暖房') || lower.includes('こたつ') || lower.includes('ソックス') || lower.includes('靴下') || lower.includes('毛布') || lower.includes('ブランケット') || lower.includes('カイロ') || lower.includes('湯たんぽ') || lower.includes('加湿器') || lower.includes('マフラー') || lower.includes('あったか') || lower.includes('防寒')) {
+    intros = [
+      '寒さが本格化するこれからの時期に手放せなくなるあったか防寒グッズです。冷え対策として実用性が高く、おうち時間も快適に過ごせそうです。❄️🧣',
+      'しっかり温まるのに使い勝手も抜群で、冬の寒さ対策に頼もしい人気アイテムです。デザインと機能性の両立が嬉しいところだと思います。🏠🔥',
+      '冷え込む季節に「買ってよかった」と満足度の高い防寒・あったかアイテムです。ギフトや家族用にも喜ばれる実用派グッズです。✨🧦',
+    ];
+    tagSets = [
+      '#楽天市場 #防寒グッズ #あったかグッズ #寒さ対策 #冬支度',
+      '#楽天市場 #温活 #冷え性対策 #便利家電 #暮らしを楽しむ',
+    ];
+  } else if (lower.includes('トラベル') || lower.includes('旅行') || lower.includes('スーツケース') || lower.includes('キャリー') || lower.includes('ポーチ') || lower.includes('パッキング')) {
+    intros = [
+      '旅行やお出かけのパッキングがぐっと快適になる便利なトラベルグッズです。整理整頓がしやすく、遠出や出張の頼もしい味方になってくれそうです。✈️🧳',
+      '機能的で持ち運びやすく、旅先でもスマートに使える設計が好評のトラベルアイテムです。旅行好きの方にもおすすめできます。🎒✨',
+    ];
+    tagSets = [
+      '#楽天市場 #トラベルグッズ #旅行便利グッズ #スーツケース #旅行準備',
+      '#楽天市場 #お出かけ #旅行好き #トラベル #便利グッズ',
     ];
   } else if (lower.includes('美顔器') || lower.includes('ドライヤー') || lower.includes('かっさ') || lower.includes('脱毛') || lower.includes('アイロン') || lower.includes('美容') || lower.includes('シェーバー') || lower.includes('マッサージ')) {
     intros = [
