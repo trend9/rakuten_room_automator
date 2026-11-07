@@ -154,7 +154,17 @@ function generateFallbackMessage(title) {
   let intros = [];
   let tagSets = [];
 
-  if (lower.includes('コスメ') || lower.includes('化粧') || lower.includes('スキンケア') || lower.includes('美容液') || lower.includes('クリーム') || lower.includes('リップ') || lower.includes('ファンデ') || lower.includes('ヘア') || lower.includes('ハンド') || lower.includes('デパコス') || lower.includes('保湿') || lower.includes('乾燥')) {
+  if (lower.includes('ふるさと納税') || lower.includes('スイーツ') || lower.includes('ケーキ') || lower.includes('プリン') || lower.includes('チョコ') || lower.includes('もつ鍋') || lower.includes('うなぎ') || lower.includes('ハンバーグ') || lower.includes('ホタテ') || lower.includes('いくら') || lower.includes('グルメ') || lower.includes('お肉')) {
+    intros = [
+      'ふるさと納税の返礼品としても大人気のご当地グルメ・スイーツです。産地直送ならではの贅沢な味わいで、食卓が一気に華やかになります。✨🍽️',
+      '口コミ評価が高く、リピーターも多い注目の返礼品です。自分へのご褒美はもちろん、家族みんなで楽しめる満足度の高い一品だと思います。🏆🎁',
+      '素材の良さと丁寧な仕込みが感じられる逸品です。毎日の食卓やおうち時間のプチ贅沢にぴったりのグルメだと思います。🌟',
+    ];
+    tagSets = [
+      '#楽天市場 #ふるさと納税 #お取り寄せグルメ #ふるさと納税返礼品 #楽天グルメ',
+      '#楽天市場 #ふるさと納税スイーツ #ご当地グルメ #おすすめ返礼品 #贅沢グルメ',
+    ];
+  } else if (lower.includes('コスメ') || lower.includes('化粧') || lower.includes('スキンケア') || lower.includes('美容液') || lower.includes('クリーム') || lower.includes('リップ') || lower.includes('ファンデ') || lower.includes('ヘア') || lower.includes('ハンド') || lower.includes('デパコス') || lower.includes('保湿') || lower.includes('乾燥')) {
     intros = [
       '乾燥が気になるこの季節にぴったりの高保湿アイテムです。肌なじみが良くて毎日のスキンケアやメイクが楽しみになる使い心地だと思います。✨🧴',
       '秋冬の乾燥対策にSNSや口コミでも高評価を集めている注目のコスメです。しっとり潤い感が続いて、自分へのご褒美やプレゼントにも良さそうです。💄✨',
@@ -174,15 +184,7 @@ function generateFallbackMessage(title) {
       '#楽天市場 #防寒グッズ #あったかグッズ #寒さ対策 #冬支度',
       '#楽天市場 #温活 #冷え性対策 #便利家電 #暮らしを楽しむ',
     ];
-  } else if (lower.includes('トラベル') || lower.includes('旅行') || lower.includes('スーツケース') || lower.includes('キャリー') || lower.includes('ポーチ') || lower.includes('パッキング')) {
-    intros = [
-      '旅行やお出かけのパッキングがぐっと快適になる便利なトラベルグッズです。整理整頓がしやすく、遠出や出張の頼もしい味方になってくれそうです。✈️🧳',
-      '機能的で持ち運びやすく、旅先でもスマートに使える設計が好評のトラベルアイテムです。旅行好きの方にもおすすめできます。🎒✨',
-    ];
-    tagSets = [
-      '#楽天市場 #トラベルグッズ #旅行便利グッズ #スーツケース #旅行準備',
-      '#楽天市場 #お出かけ #旅行好き #トラベル #便利グッズ',
-    ];
+
   } else if (lower.includes('美顔器') || lower.includes('ドライヤー') || lower.includes('かっさ') || lower.includes('脱毛') || lower.includes('アイロン') || lower.includes('美容') || lower.includes('シェーバー') || lower.includes('マッサージ')) {
     intros = [
       'サロン通いのコストを考えると、この性能のホームケア機器は長期的に見てコスパが良いのではないかと思います。✨📊',
