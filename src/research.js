@@ -58,21 +58,21 @@ function saveQueue(data) {
 // 楽天商品検索API（APIキー必須）
 // ──────────────────────────────────────────────────────────
 
-// ターゲットキーワード一覧（ふるさと納税グルメ・スイーツ4割、コスメ・乾燥対策4割、冬の防寒対策2割）
+// ターゲットキーワード一覧（ふるさと納税グルメ・スイーツ・旅行券4割、コスメ・乾燥対策4割、冬の防寒対策2割）
 const TARGET_KEYWORDS = [
-  // 🎁 ふるさと納税・スイーツ・デザート・料理・グルメ（40% / 12件）
+  // 🎁 ふるさと納税・スイーツ・デザート・料理・旅行クーポン（40% / 12件）
+  { query: 'ふるさと納税 楽天トラベルクーポン 宿泊券', minPrice: 10000, maxPrice: 100000, genre: 'ふるさと納税旅行' },
+  { query: 'ふるさと納税 温泉 宿泊券 ペア ギフト', minPrice: 15000, maxPrice: 100000, genre: 'ふるさと納税旅行' },
+  { query: 'ふるさと納税 ホテル 宿泊 クーポン', minPrice: 10000, maxPrice: 80000, genre: 'ふるさと納税旅行' },
+  { query: 'ふるさと納税 旅行 クーポン 観光', minPrice: 10000, maxPrice: 80000, genre: 'ふるさと納税旅行' },
   { query: 'ふるさと納税 スイーツ 定期便', minPrice: 5000, maxPrice: 40000, genre: 'ふるさと納税スイーツ' },
   { query: 'ふるさと納税 チーズケーキ 濃厚', minPrice: 5000, maxPrice: 20000, genre: 'ふるさと納税スイーツ' },
   { query: 'ふるさと納税 アイス 詰め合わせ', minPrice: 5000, maxPrice: 25000, genre: 'ふるさと納税デザート' },
-  { query: 'ふるさと納税 プリン 高級 ギフト', minPrice: 5000, maxPrice: 20000, genre: 'ふるさと納税スイーツ' },
   { query: 'ふるさと納税 焼き菓子 クッキー 缶', minPrice: 5000, maxPrice: 20000, genre: 'ふるさと納税スイーツ' },
-  { query: 'ふるさと納税 チョコレート 詰め合わせ', minPrice: 5000, maxPrice: 25000, genre: 'ふるさと納税スイーツ' },
   { query: 'ふるさと納税 もつ鍋 セット 国産', minPrice: 5000, maxPrice: 30000, genre: 'ふるさと納税料理' },
   { query: 'ふるさと納税 うなぎ 蒲焼 職人', minPrice: 7000, maxPrice: 35000, genre: 'ふるさと納税料理' },
   { query: 'ふるさと納税 ハンバーグ 黒毛和牛', minPrice: 5000, maxPrice: 25000, genre: 'ふるさと納税料理' },
   { query: 'ふるさと納税 ホタテ 刺身 生食', minPrice: 7000, maxPrice: 30000, genre: 'ふるさと納税料理' },
-  { query: 'ふるさと納税 いくら 醤油漬け 北海道', minPrice: 8000, maxPrice: 35000, genre: 'ふるさと納税料理' },
-  { query: 'ふるさと納税 フルーツ シャインマスカット', minPrice: 6000, maxPrice: 35000, genre: 'ふるさと納税フルーツ' },
 
   // 💄 コスメ・スキンケア・メイク・乾燥対策（40% / 12件）
   { query: '化粧水 高保湿 しっとり', minPrice: 1000, maxPrice: 30000, genre: '化粧水' },
@@ -114,7 +114,7 @@ async function fetchFromRakutenAPI(data) {
   const newProducts = [];
 
     const sortOptions = ['standard', '-reviewCount', '-updateTimestamp', '-score', '+itemPrice', '-itemPrice'];
-  const subModifiers = ['ふるさと納税', '保湿', '潤い', '2026', '人気', 'ランキング', '送料無料', 'セット', '限定', '大人気', '公式', '高評価', '秋冬', '防寒', '贅沢'];
+  const subModifiers = ['ふるさと納税', '宿泊券', 'クーポン', '保湿', '潤い', '2026', '人気', 'ランキング', '送料無料', 'セット', '限定', '大人気', '公式', '高評価', '秋冬', '防寒', '贅沢'];
 
   for (const target of shuffled) {
     if (newProducts.length >= 30) break;

@@ -154,7 +154,17 @@ function generateFallbackMessage(title) {
   let intros = [];
   let tagSets = [];
 
-  if (lower.includes('ふるさと納税') || lower.includes('スイーツ') || lower.includes('ケーキ') || lower.includes('プリン') || lower.includes('チョコ') || lower.includes('もつ鍋') || lower.includes('うなぎ') || lower.includes('ハンバーグ') || lower.includes('ホタテ') || lower.includes('いくら') || lower.includes('グルメ') || lower.includes('お肉')) {
+  if (lower.includes('トラベルクーポン') || lower.includes('宿泊券') || (lower.includes('ふるさと納税') && (lower.includes('旅行') || lower.includes('宿泊') || lower.includes('温泉') || lower.includes('ホテル') || lower.includes('クーポン') || lower.includes('利用券') || lower.includes('ギフト券')))) {
+    intros = [
+      'ふるさと納税で手に入る人気の旅行クーポン・宿泊ギフト券です。行ってみたかった温泉地や憧れのホテルステイにお得に使えるのが嬉しいところだと思います。♨️🏨',
+      '楽天トラベル等の宿泊予約でも使える便利なふるさと納税の旅行クーポンです。有効期限もゆったりしていて、家族旅行や自分へのご褒美旅にぴったりだと思います。🗺️✨',
+      '寄付を通じて旅先の地域を応援しながら贅沢な宿泊体験ができる注目の返礼品です。思い出に残る旅のきっかけにおすすめです。🚅✨',
+    ];
+    tagSets = [
+      '#楽天市場 #ふるさと納税 #楽天トラベル #旅行クーポン #宿泊券',
+      '#楽天市場 #ふるさと納税返礼品 #温泉旅行 #ホテルステイ #国内旅行',
+    ];
+  } else if (lower.includes('ふるさと納税') || lower.includes('スイーツ') || lower.includes('ケーキ') || lower.includes('プリン') || lower.includes('チョコ') || lower.includes('もつ鍋') || lower.includes('うなぎ') || lower.includes('ハンバーグ') || lower.includes('ホタテ') || lower.includes('いくら') || lower.includes('グルメ') || lower.includes('お肉')) {
     intros = [
       'ふるさと納税の返礼品としても大人気のご当地グルメ・スイーツです。産地直送ならではの贅沢な味わいで、食卓が一気に華やかになります。✨🍽️',
       '口コミ評価が高く、リピーターも多い注目の返礼品です。自分へのご褒美はもちろん、家族みんなで楽しめる満足度の高い一品だと思います。🏆🎁',
